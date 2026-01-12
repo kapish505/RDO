@@ -8,13 +8,20 @@ import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.js
 import { uploadRDO } from '@/lib/ipfs';
 import {
     type RDOMetadata
-} from '@/lib/ipfs'; // assuming RDOMetadata is exported
+} from '@/lib/ipfs';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 export default function CreateRDO() {
     const { writeContract, data: hash, isPending } = useWriteContract();
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+    const { isLoading: isConfirming, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
+
+    // Extract RDO ID from logs (RDOCreated event)
+    // Event: RDOCreated(uint256 indexed rdoId, address indexed creator, ...)
+    // Topic0: Hash, Topic1: rdoId, Topic2: creator
+    const rdoId = receipt?.logs.find(l => l.address.toLowerCase() === CONTRACT_ADDRESS?.toLowerCase())?.topics[1]
+        ? parseInt(receipt.logs.find(l => l.address.toLowerCase() === CONTRACT_ADDRESS?.toLowerCase())!.topics[1] as string, 16)
+        : null;
 
     const [step, setStep] = useState(0); // 0=Type, 1=Payload, 2=Rules, 3=Review
 
@@ -126,7 +133,7 @@ export default function CreateRDO() {
         }
     };
 
-    if (isSuccess && hash) return <SuccessView hash={hash} />;
+    if (isSuccess && hash) return <SuccessView hash={hash} rdoId={rdoId} />;
 
     return (
         <div className="max-w-3xl mx-auto pt-20 pb-12 px-6">
@@ -208,8 +215,8 @@ function TypeSelection({ selected, onSelect }: { selected: RDOType, onSelect: (t
                     key={t.id}
                     onClick={() => onSelect(t.id)}
                     className={`p-6 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selected === t.id
-                        ? 'bg-rdo-accent border-rdo-accent text-white shadow-lg shadow-rdo-accent/20'
-                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                            ? 'bg-rdo-accent border-rdo-accent text-white shadow-lg shadow-rdo-accent/20'
+                            : 'bg-white/5 border-white/10 hover:bg-white/10'
                         }`}
                 >
                     <div className="text-3xl mb-2">{t.icon}</div>
@@ -363,8 +370,8 @@ function RulesConfig({ formData, setFormData }: any) {
                             key={action}
                             onClick={() => toggleAction(action)}
                             className={`px-4 py-2 rounded-lg border text-sm transition-all ${formData.forbiddenActions.includes(action)
-                                ? 'bg-red-500/20 border-red-500 text-red-200'
-                                : 'border-white/10 hover:bg-white/5'
+                                    ? 'bg-red-500/20 border-red-500 text-red-200'
+                                    : 'border-white/10 hover:bg-white/5'
                                 }`}
                         >
                             ⛔ {action}
@@ -453,19 +460,49 @@ function Navigation({ step, onBack, onNext, onSubmit, isPending }: any) {
     );
 }
 
-function SuccessView({ hash }: { hash: string }) {
+function SuccessView({ hash, rdoId }: { hash: string, rdoId: number | null }) {
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-4xl mb-4">✓</div>
-            <h2 className="text-4xl font-serif font-bold">Object Minted</h2>
-            <a
-                href={`https://sepolia.etherscan.io/tx/${hash}`}
-                target="_blank"
-                className="font-mono text-sm text-rdo-accent hover:underline"
+            <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-24 h-24 bg-rdo-accent rounded-full flex items-center justify-center text-5xl mb-4 shadow-[0_0_30px_rgba(225,29,72,0.4)]"
             >
-                View Transaction
-            </a>
-            <a href="/" className="text-white/60 hover:text-white">Back Home</a>
+                ✓
+            </motion.div>
+
+            <div>
+                <h2 className="text-4xl font-serif font-bold mb-2">Object Minted</h2>
+                <p className="text-white/60">Your Refusable Digital Object is live on Sepolia.</p>
+            </div>
+
+            {rdoId && (
+                <div className="py-4">
+                    <div className="text-sm uppercase tracking-widest text-white/40 mb-1">Object ID</div>
+                    <div className="text-5xl font-mono font-bold text-white">#{rdoId}</div>
+                </div>
+            )}
+
+            <div className="flex flex-col gap-4 w-full max-w-sm">
+                {rdoId && (
+                    <a
+                        href={`/view/${rdoId}`}
+                        className="bg-white text-black font-bold rounded-xl px-8 py-4 hover:scale-105 transition flex items-center justify-center gap-2"
+                    >
+                        <span>👁️ View Object</span>
+                    </a>
+                )}
+
+                <a
+                    href={`https://sepolia.etherscan.io/tx/${hash}`}
+                    target="_blank"
+                    className="border border-white/10 rounded-xl px-8 py-4 hover:bg-white/5 transition font-mono text-sm text-white/60 flex items-center justify-center gap-2"
+                >
+                    <span>📜 Etherscan Receipt</span>
+                </a>
+
+                <a href="/" className="text-white/40 hover:text-white text-sm pt-4">Make Another</a>
+            </div>
         </div>
     );
 }
