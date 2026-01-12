@@ -1,20 +1,15 @@
-import { NFTStorage, Blob } from 'nft.storage';
+const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT || '';
 
-const NFT_STORAGE_TOKEN = process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN || '';
-
-// Initialize client
-const client = new NFTStorage({ token: NFT_STORAGE_TOKEN });
-
-if (!NFT_STORAGE_TOKEN) {
-    console.warn("⚠️ NEXT_PUBLIC_NFT_STORAGE_TOKEN is missing or empty.");
+if (!PINATA_JWT) {
+    console.warn("⚠️ NEXT_PUBLIC_PINATA_JWT is missing. IPFS uploads will fail.");
 } else {
-    console.log("✅ NFT Storage Token detected (Length: " + NFT_STORAGE_TOKEN.length + ")");
+    console.log("✅ Pinata JWT detected.");
 }
 
 export interface RDOMetadata {
     name: string;
     description: string;
-    image: string; // CID or URL
+    image: string;
     properties: {
         rulesHash: string;
         encryptedContentCID: string;
@@ -22,24 +17,74 @@ export interface RDOMetadata {
     };
 }
 
+// Helper to upload Blob to Pinata
+async function uploadBlobToPinata(blob: Blob, name: string): Promise<string> {
+    const data = new FormData();
+    data.append('file', blob, name);
+    // Optional: Add Pinata Metadata
+    const metadata = JSON.stringify({ name: name });
+    data.append('pinataMetadata', metadata);
+    const options = JSON.stringify({ cidVersion: 1 });
+    data.append('pinataOptions', options);
+
+    const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${PINATA_JWT}`
+        },
+        body: data
+    });
+
+    if (!res.ok) {
+        throw new Error(`Pinata File Upload Failed: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    return json.IpfsHash;
+}
+
+// Helper to upload JSON to Pinata
+async function uploadJSONToPinata(jsonBody: any, name: string): Promise<string> {
+    const data = JSON.stringify({
+        pinataContent: jsonBody,
+        pinataMetadata: { name: name },
+        pinataOptions: { cidVersion: 1 }
+    });
+
+    const res = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${PINATA_JWT}`
+        },
+        body: data
+    });
+
+    if (!res.ok) {
+        throw new Error(`Pinata JSON Upload Failed: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    return json.IpfsHash;
+}
+
 /**
- * Uploads RDO metadata and encrypted content to IPFS.
+ * Uploads RDO metadata and encrypted content to IPFS via Pinata.
  */
 export async function uploadRDO(
     metadata: RDOMetadata,
     encryptedContent: Blob
 ): Promise<string> {
     // 1. Upload Encrypted Content
-    const contentCid = await client.storeBlob(encryptedContent);
+    console.log("Uploading content to Pinata...");
+    const contentCid = await uploadBlobToPinata(encryptedContent, `rdo-content-${Date.now()}.bin`);
 
     // 2. Update Metadata with content CID
     metadata.properties.encryptedContentCID = contentCid;
 
-    // 3. Store Metadata (nft.storage stores structured metadata as a JSON)
-    // We construct a File for metadata to get a direct CID or use store() which wraps it.
-    // We want the direct CID of the JSON.
-    const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
-    const metadataCid = await client.storeBlob(metadataBlob);
+    // 3. Store Metadata
+    console.log("Uploading metadata to Pinata...");
+    const metadataCid = await uploadJSONToPinata(metadata, `rdo-metadata-${Date.now()}.json`);
 
     return metadataCid;
 }

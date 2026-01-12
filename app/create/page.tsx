@@ -6,7 +6,7 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { compileRules, type RuleIntent } from '@/lib/rules';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
 import { uploadRDO } from '@/lib/ipfs';
-import { Blob } from 'nft.storage';
+// Removed: import { Blob } from 'nft.storage';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 if (!CONTRACT_ADDRESS) {
@@ -56,7 +56,7 @@ export default function CreateRDO() {
             }, contentBlob);
         } catch (e: any) {
             console.error("IPFS Upload failed:", e);
-            alert(`IPFS Upload Failed: ${e.message || e.toString()}\n\nPlease ensure 'NEXT_PUBLIC_NFT_STORAGE_TOKEN' is set correctly in your Vercel Environment Variables.`);
+            alert(`IPFS Upload Failed: ${e.message || e.toString()}\n\nPlease ensure 'NEXT_PUBLIC_PINATA_JWT' is set correctly in your Vercel Environment Variables.`);
             return;
         }
 
