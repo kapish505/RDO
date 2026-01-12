@@ -5,6 +5,12 @@ const NFT_STORAGE_TOKEN = process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN || '';
 // Initialize client
 const client = new NFTStorage({ token: NFT_STORAGE_TOKEN });
 
+if (!NFT_STORAGE_TOKEN) {
+    console.warn("⚠️ NEXT_PUBLIC_NFT_STORAGE_TOKEN is missing or empty.");
+} else {
+    console.log("✅ NFT Storage Token detected (Length: " + NFT_STORAGE_TOKEN.length + ")");
+}
+
 export interface RDOMetadata {
     name: string;
     description: string;

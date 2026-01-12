@@ -50,9 +50,9 @@ export default function CreateRDO() {
                     createdAt: Date.now(),
                 }
             }, contentBlob);
-        } catch (e) {
+        } catch (e: any) {
             console.error("IPFS Upload failed:", e);
-            alert("Failed to upload metadata to IPFS. Check your Token.");
+            alert(`IPFS Error: ${e.message || e.toString()}. \n\nCheck console for details.`);
             return;
         }
 
