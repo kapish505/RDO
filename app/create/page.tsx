@@ -37,8 +37,12 @@ export default function CreateRDO() {
         // 2. Upload Metadata
         let metadataCID = "";
         try {
-            // Create a simple blob for content (using description as placeholder content)
-            const contentBlob = new Blob([formData.description], { type: 'text/plain' });
+            // Create a blob for content. Ensure it's not empty as nft.storage rejects 0-byte blobs.
+            const contentText = formData.description && formData.description.length > 0
+                ? formData.description
+                : "RDO Encrypted Content"; // Fallback to ensure non-zero size
+
+            const contentBlob = new Blob([contentText], { type: 'text/plain' });
 
             metadataCID = await uploadRDO({
                 name: formData.name,
