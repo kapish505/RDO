@@ -110,7 +110,7 @@ contract RDORegistry is Context {
 
         // 1. Check Locked State
         if (rdo.locked) {
-            emit ActionRefused(_rdoId, _msgSender(), _actionType, rdo.rulesHash, "RDO is permanently locked");
+            emit ActionRefused(_rdoId, _msgSender(), _actionType, rdo.rulesHash, "OBJECT_LOCKED");
             return false;
         }
 

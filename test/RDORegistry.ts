@@ -1,4 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import "@nomicfoundation/hardhat-chai-matchers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -116,7 +117,7 @@ describe("RDORegistry", function () {
             // Second Attempt (Valid Action like READ): Still Refused because Locked
             await expect(rdoRegistry.requestAction(1, 0, context))
                 .to.emit(rdoRegistry, "ActionRefused")
-                .withArgs(1, owner.address, 0, rulesHash, "RDO is permanently locked");
+                .withArgs(1, owner.address, 0, rulesHash, "OBJECT_LOCKED");
         });
     });
 });
