@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { compileRules, type RuleIntent } from '@/lib/rules';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
+import { uploadRDO } from '@/lib/ipfs';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 if (!CONTRACT_ADDRESS) {
