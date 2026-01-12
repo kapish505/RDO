@@ -51,9 +51,13 @@ export default function CreateRDO() {
                 }
             }, contentBlob);
         } catch (e: any) {
-            console.error("IPFS Upload failed:", e);
-            alert(`IPFS Error: ${e.message || e.toString()}. \n\nCheck console for details.`);
-            return;
+            console.warn("IPFS Upload failed, using fallback:", e);
+            const shouldProceed = confirm(`IPFS Upload failed (${e.message}). \n\nProceed with default metadata? (Recommended for Demo)`);
+
+            if (!shouldProceed) return;
+
+            // Fallback CID (Generic RDO Metadata)
+            metadataCID = "bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u";
         }
 
         // 3. Write Contract
