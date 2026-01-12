@@ -6,7 +6,7 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { compileRules, type RuleIntent } from '@/lib/rules';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
 
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Localhost/Deploy address - Update after deploy
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xeA50BfF374633155c071f8a6c4dB56923854c026';
 
 export default function CreateRDO() {
     const { writeContract, data: hash, isPending } = useWriteContract();

@@ -1,6 +1,6 @@
 import { NFTStorage, Blob } from 'nft.storage';
 
-const NFT_STORAGE_TOKEN = process.env.NFT_STORAGE_TOKEN || '';
+const NFT_STORAGE_TOKEN = process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN || '';
 
 // Initialize client
 const client = new NFTStorage({ token: NFT_STORAGE_TOKEN });
