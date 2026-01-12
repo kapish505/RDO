@@ -10,13 +10,31 @@ import "@openzeppelin/contracts/utils/Context.sol";
  */
 contract RDORegistry is Context {
     
+    // Enums
+    enum RDOType { MESSAGE, FILE, LINK, PERMISSION }
+
+    // Compact Rules Struct (Gas Optimized)
+    struct Rules {
+        bool forbidCopy;
+        bool forbidForward;
+        bool forbidExport;
+        uint64 expiry; // unix ts, 0 = never
+        uint8 accessType; // 0=ANY, 1=LINK, 2=CREATOR, 3=SINGLE, 4=LIST
+        uint256 maxUses; // 0 = unlimited
+        bool lockOnViolation;
+        bool requireIdentity;
+    }
+
     // Core definition of an RDO
     struct RDO {
         uint256 id;
         address creator;
+        RDOType rdoType;
         bytes32 rulesHash;      // Immutable hash of the rules JSON
+        Rules rules;            // Compact enforceable rules
         string metadataCID;     // IPFS CID for metadata (name, desc, etc.)
         uint256 createdAt;
+        bool locked;            // Locked state if lockOnViolation triggered
     }
 
     // Counter for RDO IDs
@@ -29,6 +47,7 @@ contract RDORegistry is Context {
     event RDOCreated(
         uint256 indexed rdoId,
         address indexed creator,
+        RDOType rdoType,
         bytes32 rulesHash,
         string metadataCID
     );
@@ -36,13 +55,15 @@ contract RDORegistry is Context {
     event ActionAllowed(
         uint256 indexed rdoId,
         address indexed actor,
+        uint8 actionType,
         bytes32 actionHash
     );
 
     event ActionRefused(
         uint256 indexed rdoId,
         address indexed actor,
-        bytes32 actionHash,
+        uint8 actionType,
+        bytes32 violatedRuleHash,
         string reason
     );
 
@@ -50,101 +71,93 @@ contract RDORegistry is Context {
 
     /**
      * @dev Creates a new RDO with immutable rules.
-     * @param _rulesHash Keccak256 hash of the canonical rules JSON.
-     * @param _metadataCID IPFS CID of the RDO metadata.
      */
-    function createRDO(bytes32 _rulesHash, string memory _metadataCID) external returns (uint256) {
+    function createRDO(
+        bytes32 _rulesHash, 
+        RDOType _rdoType,
+        Rules calldata _rulesCompact,
+        string memory _metadataCID
+    ) external returns (uint256) {
         _currentRdoId++;
         uint256 newId = _currentRdoId;
 
         rdos[newId] = RDO({
             id: newId,
             creator: _msgSender(),
+            rdoType: _rdoType,
             rulesHash: _rulesHash,
+            rules: _rulesCompact,
             metadataCID: _metadataCID,
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            locked: false
         });
 
-        emit RDOCreated(newId, _msgSender(), _rulesHash, _metadataCID);
+        emit RDOCreated(newId, _msgSender(), _rdoType, _rulesHash, _metadataCID);
 
         return newId;
     }
 
     /**
      * @dev Requests an action on an RDO.
-     *      The contract records the attempt. Verification logic is currently strictly on-chain
-     *      enforcing simple flags, or emitting events for off-chain verification agents/clients
-     *      to prove the refusal. 
-     *      
-     *      For the MVP, we assume the client checks the rules. If the client tries to perform
-     *      a forbidden action (e.g. forward), the OBJECT (code) should refuse.
-     *      However, on-chain refusal needs on-chain knowledge of rules.
-     *      
-     *      To strictly follow local refusal logic ("Objects that say no"):
-     *      The user calls this function. IF the contract determines it is refused, it emits Refused.
-     *      Since we store only hash, we pass the rule params to verify?
-     *      
-     *      Simplified for MVP: The contract blindly emits Allowed or Refused based on 
-     *      input flags? No, that's fake.
-     *      
-     *      REAL MVP IMPLEMENTATION:
-     *      We map `rulesHash` to a simplified on-chain config if we want on-chain enforcement.
-     *      OR we pass the rules plaintext + proof that hash matches.
-     *      Let's go with: Pass the rule components. The contract verifies hash matches stored hash.
-     *      Then contract enforces the logic.
      */
     function requestAction(
         uint256 _rdoId,
-        string memory _actionType, // "READ", "FORWARD", "COPY"
-        bytes memory _contextData, // e.g. target address, timestamp
-        // Rule verification params
-        uint256 _expiry,
-        bool _allowForward
-        // In real impl, we'd pass a Merkle proof or the full JSON string if small
-        // For MVP, we will require the creator to salt/hash these specific params 
-        // to equal the rulesHash? Or just simple hash for MVP.
-    ) external {
-        RDO memory rdo = rdos[_rdoId];
+        uint8 _actionType, // 0=READ, 1=FORWARD...
+        bytes calldata _contextData
+    ) external returns (bool) {
+        RDO storage rdo = rdos[_rdoId];
         require(rdo.id != 0, "RDO does not exist");
 
-        // 1. Verify that the provided rule params match the stored hash
-        // For MVP, assume rulesHash = keccak256(abi.encodePacked(_expiry, _allowForward))
-        // This is a simplification to allow on-chain enforcement without excessive gas/calldata.
-        // In a full version, we'd validte a ZK proof or Merkle proof against the hash.
-        bytes32 calculatedHash = keccak256(abi.encodePacked(_expiry, _allowForward));
-        
-        // If the hash doesn't match, we can't trust the params, so we revert? 
-        // Or we treat it as an INVALID request attempt? 
-        // Let's revert for "Invalid Proof of Rules". 
-        // But for "Refusal", we want the params to be correct but the ACTION to be bad.
-        require(calculatedHash == rdo.rulesHash, "Provided rules do not match stored hash");
+        // 1. Check Locked State
+        if (rdo.locked) {
+            emit ActionRefused(_rdoId, _msgSender(), _actionType, rdo.rulesHash, "RDO is permanently locked");
+            return false;
+        }
 
-        bytes32 actionHash = keccak256(abi.encodePacked(_actionType, _contextData));
+        // 2. Check Expiry
+        if (rdo.rules.expiry > 0 && block.timestamp > rdo.rules.expiry) {
+             emit ActionRefused(_rdoId, _msgSender(), _actionType, rdo.rulesHash, "RDO has expired");
+             return false;
+        }
 
-        // 2. Execute Logic
         bool refused = false;
         string memory refusalReason = "";
 
-        // Rule: Expiry
-        if (_expiry > 0 && block.timestamp > _expiry) {
+        // 3. Check Forbidden Flag
+        // ActionType: READ=0, FORWARD=1, COPY=2, DOWNLOAD=3, EXECUTE=4
+        if (_actionType == 1 && rdo.rules.forbidForward) { // FORWARD
             refused = true;
-            refusalReason = "RDO has expired";
+            refusalReason = "Forwarding forbidden";
+        } else if (_actionType == 2 && rdo.rules.forbidCopy) { // COPY
+            refused = true;
+            refusalReason = "Copying forbidden";
+        } else if (_actionType == 3 && rdo.rules.forbidExport) { // EXPORT/DOWNLOAD
+            refused = true;
+            refusalReason = "Export forbidden";
         }
 
-        // Rule: Forwarding
-        // Use keccak for string comparison
-        if (!refused && keccak256(bytes(_actionType)) == keccak256(bytes("FORWARD"))) {
-            if (!_allowForward) {
-                refused = true;
-                refusalReason = "Forwarding is not allowed";
-            }
-        }
+        // 4. Emit Result & Enforce Lock
+        bytes32 actionHash = keccak256(abi.encodePacked(_actionType, _contextData));
 
-        // 3. Emit Result
         if (refused) {
-            emit ActionRefused(_rdoId, _msgSender(), actionHash, refusalReason);
+            if (rdo.rules.lockOnViolation) {
+                rdo.locked = true;
+                refusalReason = string(abi.encodePacked(refusalReason, " (Object Locked)"));
+            }
+            emit ActionRefused(_rdoId, _msgSender(), _actionType, rdo.rulesHash, refusalReason);
+            return false;
         } else {
-            emit ActionAllowed(_rdoId, _msgSender(), actionHash);
+            // Success Logic
+             if (rdo.rules.maxUses > 0) {
+                 if (rdo.rules.maxUses == 1) {
+                     // Last use used up
+                     rdo.rules.maxUses--; 
+                 } else {
+                     rdo.rules.maxUses--;
+                 }
+            }
+            emit ActionAllowed(_rdoId, _msgSender(), _actionType, actionHash);
+            return true;
         }
     }
 }

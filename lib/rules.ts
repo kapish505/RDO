@@ -1,23 +1,52 @@
 import { keccak256, toHex } from 'viem';
 
+// Core RDO Types
+export enum RDOType {
+    MESSAGE = "MESSAGE",
+    FILE = "FILE",
+    LINK = "LINK",
+    PERMISSION = "PERMISSION"
+}
+
 // User Intent Input
 export interface RuleIntent {
+    type: RDOType;
     name: string;
     description: string;
-    allowedUsers: 'ANY' | 'LINK' | 'LIST'; // Who can use it?
-    forbiddenActions: ('FORWARD' | 'COPY' | 'EXPORT')[]; // What should NEVER happen?
-    expirySeconds: number; // When should it expire? (0 = never)
-    violationAction: 'REFUSE' | 'BURN'; // What happens on violation?
+
+    // Type-Specific Payload
+    payload: {
+        text?: string;        // For MESSAGE
+        file?: File;          // For FILE (Client-side use only)
+        url?: string;         // For LINK
+        scope?: string;       // For PERMISSION (e.g. READ)
+        resource?: string;    // For PERMISSION
+        mimeType?: string;    // For FILE
+        fileName?: string;    // For FILE
+    };
+
+    // Rule Options
+    allowedUsers: 'ANY' | 'LINK' | 'LIST' | 'CREATOR_ONLY' | 'SINGLE_USE';
+    forbiddenActions: ('FORWARD' | 'COPY' | 'EXPORT')[];
+    expirySeconds: number; // 0 = never
+    violationAction: 'REFUSE' | 'LOCK'; // Refuse vs Permanently Lock
+    maxUses: number; // 0 = unlimited
+    requireIdentity: 'ALWAYS' | 'CONDITIONAL' | 'NEVER';
 }
 
 // Canonical Rule Object (Machine Readable)
 export interface CanonicalRules {
-    v: number; // version
-    allow_read: boolean;
-    allow_forward: boolean;
-    expiry: number;
-    violation_action: string;
-    // Deterministic sorting is key, so we use a flat structure with sorted keys
+    v: number;
+    type: string;
+    payload: any; // Simplified for hash input
+    rules: {
+        access_scope: string; // ANYONE, WHITELIST, etc.
+        forbidden: string[];
+        expiry: number;
+        max_uses: number;
+        lock_on_violation: boolean;
+        require_identity: string;
+    };
 }
 
 /**
@@ -25,20 +54,26 @@ export interface CanonicalRules {
  */
 export function compileRules(intent: RuleIntent): { json: string; hash: `0x${string}`; rules: CanonicalRules } {
     // 1. Map Intent to Canonical Rules
+    // Construct simplified payload for hashing (exclude actual file binaries, just metadata)
+    const payloadForHash = { ...intent.payload };
+    delete payloadForHash.file; // Don't hash the file object itself here, just metadata if present
+
     const rules: CanonicalRules = {
         v: 1,
-        allow_read: true, // Always true if they have access to the object?
-        allow_forward: !intent.forbiddenActions.includes('FORWARD'),
-        expiry: intent.expirySeconds > 0 ? Math.floor(Date.now() / 1000) + intent.expirySeconds : 0,
-        violation_action: intent.violationAction
+        type: intent.type,
+        payload: payloadForHash,
+        rules: {
+            access_scope: intent.allowedUsers,
+            forbidden: intent.forbiddenActions.sort(), // Deterministic sort
+            expiry: intent.expirySeconds > 0 ? Math.floor(Date.now() / 1000) + intent.expirySeconds : 0,
+            max_uses: intent.maxUses,
+            lock_on_violation: intent.violationAction === 'LOCK',
+            require_identity: intent.requireIdentity
+        }
     };
 
     // 2. Canonical Stringify (Deterministic)
-    // We manually order keys or use a library. Here we manually construct to allow simple deterministic behavior.
-    // Or utilize JSON.stringify with specific property order.
     const canonicalString = stringifyDeterministic(rules);
-
-
 
     // 3. Hash
     const hash = keccak256(toHex(canonicalString));
