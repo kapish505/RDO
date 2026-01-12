@@ -6,7 +6,10 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xeA50BfF374633155c071f8a6c4dB56923854c026';
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+if (!CONTRACT_ADDRESS) {
+    console.error("Missing NEXT_PUBLIC_CONTRACT_ADDRESS");
+}
 
 export default function ViewRDO() {
     const { rdoId } = useParams();

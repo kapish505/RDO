@@ -5,8 +5,13 @@ import { motion } from 'framer-motion';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { compileRules, type RuleIntent } from '@/lib/rules';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
+import { uploadRDO } from '@/lib/ipfs';
+import { Blob } from 'nft.storage';
 
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xeA50BfF374633155c071f8a6c4dB56923854c026';
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+if (!CONTRACT_ADDRESS) {
+    console.error("Missing NEXT_PUBLIC_CONTRACT_ADDRESS");
+}
 
 export default function CreateRDO() {
     const { writeContract, data: hash, isPending } = useWriteContract();
@@ -29,8 +34,27 @@ export default function CreateRDO() {
         // 1. Compile Rules
         const { hash: rulesHash } = compileRules(formData);
 
-        // 2. Upload Metadata (Mocked for MVP if no key)
-        const metadataCID = "QmMockMetadataCID";
+        // 2. Upload Metadata
+        let metadataCID = "";
+        try {
+            // Create a simple blob for content (using description as placeholder content)
+            const contentBlob = new Blob([formData.description], { type: 'text/plain' });
+
+            metadataCID = await uploadRDO({
+                name: formData.name,
+                description: formData.description,
+                image: "ipfs://bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u", // Default placeholder image
+                properties: {
+                    rulesHash,
+                    encryptedContentCID: "", // Will be filled by uploadRDO
+                    createdAt: Date.now(),
+                }
+            }, contentBlob);
+        } catch (e) {
+            console.error("IPFS Upload failed:", e);
+            alert("Failed to upload metadata to IPFS. Check your Token.");
+            return;
+        }
 
         // 3. Write Contract
         writeContract({
