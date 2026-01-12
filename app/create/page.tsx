@@ -5,8 +5,6 @@ import { motion } from 'framer-motion';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { compileRules, type RuleIntent } from '@/lib/rules';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
-import { uploadRDO } from '@/lib/ipfs';
-// Removed: import { Blob } from 'nft.storage';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 if (!CONTRACT_ADDRESS) {
@@ -37,7 +35,7 @@ export default function CreateRDO() {
         // 2. Upload Metadata
         let metadataCID = "";
         try {
-            // Create a blob for content. Ensure it's not empty as nft.storage rejects 0-byte blobs.
+            // Create a blob for content. Ensure it's not empty as IPFS/Pinata might reject 0-byte blobs.
             const contentText = formData.description && formData.description.length > 0
                 ? formData.description
                 : "RDO Encrypted Content"; // Fallback to ensure non-zero size
