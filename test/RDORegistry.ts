@@ -35,8 +35,9 @@ describe("RDORegistry", function () {
             const rules = createRules({ expiry: Math.floor(Date.now() / 1000) + 3600 });
             const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("canonical-json-mock"));
             const metadataCID = "QmTest";
+            const whitelist: string[] = [];
 
-            await expect(rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, metadataCID))
+            await expect(rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, metadataCID, whitelist))
                 .to.emit(rdoRegistry, "RDOCreated")
                 .withArgs(1, owner.address, RDOType.MESSAGE, rulesHash, metadataCID);
         });
@@ -46,7 +47,7 @@ describe("RDORegistry", function () {
 
             const rules = createRules({ forbidForward: false });
             const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock"));
-            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest");
+            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", []);
 
             // Request Forward (Allowed)
             // ActionType.FORWARD = 1
@@ -65,7 +66,7 @@ describe("RDORegistry", function () {
             const rules = createRules({ forbidForward: true });
             const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock"));
 
-            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest");
+            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", []);
 
             // Request Forward
             const context = "0x";
@@ -86,7 +87,7 @@ describe("RDORegistry", function () {
             const rules = createRules({ expiry: expiredTimestamp });
             const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock"));
 
-            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest");
+            await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", []);
 
             const context = "0x";
             // READ = 0
@@ -104,7 +105,7 @@ describe("RDORegistry", function () {
             const rules = createRules({ forbidCopy: true, lockOnViolation: true });
             const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock"));
 
-            await rdoRegistry.createRDO(rulesHash, RDOType.FILE, rules, "QmTest");
+            await rdoRegistry.createRDO(rulesHash, RDOType.FILE, rules, "QmTest", []);
 
             const context = "0x";
             // COPY = 2
@@ -118,6 +119,60 @@ describe("RDORegistry", function () {
             await expect(rdoRegistry.requestAction(1, 0, context))
                 .to.emit(rdoRegistry, "ActionRefused")
                 .withArgs(1, owner.address, 0, rulesHash, "OBJECT_LOCKED");
+            it("Should enforce Whitelist Access", async function () {
+                const { rdoRegistry, owner, otherAccount } = await loadFixture(deployFixture);
+
+                // Create RDO with LIST access (4)
+                const rules = createRules({ accessType: 4 });
+                const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock-whitelist"));
+
+                // Allow otherAccount. NOT owner (unless explicitly added).
+                await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", [otherAccount.address]);
+
+                const context = "0x";
+                const actionHash = ethers.solidityPackedKeccak256(["uint8", "bytes"], [0, context]); // READ
+
+                // 1. Owner attempts access (NOT in whitelist) -> FAIL
+            });
+
+            it("Should enforce Whitelist Access", async function () {
+                const { rdoRegistry, owner, otherAccount } = await loadFixture(deployFixture);
+
+                // Create RDO with LIST access (4)
+                const rules = createRules({ accessType: 4 });
+                const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock-whitelist"));
+
+                // Allow otherAccount. NOT owner (unless explicitly added).
+                await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", [otherAccount.address]);
+
+                const context = "0x";
+                const actionHash = ethers.solidityPackedKeccak256(["uint8", "bytes"], [0, context]); // READ
+
+                // 1. Owner attempts access (NOT in whitelist) -> FAIL
+            });
+
+            it("Should enforce Whitelist Access", async function () {
+                const { rdoRegistry, owner, otherAccount } = await loadFixture(deployFixture);
+
+                // Create RDO with LIST access (4)
+                const rules = createRules({ accessType: 4 });
+                const rulesHash = ethers.keccak256(ethers.toUtf8Bytes("mock-whitelist"));
+
+                // Allow otherAccount. NOT owner (unless explicitly added).
+                await rdoRegistry.createRDO(rulesHash, RDOType.MESSAGE, rules, "QmTest", [otherAccount.address]);
+
+                const context = "0x";
+                const actionHash = ethers.solidityPackedKeccak256(["uint8", "bytes"], [0, context]); // READ
+
+                // 1. Owner attempts access (NOT in whitelist) -> FAIL
+                await expect(rdoRegistry.requestAction(1, 0, context))
+                    .to.emit(rdoRegistry, "ActionRefused")
+                    .withArgs(1, owner.address, 0, rulesHash, "Access denied (Not in whitelist)");
+
+                // 2. otherAccount (Whitelisted) attempts access -> ALLOW
+                await expect(rdoRegistry.connect(otherAccount).requestAction(1, 0, context))
+                    .to.emit(rdoRegistry, "ActionAllowed")
+                    .withArgs(1, otherAccount.address, 0, actionHash);
+            });
         });
     });
-});

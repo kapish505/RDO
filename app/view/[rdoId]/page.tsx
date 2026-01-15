@@ -33,7 +33,10 @@ export default function ViewRDO() {
         creator: (rdoData as any)[1],
         type: (rdoData as any)[2],
         rulesHash: (rdoData as any)[3],
-        rules: (rdoData as any)[4],
+        rules: {
+            ...((rdoData as any)[4]),
+            accessType: (rdoData as any)[4].accessType
+        },
         metadataCID: (rdoData as any)[5],
         createdAt: (rdoData as any)[6],
         locked: (rdoData as any)[7],
@@ -178,6 +181,18 @@ export default function ViewRDO() {
                     ) : (
                         <div className="text-white/60">Refusal Only (Standard)</div>
                     )}
+                </div>
+
+                {/* Rule: Access Control */}
+                <div className="p-6 rounded-xl bg-white/5 border border-white/10">
+                    <h4 className="text-sm text-white/40 uppercase tracking-wider mb-4">Access Control</h4>
+                    <div className="text-lg font-mono">
+                        {rules.accessType === 4 ? (
+                            <span className="text-yellow-400 font-bold">WHITELIST ONLY</span>
+                        ) : (
+                            <span className="text-green-400">PUBLIC ACCESS</span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Rule 4: Usage Limit */}

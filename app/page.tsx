@@ -29,11 +29,12 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="relative overflow-hidden">
-      {/* Dynamic Background */}
       <div className="fixed inset-0 pointer-events-none -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-rdo-accent/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[150px]" />
       </div>
+
+      <ActivityTicker />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
@@ -182,6 +183,57 @@ export default function Home() {
           </motion.button>
         </Link>
       </Section>
+    </div>
+  );
+}
+
+function ActivityTicker() {
+  // Mock Data for "Live" feel
+  const activities = [
+    { type: 'REFUSED', id: '8291', reason: 'Forwarding Forbidden', time: '2s ago' },
+    { type: 'CREATED', id: '8292', reason: 'New Message RDO', time: '5s ago' },
+    { type: 'REFUSED', id: '8288', reason: 'Access Denied (Whitelist)', time: '12s ago' },
+    { type: 'ALLOWED', id: '8290', reason: 'Read Access Granted', time: '15s ago' },
+    { type: 'CREATED', id: '8293', reason: 'New File RDO', time: '18s ago' },
+    { type: 'REFUSED', id: '8102', reason: 'Object Locked', time: '24s ago' },
+  ];
+
+  return (
+    <div className="absolute top-24 right-6 z-20 hidden lg:block">
+      <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-4 w-80 shadow-2xl">
+        <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-xs font-bold uppercase tracking-widest text-white/60">Live Protocol Activity</span>
+          </div>
+          <div className="text-[10px] text-white/30">Sepolia Testnet</div>
+        </div>
+
+        <div className="space-y-3">
+          {activities.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center gap-2">
+                <span className={`font-mono font-bold ${item.type === 'REFUSED' ? 'text-red-400' :
+                  item.type === 'CREATED' ? 'text-purple-400' : 'text-green-400'
+                  }`}>
+                  {item.type === 'REFUSED' ? '❌' : item.type === 'CREATED' ? '✨' : '✅'} #{item.id}
+                </span>
+                <span className="text-white/60 truncate max-w-[120px]">{item.reason}</span>
+              </div>
+              <span className="text-white/20 font-mono">{item.time}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
