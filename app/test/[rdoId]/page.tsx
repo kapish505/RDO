@@ -30,7 +30,7 @@ export default function TestDashboard() {
     // Execution State
     const [execState, setExecState] = useState<ExecutionState>('IDLE');
     const [currentActionType, setCurrentActionType] = useState<number | null>(null);
-    const [modalData, setModalData] = useState<{ title: string, content: string, type: 'TEXT' | 'LINK' | 'SHARE' } | null>(null);
+    const [modalData, setModalData] = useState<{ title: string, content: string, type: 'TEXT' | 'LINK' | 'SHARE' | 'IMAGE' } | null>(null);
 
     // 1. Fetch RDO Data (including Metadata CID at index 5)
     // RDO Struct: id, creator, type, rulesHash, rules, metadataCID, createdAt, locked
@@ -133,9 +133,21 @@ export default function TestDashboard() {
             // 2. Perform Action Specific Logic
             if (actionType === 0) { // READ
                 const contentRes = await fetchFromIPFS(contentCID);
-                const text = await contentRes.text(); // Assuming text for MVP (or JSON)
-                // In real app, we would decrypt here using user keys
-                setModalData({ title: 'Decrypted Content', content: text, type: 'TEXT' });
+
+                if (parsedRDO.rdoType === 1) { // FILE
+                    const blob = await contentRes.blob();
+                    if (blob.type.startsWith('image/')) {
+                        const url = URL.createObjectURL(blob);
+                        setModalData({ title: 'Decrypted Content', content: url, type: 'IMAGE' });
+                    } else {
+                        // Fallback for non-image files (e.g. PDF) -> Show generic or text
+                        const text = "Binary File Content (Download to view)";
+                        setModalData({ title: 'Decrypted Content', content: text, type: 'TEXT' });
+                    }
+                } else {
+                    const text = await contentRes.text();
+                    setModalData({ title: 'Decrypted Content', content: text, type: 'TEXT' });
+                }
             }
             else if (actionType === 1) { // FORWARD
                 setModalData({
@@ -484,8 +496,12 @@ function Modal({ data, onClose }: { data: any, onClose: () => void }) {
                     <h2 className="text-2xl font-serif font-bold">{data.title}</h2>
                 </div>
 
-                <div className="bg-black/50 rounded-xl p-4 font-mono text-sm break-all max-h-[300px] overflow-y-auto">
-                    {data.content}
+                <div className="bg-black/50 rounded-xl p-4 font-mono text-sm break-all max-h-[400px] overflow-y-auto flex justify-center">
+                    {data.type === 'IMAGE' ? (
+                        <img src={data.content} alt="Decrypted RDO" className="max-w-full rounded-lg" />
+                    ) : (
+                        data.content
+                    )}
                 </div>
 
                 <button
