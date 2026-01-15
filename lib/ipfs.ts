@@ -88,3 +88,19 @@ export async function uploadRDO(
 
     return metadataCid;
 }
+
+
+/**
+ * Fetches content from IPFS via a public gateway
+ */
+export async function fetchFromIPFS(cid: string): Promise<Response> {
+    const gateway = "https://gateway.pinata.cloud/ipfs/";
+    const url = `${gateway}${cid}`;
+
+    // We add a cache buster or specific headers if needed, but basic fetch is usually ok
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch from IPFS: ${res.statusText}`);
+    }
+    return res;
+}

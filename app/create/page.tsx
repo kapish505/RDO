@@ -71,75 +71,87 @@ export default function CreateRDO() {
     };
     const handleBack = () => setStep(step - 1);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async () => {
-        // 1. Compile Rules
-        const { hash: rulesHash, rules } = compileRules(formData);
-
-        // 2. Prepare Payload Blob & Metadata
-        let contentBlob: Blob;
-        let imageURI = "ipfs://bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u"; // Default
-
-        // Logic for different types
-        if (formData.type === RDOType.FILE && formData.payload.file) {
-            contentBlob = formData.payload.file;
-            // In a real app we might create a thumbnail here
-        } else if (formData.type === RDOType.MESSAGE) {
-            contentBlob = new Blob([formData.payload.text || ''], { type: 'text/plain' });
-        } else {
-            // For Link/Permission, the payload IS the core JSON content, but we still need a blob for "encrypted content" slot
-            // We can store the detailed JSON as the content
-            const contentJson = JSON.stringify(formData.payload);
-            contentBlob = new Blob([contentJson], { type: 'application/json' });
-        }
-
-        // 3. Upload to IPFS via Pinata
-        let metadataCID = "";
+        if (isSubmitting || isPending) return;
+        setIsSubmitting(true);
         try {
-            metadataCID = await uploadRDO({
-                name: formData.name,
-                description: formData.description,
-                image: imageURI,
-                properties: {
+            // 1. Compile Rules
+            const { hash: rulesHash, rules } = compileRules(formData);
+
+            // 2. Prepare Payload Blob & Metadata
+            let contentBlob: Blob;
+            let imageURI = "ipfs://bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u"; // Default
+
+            // Logic for different types
+            if (formData.type === RDOType.FILE && formData.payload.file) {
+                contentBlob = formData.payload.file;
+                // In a real app we might create a thumbnail here
+            } else if (formData.type === RDOType.MESSAGE) {
+                contentBlob = new Blob([formData.payload.text || ''], { type: 'text/plain' });
+            } else {
+                // For Link/Permission, the payload IS the core JSON content, but we still need a blob for "encrypted content" slot
+                // We can store the detailed JSON as the content
+                const contentJson = JSON.stringify(formData.payload);
+                contentBlob = new Blob([contentJson], { type: 'application/json' });
+            }
+
+            // 3. Upload to IPFS via Pinata
+            let metadataCID = "";
+            try {
+                metadataCID = await uploadRDO({
+                    name: formData.name,
+                    description: formData.description,
+                    image: imageURI,
+                    properties: {
+                        rulesHash,
+                        encryptedContentCID: "", // Filled by uploader
+                        createdAt: Date.now(),
+                    }
+                }, contentBlob);
+            } catch (e: any) {
+                alert(`Upload Failed: ${e.message}`);
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 4. Construct Compact Rules (Struct)
+            // Must match Contract Struct Order:
+            // forbidCopy, forbidForward, forbidExport, expiry, accessType, maxUses, lockOnViolation, requireIdentity
+            const compactRules = {
+                forbidCopy: formData.forbiddenActions.includes('COPY'),
+                forbidForward: formData.forbiddenActions.includes('FORWARD'),
+                forbidExport: formData.forbiddenActions.includes('EXPORT'),
+                expiry: formData.expirySeconds > 0 ? Math.floor(Date.now() / 1000) + formData.expirySeconds : 0,
+                accessType: mapAccessType(formData.allowedUsers),
+                maxUses: formData.maxUses,
+                lockOnViolation: formData.violationAction === 'LOCK',
+                requireIdentity: formData.requireIdentity !== 'NEVER'
+            };
+
+            // 5. Write Contract
+            const typeEnumMap = {
+                'MESSAGE': 0, 'FILE': 1, 'LINK': 2, 'PERMISSION': 3
+            };
+
+            writeContract({
+                address: CONTRACT_ADDRESS as `0x${string}`,
+                abi: RDORegistryABI.abi,
+                functionName: 'createRDO',
+                args: [
                     rulesHash,
-                    encryptedContentCID: "", // Filled by uploader
-                    createdAt: Date.now(),
-                }
-            }, contentBlob);
-        } catch (e: any) {
-            alert(`Upload Failed: ${e.message}`);
-            return;
+                    typeEnumMap[formData.type],
+                    compactRules,
+                    metadataCID
+                ],
+            }, {
+                onSettled: () => setIsSubmitting(false)
+            });
+        } catch (e) {
+            console.error(e);
+            setIsSubmitting(false);
         }
-
-        // 4. Construct Compact Rules (Struct)
-        // Must match Contract Struct Order:
-        // forbidCopy, forbidForward, forbidExport, expiry, accessType, maxUses, lockOnViolation, requireIdentity
-        const compactRules = {
-            forbidCopy: formData.forbiddenActions.includes('COPY'),
-            forbidForward: formData.forbiddenActions.includes('FORWARD'),
-            forbidExport: formData.forbiddenActions.includes('EXPORT'),
-            expiry: formData.expirySeconds > 0 ? Math.floor(Date.now() / 1000) + formData.expirySeconds : 0,
-            accessType: mapAccessType(formData.allowedUsers),
-            maxUses: formData.maxUses,
-            lockOnViolation: formData.violationAction === 'LOCK',
-            requireIdentity: formData.requireIdentity !== 'NEVER'
-        };
-
-        // 5. Write Contract
-        const typeEnumMap = {
-            'MESSAGE': 0, 'FILE': 1, 'LINK': 2, 'PERMISSION': 3
-        };
-
-        writeContract({
-            address: CONTRACT_ADDRESS as `0x${string}`,
-            abi: RDORegistryABI.abi,
-            functionName: 'createRDO',
-            args: [
-                rulesHash,
-                typeEnumMap[formData.type],
-                compactRules,
-                metadataCID
-            ],
-        });
     };
 
     // Mapping helper
@@ -199,7 +211,7 @@ export default function CreateRDO() {
                 onBack={handleBack}
                 onNext={handleNext}
                 onSubmit={handleSubmit}
-                isPending={isPending || isConfirming}
+                isPending={isPending || isConfirming || isSubmitting}
             />
         </div>
     );
