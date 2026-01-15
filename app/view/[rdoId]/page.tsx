@@ -1,6 +1,6 @@
 'use client';
 
-import { useReadContract } from 'wagmi';
+import { useReadContract, usePublicClient } from 'wagmi';
 import RDORegistryABI from '@/artifacts/contracts/RDORegistry.sol/RDORegistry.json';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -48,6 +48,45 @@ export default function ViewRDO() {
                 .catch(err => console.error("IPFS Fetch Error:", err));
         }
     }, [rdo?.metadataCID]);
+
+    // 3. Fetch Creation Transaction (Event Log)
+    const [creationTx, setCreationTx] = useState<string | null>(null);
+    const publicClient = usePublicClient();
+
+    useEffect(() => {
+        if (!publicClient || !rdoId) return;
+
+        const fetchCreationEvent = async () => {
+            try {
+                // RDOCreated(uint256 indexed rdoId, address indexed creator, uint8 rdoType, bytes32 rulesHash)
+                const logs = await publicClient.getLogs({
+                    address: CONTRACT_ADDRESS as `0x${string}`,
+                    event: {
+                        type: 'event',
+                        name: 'RDOCreated',
+                        inputs: [
+                            { type: 'uint256', indexed: true, name: 'rdoId' },
+                            { type: 'address', indexed: true, name: 'creator' },
+                            { type: 'uint8', indexed: false, name: 'rdoType' },
+                            { type: 'bytes32', indexed: false, name: 'rulesHash' }
+                        ]
+                    },
+                    args: {
+                        rdoId: BigInt(rdoId as string)
+                    },
+                    fromBlock: 'earliest'
+                });
+
+                if (logs.length > 0) {
+                    setCreationTx(logs[0].transactionHash);
+                }
+            } catch (error) {
+                console.error("Failed to fetch creation event:", error);
+            }
+        };
+
+        fetchCreationEvent();
+    }, [publicClient, rdoId]);
 
     if (isContractLoading) return <div className="flex h-screen items-center justify-center text-white/40 animate-pulse">Loading Object Data...</div>;
     if (!rdo || rdo.id === BigInt(0)) return <div className="flex h-screen items-center justify-center text-red-400">Object Not Found</div>;
@@ -153,7 +192,7 @@ export default function ViewRDO() {
             {/* Technical Footer */}
             <div className="border-t border-white/10 pt-8 mt-8">
                 <h4 className="text-sm font-bold opacity-50 mb-4">Technical Proofs</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-mono text-xs text-white/40 break-all">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 font-mono text-xs text-white/40 break-all">
                     <div>
                         <div className="mb-2">Rules Hash (Immutable Intent)</div>
                         <div className="p-3 bg-black/30 rounded">{rdo.rulesHash}</div>
@@ -165,6 +204,18 @@ export default function ViewRDO() {
                                 {rdo.metadataCID}
                             </a>
                         </div>
+                    </div>
+                    <div>
+                        <div className="mb-2">Creation Receipt (Etherscan)</div>
+                        {creationTx ? (
+                            <div className="p-3 bg-black/30 rounded">
+                                <a href={`https://sepolia.etherscan.io/tx/${creationTx}`} target="_blank" className="hover:text-green-400 hover:underline flex items-center gap-2">
+                                    <span>🔗 View Transaction</span>
+                                </a>
+                            </div>
+                        ) : (
+                            <div className="p-3 bg-black/30 rounded opacity-50">Searching...</div>
+                        )}
                     </div>
                 </div>
             </div>

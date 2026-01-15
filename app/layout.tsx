@@ -28,8 +28,9 @@ export default function RootLayout({
               <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 <Link href="/" className="font-serif text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">RDO</Link>
                 <div className="flex items-center gap-6 text-sm font-medium text-white/70">
-                  <a href="/create" className="hover:text-white transition-colors">Create</a>
-                  <a href="/about" className="hover:text-white transition-colors">Manifesto</a>
+                  <Link href="/test" className="hover:text-white transition-colors">Test</Link>
+                  <Link href="/create" className="hover:text-white transition-colors">Create</Link>
+                  <Link href="/about" className="hover:text-white transition-colors">Manifesto</Link>
                   <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
                 </div>
               </div>
