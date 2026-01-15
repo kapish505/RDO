@@ -64,3 +64,35 @@ export async function decryptData(key: CryptoKey, ivHex: string, ciphertextHex: 
 
     return new TextDecoder().decode(decrypted);
 }
+
+// Binary Helpers (For File RDOs)
+export async function encryptBinary(key: CryptoKey, data: ArrayBuffer): Promise<{ iv: string; ciphertext: ArrayBuffer }> {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+
+    const encrypted = await crypto.subtle.encrypt(
+        {
+            name: "AES-GCM",
+            iv: iv,
+        },
+        key,
+        data
+    );
+
+    return {
+        iv: Buffer.from(iv).toString('hex'),
+        ciphertext: encrypted
+    };
+}
+
+export async function decryptBinary(key: CryptoKey, ivHex: string, ciphertext: ArrayBuffer): Promise<ArrayBuffer> {
+    const iv = Buffer.from(ivHex, 'hex');
+
+    return await crypto.subtle.decrypt(
+        {
+            name: "AES-GCM",
+            iv: iv,
+        },
+        key,
+        ciphertext
+    );
+}

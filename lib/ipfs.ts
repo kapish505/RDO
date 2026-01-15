@@ -13,6 +13,7 @@ export interface RDOMetadata {
     properties: {
         rulesHash: string;
         encryptedContentCID: string;
+        iv?: string; // Initialization Vector for AES-GCM
         createdAt: number;
     };
 }

@@ -9,6 +9,7 @@ import { uploadRDO } from '@/lib/ipfs';
 import {
     type RDOMetadata
 } from '@/lib/ipfs';
+import { generateKey, exportKey, encryptBinary } from '@/lib/crypto';
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
@@ -74,6 +75,8 @@ export default function CreateRDO() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [encKey, setEncKey] = useState<string | null>(null);
+
     const handleSubmit = async () => {
         if (isSubmitting || isPending) return;
         setIsSubmitting(true);
@@ -81,22 +84,27 @@ export default function CreateRDO() {
             // 1. Compile Rules
             const { hash: rulesHash, rules } = compileRules(formData);
 
-            // 2. Prepare Payload Blob & Metadata
-            let contentBlob: Blob;
-            let imageURI = "ipfs://bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u"; // Default
+            // 2. Prepare Payload & Key Generation
+            const key = await generateKey();
+            const keyJwk = await exportKey(key);
+            setEncKey(keyJwk); // Store key for Success View
+
+            let contentBuffer: ArrayBuffer;
+            let imageURI = "ipfs://bafkreidmvnotre7527r4jjk3v3i5h3qaqy2q2f22cbe62g3aa22a4z3w7u";
 
             // Logic for different types
             if (formData.type === RDOType.FILE && formData.payload.file) {
-                contentBlob = formData.payload.file;
-                // In a real app we might create a thumbnail here
+                contentBuffer = await formData.payload.file.arrayBuffer();
             } else if (formData.type === RDOType.MESSAGE) {
-                contentBlob = new Blob([formData.payload.text || ''], { type: 'text/plain' });
+                contentBuffer = new TextEncoder().encode(formData.payload.text || '').buffer;
             } else {
-                // For Link/Permission, the payload IS the core JSON content, but we still need a blob for "encrypted content" slot
-                // We can store the detailed JSON as the content
                 const contentJson = JSON.stringify(formData.payload);
-                contentBlob = new Blob([contentJson], { type: 'application/json' });
+                contentBuffer = new TextEncoder().encode(contentJson).buffer;
             }
+
+            // Encrypt Content
+            const { iv, ciphertext } = await encryptBinary(key, contentBuffer);
+            const encryptedBlob = new Blob([ciphertext]);
 
             // 3. Upload to IPFS via Pinata
             let metadataCID = "";
@@ -108,9 +116,10 @@ export default function CreateRDO() {
                     properties: {
                         rulesHash,
                         encryptedContentCID: "", // Filled by uploader
+                        iv, // Store IV publicly
                         createdAt: Date.now(),
                     }
-                }, contentBlob);
+                }, encryptedBlob);
             } catch (e: any) {
                 alert(`Upload Failed: ${e.message}`);
                 setIsSubmitting(false);
@@ -168,9 +177,9 @@ export default function CreateRDO() {
         }
     };
 
-    if (isSuccess && hash) return <SuccessView hash={hash} rdoId={rdoId} />;
-
-    return (
+    if (isSuccess && hash) {
+        return <SuccessView hash={hash} rdoId={rdoId} encKey={encKey} />;
+    } return (
         <div className="max-w-3xl mx-auto pt-20 pb-12 px-6">
             <Header step={step} />
 
@@ -529,7 +538,11 @@ function Navigation({ step, onBack, onNext, onSubmit, isPending }: any) {
     );
 }
 
-function SuccessView({ hash, rdoId }: { hash: string, rdoId: number | null }) {
+function SuccessView({ hash, rdoId, encKey }: { hash: string, rdoId: number | null, encKey: string | null }) {
+    const magicLink = typeof window !== 'undefined' && rdoId && encKey
+        ? `${window.location.origin}/rdo/${rdoId}#${btoa(encKey)}`
+        : '';
+
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
             <motion.div
@@ -546,31 +559,50 @@ function SuccessView({ hash, rdoId }: { hash: string, rdoId: number | null }) {
             </div>
 
             {rdoId && (
-                <div className="py-4">
+                <div className="py-2">
                     <div className="text-sm uppercase tracking-widest text-white/40 mb-1">Object ID</div>
                     <div className="text-5xl font-mono font-bold text-white">#{rdoId}</div>
                 </div>
             )}
 
-            <div className="flex flex-col gap-4 w-full max-w-sm">
-                {rdoId && (
-                    <a
-                        href={`/view/${rdoId}`}
-                        className="bg-white text-black font-bold rounded-xl px-8 py-4 hover:scale-105 transition flex items-center justify-center gap-2"
-                    >
-                        <span>👁️ View Object</span>
-                    </a>
-                )}
+            {/* MAGIC LINK CARD */}
+            {magicLink && (
+                <div className="w-full max-w-md p-6 bg-white/5 border border-white/10 rounded-2xl relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-rdo-accent/10 to-transparent opacity-50" />
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-rdo-accent mb-3 relative z-10">Secret Share Link</h3>
+                    <p className="text-xs text-white/60 mb-4 relative z-10">
+                        This link contains the <strong>decryption key</strong>. It is the ONLY way to view the content.
+                    </p>
 
+                    <div className="flex gap-2 relative z-10">
+                        <input
+                            readOnly
+                            value={magicLink}
+                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white/60 outline-none"
+                        />
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(magicLink);
+                                alert("Link Copied!");
+                            }}
+                            className="bg-white text-black font-bold px-4 rounded-lg text-sm hover:scale-105 transition"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col gap-4 w-full max-w-sm pt-4">
                 <a
                     href={`https://sepolia.etherscan.io/tx/${hash}`}
                     target="_blank"
-                    className="border border-white/10 rounded-xl px-8 py-4 hover:bg-white/5 transition font-mono text-sm text-white/60 flex items-center justify-center gap-2"
+                    className="border border-white/10 rounded-xl px-8 py-3 hover:bg-white/5 transition font-mono text-sm text-white/60 flex items-center justify-center gap-2"
                 >
                     <span>📜 Etherscan Receipt</span>
                 </a>
 
-                <a href="/" className="text-white/40 hover:text-white text-sm pt-4">Make Another</a>
+                <a href="/" className="text-white/40 hover:text-white text-sm">Make Another</a>
             </div>
         </div>
     );
