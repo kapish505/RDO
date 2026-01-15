@@ -46,7 +46,10 @@ export default function TestDashboard() {
         creator: (rdoData as any)[1],
         rdoType: (rdoData as any)[2],
         rulesHash: (rdoData as any)[3],
-        rules: (rdoData as any)[4],
+        rules: {
+            ...((rdoData as any)[4]),
+            accessType: (rdoData as any)[4].accessType // Ensure accessType is accessible
+        },
         metadataCID: (rdoData as any)[5],
         locked: (rdoData as any)[7],
     } : null;
@@ -327,8 +330,11 @@ function ObjectStateCard({ rdo, typeLabels }: any) {
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
-                    <div className="text-xs uppercase text-white/30 mb-2">Requires Identity</div>
-                    <div className="font-mono">{rdo.rules.requireIdentity ? 'YES' : 'NO'}</div>
+                    <div className="text-xs uppercase text-white/30 mb-2">Access Control</div>
+                    <div className="font-mono">
+                        {rdo.rules.requireIdentity ? 'ID_REQ ' : ''}
+                        {rdo.rules.accessType === 4 ? <span className="text-yellow-400">WHITELIST</span> : 'PUBLIC'}
+                    </div>
                 </div>
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                     <div className="text-xs uppercase text-white/30 mb-2">Rules Config</div>

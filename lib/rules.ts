@@ -32,6 +32,7 @@ export interface RuleIntent {
     violationAction: 'REFUSE' | 'LOCK'; // Refuse vs Permanently Lock
     maxUses: number; // 0 = unlimited
     requireIdentity: 'ALWAYS' | 'CONDITIONAL' | 'NEVER';
+    whitelist?: string[]; // Optional whitelist for LIST access type
 }
 
 // Canonical Rule Object (Machine Readable)

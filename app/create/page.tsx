@@ -36,7 +36,8 @@ export default function CreateRDO() {
         expirySeconds: 3600,
         violationAction: 'REFUSE',
         maxUses: 0, // Unlimited
-        requireIdentity: 'NEVER'
+        requireIdentity: 'NEVER',
+        whitelist: [] as string[]
     });
 
     // Helper for Payload Updates
@@ -143,7 +144,8 @@ export default function CreateRDO() {
                     rulesHash,
                     typeEnumMap[formData.type],
                     compactRules,
-                    metadataCID
+                    metadataCID,
+                    formData.whitelist // Pass whitelist
                 ],
             }, {
                 onSettled: () => setIsSubmitting(false)
@@ -365,6 +367,40 @@ function RulesConfig({ formData, setFormData }: any) {
             <div>
                 <h3 className="text-white/60 uppercase text-xs font-bold tracking-wider mb-4">Core Constraints</h3>
                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-sm mb-2 block">Access Control</label>
+                        <select
+                            className="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none"
+                            value={formData.allowedUsers}
+                            onChange={e => setFormData({ ...formData, allowedUsers: e.target.value as any })}
+                        >
+                            <option value="ANY">Everyone (Public)</option>
+                            <option value="LINK">Anyone with Link (Capability)</option>
+                            <option value="LIST">Specific People (Whitelist)</option>
+                            <option value="CREATOR">Only Me</option>
+                        </select>
+
+                        {formData.allowedUsers === 'LIST' && (
+                            <div className="mt-4">
+                                <label className="text-sm mb-2 block text-rdo-accent font-bold">Allowed Wallet Addresses</label>
+                                <textarea
+                                    rows={4}
+                                    placeholder="0x123...&#10;0x456...&#10;(One per line or comma separated)"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none font-mono text-xs"
+                                    value={formData.whitelist?.join('\n') || ''}
+                                    onChange={e => {
+                                        // Simple split by newline or comma
+                                        const raw = e.target.value;
+                                        const list = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
+                                        setFormData({ ...formData, whitelist: list });
+                                    }}
+                                />
+                                <div className="text-right text-xs text-white/30 mt-1">
+                                    {formData.whitelist?.length || 0} addresses
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div>
                         <label className="text-sm mb-2 block">Max Uses</label>
                         <select

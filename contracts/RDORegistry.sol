@@ -42,6 +42,9 @@ contract RDORegistry is Context {
 
     // Mapping from ID to RDO
     mapping(uint256 => RDO) public rdos;
+    
+    // Mapping from RDO ID to Whitelisted Addresses
+    mapping(uint256 => mapping(address => bool)) private _whitelists;
 
     // Events
     event RDOCreated(
@@ -76,7 +79,8 @@ contract RDORegistry is Context {
         bytes32 _rulesHash, 
         RDOType _rdoType,
         Rules calldata _rulesCompact,
-        string memory _metadataCID
+        string memory _metadataCID,
+        address[] calldata _whitelist
     ) external returns (uint256) {
         _currentRdoId++;
         uint256 newId = _currentRdoId;
@@ -91,6 +95,13 @@ contract RDORegistry is Context {
             createdAt: block.timestamp,
             locked: false
         });
+
+        // Populate Whitelist if AccessType is LIST (4)
+        if (_rulesCompact.accessType == 4) {
+            for (uint i = 0; i < _whitelist.length; i++) {
+                _whitelists[newId][_whitelist[i]] = true;
+            }
+        }
 
         emit RDOCreated(newId, _msgSender(), _rdoType, _rulesHash, _metadataCID);
 
@@ -136,11 +147,22 @@ contract RDORegistry is Context {
             refusalReason = "Export forbidden";
         }
 
-        // 4. Emit Result & Enforce Lock
+        // 4. Check Access Control (Whitelist)
+        // AccessType 4 = LIST
+        if (!refused && rdo.rules.accessType == 4) {
+            if (!_whitelists[_rdoId][_msgSender()]) {
+                refused = true;
+                refusalReason = "Access denied (Not in whitelist)";
+            }
+        }
+
+        // 5. Emit Result & Enforce Lock
         bytes32 actionHash = keccak256(abi.encodePacked(_actionType, _contextData));
 
         if (refused) {
             if (rdo.rules.lockOnViolation) {
+                // If it was a whitelist violation, maybe we lock? Or maybe just refuse.
+                // Protocol choice: Violating whitelist is intrusive -> Lock if configured.
                 rdo.locked = true;
                 refusalReason = string(abi.encodePacked(refusalReason, " (Object Locked)"));
             }
@@ -159,5 +181,12 @@ contract RDORegistry is Context {
             emit ActionAllowed(_rdoId, _msgSender(), _actionType, actionHash);
             return true;
         }
+    }
+
+    /**
+     * @dev Checks if a user is whitelisted for a specific RDO.
+     */
+    function isWhitelisted(uint256 _rdoId, address _user) external view returns (bool) {
+        return _whitelists[_rdoId][_user];
     }
 }
