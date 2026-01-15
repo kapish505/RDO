@@ -47,7 +47,28 @@ export default function CreateRDO() {
         }));
     };
 
-    const handleNext = () => setStep(step + 1);
+    const handleNext = () => {
+        // Validation check
+        if (step === 1) {
+            if (!formData.name.trim()) {
+                alert("Please name your object first.");
+                return;
+            }
+            if (formData.type === RDOType.MESSAGE && !formData.payload.text?.trim()) {
+                alert("Please enter a message content.");
+                return;
+            }
+            if (formData.type === RDOType.FILE && !formData.payload.file) {
+                alert("Please upload a file.");
+                return;
+            }
+            if (formData.type === RDOType.LINK && !formData.payload.url?.trim()) {
+                alert("Please enter a destination URL.");
+                return;
+            }
+        }
+        setStep(step + 1);
+    };
     const handleBack = () => setStep(step - 1);
 
     const handleSubmit = async () => {
@@ -215,8 +236,8 @@ function TypeSelection({ selected, onSelect }: { selected: RDOType, onSelect: (t
                     key={t.id}
                     onClick={() => onSelect(t.id)}
                     className={`p-6 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selected === t.id
-                            ? 'bg-rdo-accent border-rdo-accent text-white shadow-lg shadow-rdo-accent/20'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                        ? 'bg-rdo-accent border-rdo-accent text-white shadow-lg shadow-rdo-accent/20'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
                         }`}
                 >
                     <div className="text-3xl mb-2">{t.icon}</div>
@@ -370,8 +391,8 @@ function RulesConfig({ formData, setFormData }: any) {
                             key={action}
                             onClick={() => toggleAction(action)}
                             className={`px-4 py-2 rounded-lg border text-sm transition-all ${formData.forbiddenActions.includes(action)
-                                    ? 'bg-red-500/20 border-red-500 text-red-200'
-                                    : 'border-white/10 hover:bg-white/5'
+                                ? 'bg-red-500/20 border-red-500 text-red-200'
+                                : 'border-white/10 hover:bg-white/5'
                                 }`}
                         >
                             ⛔ {action}

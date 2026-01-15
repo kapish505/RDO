@@ -44,7 +44,7 @@ export default function TestDashboard() {
 
     // 3. Handle Receipt & Decode Logs
     useEffect(() => {
-        if (isSuccess && receipt && parsedRDO) {
+        if (isSuccess && receipt) {
             // Find our contract's logs
             const relevantLogs = receipt.logs.filter((l: any) => l.address.toLowerCase() === CONTRACT_ADDRESS?.toLowerCase());
 
@@ -56,29 +56,36 @@ export default function TestDashboard() {
                         topics: log.topics,
                     });
 
-                    if (decoded.eventName === 'ActionAllowed') {
-                        setActionLog((prev: LogItem[]) => [{
-                            type: 'ALLOWED',
-                            action: (decoded.args as any).actionType,
-                            tx: receipt.transactionHash,
-                            timestamp: Date.now()
-                        }, ...prev]);
-                    } else if (decoded.eventName === 'ActionRefused') {
-                        setActionLog((prev: LogItem[]) => [{
-                            type: 'REFUSED',
-                            action: (decoded.args as any).actionType,
-                            reason: (decoded.args as any).reason,
-                            tx: receipt.transactionHash,
-                            timestamp: Date.now()
-                        }, ...prev]);
-                    }
+                    setActionLog(prev => {
+                        // Prevent duplicates (Debounce the effect)
+                        if (prev.some(p => p.tx === receipt.transactionHash)) return prev;
+
+                        if (decoded.eventName === 'ActionAllowed') {
+                            return [{
+                                type: 'ALLOWED',
+                                action: (decoded.args as any).actionType,
+                                tx: receipt.transactionHash,
+                                timestamp: Date.now()
+                            }, ...prev];
+                        } else if (decoded.eventName === 'ActionRefused') {
+                            return [{
+                                type: 'REFUSED',
+                                action: (decoded.args as any).actionType,
+                                reason: (decoded.args as any).reason,
+                                tx: receipt.transactionHash,
+                                timestamp: Date.now()
+                            }, ...prev];
+                        }
+                        return prev;
+                    });
+
                     refetchRDO(); // Update RDO state (e.g. check if it locked)
                 } catch (e) {
                     console.error("Failed to decode log", e);
                 }
             }
         }
-    }, [isSuccess, receipt, parsedRDO]);
+    }, [isSuccess, receipt]); // Removed parsedRDO to prevent infinite loop
 
     const handleAction = (actionType: number) => {
         if (!CONTRACT_ADDRESS || isTxPending || isConfirming) return;
