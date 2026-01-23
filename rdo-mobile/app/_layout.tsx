@@ -1,9 +1,15 @@
+import React from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { WalletConnectModal } from '@walletconnect/modal-react-native';
 import { WalletProvider } from '@/context/WalletContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import "../global.css";
+
+// Polyfill for libraries that expect React in global scope
+if (typeof window !== 'undefined') {
+    (window as any).React = React;
+}
 
 const projectId = "04cb5ebecafca5f304a457b06467b573";
 
