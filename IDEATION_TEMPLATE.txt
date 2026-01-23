@@ -1,0 +1,490 @@
+# Ideation Template Doc
+
+## Team Details:
+**Team Name:** RDO Protocol Team  
+**Team Members:** [Your Names Here]
+
+---
+
+## Mentor Assigned:
+[To be assigned]
+
+---
+
+## Project Description
+
+### Detailed description of the project and how you are incorporating the **Viral Mobile-Only Consumer Apps** and **x402 Agent Economy** tracks:
+
+#### 1. What problem are you solving?
+
+**Consumer Problem:**
+Digital privacy is dead. When you share a private message, meme, or photo—you lose all control. Recipients can screenshot, forward, and leak your content without consequences. Current solutions (Snapchat's screenshot detection, disappearing messages) are trivial to bypass and provide no **cryptographic guarantees** or **verifiable enforcement**.
+
+**For the Agent Economy:**
+As autonomous agents begin transacting in digital marketplaces, they need **self-enforcing digital rights** for the content they buy/sell. Agents can't rely on human legal systems—they need smart contracts that enforce permissions autonomously and provide cryptographic proof of compliance.
+
+#### 2. What insight led you to this problem?
+
+**Consumer Insight:**
+We observed that Gen Z users want **ephemerality + control**:
+- Self-destructing content (Snapchat, BeReal)
+- But with *real* enforcement (not spoofable)
+- Gamified social features (streaks, challenges)
+- Web3 ownership (your data = your asset)
+
+**The killer combo:** Make privacy violations **expensive and public**. When someone tries to screenshot your RDO, it locks on-chain and alerts your followers. This creates **social pressure** and **viral sharing** ("Did you see John got locked for leaking Sarah's RDO?").
+
+**Agent Economy Insight:**
+AI agents will be the biggest consumers of digital content (training data, API access, media assets). They need:
+- Automated payment rails (x402 SDK)
+- Self-enforcing licensing (RDOs)
+- Anomaly detection (PoEC) to avoid scam content
+
+#### 3. What's your solution (tech overview)?
+
+**RDO Protocol** = **Mobile-First Consumer App** + **Backend Agent Infrastructure**
+
+### 📱 **Part 1: Viral Mobile Consumer App**
+
+**Core Features:**
+1. **"Snapchat for Web3"** - Send self-destructing messages/photos as RDOs
+2. **One-Time View Objects** - Content that self-destructs after first read (can't be forwarded)
+3. **QR Code Sharing** - Scan to unlock secret content (physical→digital viral loop)
+4. **Violation Leaderboards** - Public shame for users who violate rules (gamification)
+5. **Creator Monetization** - Sell limited-access content (100 views max, auto-expire after 24h)
+
+**Why It Goes Viral:**
+- **Network Effects**: More users = more valuable secrets to unlock
+- **FOMO**: Limited-use RDOs create scarcity ("Only 5 people can see this")
+- **Gamification**: Compete for "most trusted user" (fewest violations)
+- **Meme Culture**: Viral RDO challenges ("Send me an RDO I can't leak")
+
+### 🤖 **Part 2: x402 Agent Economy Backend**
+
+**Agent Use Cases:**
+- **Autonomous Data Marketplaces**: Agents buy/sell datasets as RDOs
+- **AI Model Licensing**: GPT-4 wrapper sold as RDO (pay-per-inference via x402)
+- **API Access Tokens**: RDOs that grant temporary API keys to agents
+- **PoEC Risk Scoring**: GNN model flags suspicious agent wallets before purchase
+
+### 🔒 **Part 3: PoEC - AI Compliance Layer**
+
+**Graph Neural Network** detects anomalous behavior:
+- Consumer: Warns you if recipient has leaked RDOs before
+- Agent: Flags wallets with suspicious transaction patterns
+- Generates **Merkle proofs** for on-chain verification
+
+**Tech Stack:**
+- **Smart Contracts (Solidity)**: Store rule hashes, track violations
+- **IPFS**: Encrypted content storage
+- **AES-GCM**: Client-side encryption (keys never leave device)
+- **GNN (PyTorch → ONNX)**: Browser/mobile-based anomaly detection
+- **x402 SDK**: Agent payment rails
+- **Monad Blockchain**: High-performance EVM-compatible chain for fast consumer transactions
+
+#### 4. What is its novelty / USP?
+
+**Consumer USP:**
+1. **First truly enforceable ephemeral content** (on-chain violations, not just alerts)
+2. **Crypto-native social app** (your secrets are on-chain assets you own)
+3. **Viral gamification** (public leaderboards, challenges, FOMO mechanics)
+
+**Agent Economy USP:**
+1. **Self-sovereign data licensing** for AI agents
+2. **x402 micropayments + RDO access control** = trustless agent commerce
+3. **PoEC reputation system** (agents earn trust scores)
+
+**Technical Novelty:**
+- **Hybrid mobile app + agent SDK** (same protocol, dual interfaces)
+- **Client-side GNN inference** (privacy-preserving anomaly detection)
+- **Monad-optimized contracts** (sub-second finality for UX)
+
+---
+
+## Features
+
+### Frontend: Mobile-First Consumer Experience
+
+#### **React Native Mobile App (iOS/Android)**
+
+**Why Mobile-Only:**
+- **Camera Integration**: Snap photos → encrypt → mint as RDO (TikTok-style UX)
+- **Push Notifications**: Real-time alerts when RDOs are accessed/violated
+- **QR Code Scanner**: Physical sharing at parties, events (viral offline→online loop)
+- **Biometric Auth**: Unlock RDOs with FaceID/fingerprint (premium security)
+
+**Tech Stack:**
+- **React Native + Expo Router**: Cross-platform native app
+- **NativeWind**: TailwindCSS-style components (rapid UI iteration)
+- **WalletConnect Modal**: Mobile wallet integration (MetaMask Mobile, Rainbow)
+- **Expo Camera**: Native camera access for AR RDO drops
+- **Expo Notifications**: Push alerts for violations
+
+**Key Screens:**
+1. **Home Feed**: Discover trending RDOs, view violation leaderboard
+2. **Create Screen**: Multi-step wizard (content → rules → mint)
+3. **RDO Viewer**: Decrypt + display content with countdown timer
+4. **Profile**: Your RDOs created, accessed, violations committed
+5. **Marketplace**: Buy/sell limited-access content
+
+#### **Web App (Next.js 14) - Secondary Interface**
+
+**Use Case:** Desktop management dashboard for creators
+- Bulk RDO creation
+- Analytics (views, violations, revenue)
+- Agent SDK integration testing
+
+**Tech:** Next.js 14, RainbowKit, TailwindCSS, Framer Motion
+
+---
+
+### Backend: Agent-Native Infrastructure
+
+#### **Smart Contracts (Solidity on Monad)**
+
+**Why Monad:**
+- **10,000+ TPS**: Instant RDO mints (no gas wars, sub-second UX)
+- **EVM-Compatible**: Drop-in x402 SDK support
+- **Low Fees**: Consumer-friendly gas costs (< $0.01 per RDO)
+
+**Contract: `RDORegistry.sol`**
+```solidity
+function createRDO(
+    bytes32 rulesHash,
+    uint8 rdoType,
+    Rules memory rules,
+    string metadataCID,
+    address[] whitelist
+) returns (uint256 rdoId)
+
+function requestAction(
+    uint256 rdoId,
+    uint8 actionType,
+    bytes signature
+) // Triggers PoEC verification
+```
+
+**Events:**
+- `RDOCreated(id, creator, type)`
+- `ActionRequested(id, user, action)`
+- `ViolationRecorded(id, violator, penalty)`
+
+#### **x402 SDK Integration**
+
+**Agent Payment Flows:**
+1. Agent discovers RDO in marketplace
+2. Calls `x402.pay(amount)` → triggers `requestAction(READ)`
+3. PoEC verifies agent wallet (GNN check)
+4. If safe, contract emits `AccessGranted` event
+5. Frontend decrypts content for agent
+
+**Revenue Sharing:**
+- Creator: 90% of payment
+- PoEC operators: 5% (staking rewards)
+- Protocol: 5% (treasury)
+
+#### **PoEC: Graph Neural Network Anomaly Detection**
+
+**How It Works:**
+1. **Build Graph**: Fetch user's transaction history from Monad
+2. **Extract Features**: 20+ metrics (degree centrality, clustering, gas patterns)
+3. **GNN Inference**: 2-layer GCN (64→32 neurons) → anomaly score
+4. **Merkle Proof**: Hash results + blockchain state → on-chain verification
+
+**Consumer Use Case:**
+- Before unlocking RDO, check if recipient has violations
+- Show risk score: 🟢 Safe (0-20%), 🟡 Caution (20-60%), 🔴 Risky (60%+)
+
+**Agent Use Case:**
+- Flag wallets with suspicious patterns (wash trading, sybil attacks)
+- Auto-reject high-risk agents (or charge premium)
+
+**Tech:**
+- **Python Training**: PyTorch GNN trained on Monad testnet data
+- **ONNX Export**: Convert to browser-compatible WebAssembly
+- **Client-Side Inference**: No backend API (privacy + speed)
+
+---
+
+### Storage & Encryption
+
+**IPFS (Pinata):**
+- Encrypted content uploaded to IPFS
+- Metadata JSON includes: `rulesHash`, `encryptedContentCID`, `iv`
+
+**AES-GCM Encryption:**
+- 256-bit keys generated client-side
+- Content encrypted in browser/mobile before upload
+- Decryption key stored in RDO metadata (only accessible if rules pass)
+
+**Viem Cryptography:**
+- Keccak256 hashing for deterministic rule compilation
+- Ensures same rules → same hash (on-chain verification)
+
+---
+
+## How the Project Works Technically
+
+### **Consumer Flow: Creating a Self-Destructing RDO**
+
+```
+1. User opens mobile app → taps "Create RDO"
+2. Selects type: MESSAGE, PHOTO, VIDEO, LINK
+3. Captures content (camera or text input)
+4. Sets rules:
+   - Max views: 1 (self-destruct after first read)
+   - Forbid screenshot: true
+   - Expiry: 24 hours
+5. App generates AES-256 key → encrypts content locally
+6. Uploads encrypted blob to IPFS → gets CID
+7. Compiles rules → Keccak256 hash
+8. Signs transaction to Monad RDORegistry.createRDO()
+9. Contract mints RDO, emits event
+10. App generates QR code with RDO ID
+11. User shares QR at party → recipient scans → unlocks secret
+```
+
+### **Consumer Flow: Accessing an RDO (with PoEC Check)**
+
+```
+1. Recipient scans QR → opens mobile app
+2. App calls RDORegistry.requestAction(rdoId, READ)
+3. **PoEC Verification Triggered:**
+   a. Fetch recipient's transaction history from Monad
+   b. Build graph of wallet interactions
+   c. Run GNN inference → anomaly score
+   d. If score > 60%, show warning: "High-risk user!"
+4. If recipient approves (or score is safe):
+   a. Smart contract checks rules (not expired, views < max)
+   b. Emits AccessGranted event
+5. App fetches IPFS metadata → decrypts AES key
+6. Downloads encrypted content → decrypts locally
+7. Displays content with countdown timer
+8. After 10 seconds → auto-deletes (memory cleared)
+9. If user screenshots → device detects → triggers ViolationRecorded()
+```
+
+### **Agent Flow: Buying Dataset RDO with x402**
+
+```
+1. AI agent browses RDO marketplace API
+2. Finds "GPT-4 Prompts Dataset" RDO (1000 uses, $10 in MONAD)
+3. Agent wallet calls x402.pay(10 MONAD, rdoId)
+4. Payment triggers PoEC verification:
+   - GNN checks agent wallet for wash trading
+   - Validates agent has no prior violations
+5. If safe, RDORegistry.requestAction(DOWNLOAD) succeeds
+6. Agent receives decryption key via API
+7. Downloads dataset from IPFS
+8. Uses data for model training
+9. Agent's usage logged on-chain (transparency)
+```
+
+---
+
+## Primary Tracks
+
+### ✅ **Track 1: Viral Mobile-Only Consumer Apps** (PRIMARY)
+
+**How RDO Fits:**
+
+**1. Mobile-First Design:**
+- React Native app optimized for iOS/Android
+- Camera-native UX (snap → encrypt → share)
+- Push notifications for real-time engagement
+- QR codes bridge physical → digital (parties, meetups)
+
+**2. Viral Mechanics:**
+- **Scarcity**: "This RDO can only be viewed 5 times" (FOMO)
+- **Social Proof**: Leaderboards of most-trusted users
+- **Challenges**: "Send me an RDO I can't leak" (meme potential)
+- **Network Effects**: More users = more secrets = more value
+- **Gamification**: Earn reputation points for respecting rules
+
+**3. Financialization of Consumer Assets:**
+- Creators monetize ephemeral content (charge $1 for 24h access)
+- Limited-edition RDOs (only 100 people can see this meme)
+- Secondary market (resell unused RDO views—if rules allow)
+
+**4. Cultural Relevance:**
+- **Gen Z Privacy Demand**: After countless data breaches, users want control
+- **Web3 Ownership**: Your secrets = your on-chain assets
+- **Anti-Screenshot Culture**: Public shaming for leakers (on-chain violations)
+
+**Viral Loop:**
+```
+User A creates RDO → Shares QR at party → 10 people scan
+→ Each person shares to 5 friends → 50 new users
+→ Some friends create RDOs → Loop repeats
+```
+
+---
+
+### ✅ **Track 3: x402 & The Agent Economy** (SECONDARY)
+
+**How RDO Fits:**
+
+**1. Agent-Native Access Control:**
+- Agents use x402 SDK to pay for RDO content
+- Micropayments enable pay-per-use licensing (no subscriptions)
+- Smart contracts enforce rules without human intervention
+
+**2. Autonomous Commerce:**
+- AI agents buy/sell datasets, API keys, model weights as RDOs
+- x402 handles settlement, RDO handles access control
+- PoEC provides trust layer (reputation scores for agents)
+
+**3. Programmable Payment Triggers:**
+- `x402.pay()` → triggers `RDORegistry.requestAction()`
+- Payment only settles if PoEC verification passes
+- Refunds if content doesn't match metadata (scam protection)
+
+**4. Real-World Use Cases:**
+- **AI Model Marketplaces**: Buy GPT-4 API wrapper as RDO (1000 inferences, $50)
+- **Data Exchanges**: Agents trade training datasets with enforced licensing
+- **Agentic SaaS**: Software tools sold as RDOs (pay per execution)
+
+**x402 Integration Points:**
+```javascript
+// Agent SDK Example
+import { x402 } from '@x402/sdk';
+import { RDORegistry } from './contracts';
+
+async function buyRDO(rdoId: number, priceInMONAD: number) {
+  // 1. Pay via x402
+  const paymentHash = await x402.pay({
+    amount: priceInMONAD,
+    recipient: RDO_REGISTRY_ADDRESS,
+    metadata: { rdoId }
+  });
+  
+  // 2. Request access (triggers PoEC)
+  const tx = await RDORegistry.requestAction(rdoId, ACTION.DOWNLOAD);
+  await tx.wait();
+  
+  // 3. Decrypt content
+  const key = await fetchDecryptionKey(rdoId);
+  const content = await decryptFromIPFS(key);
+  
+  return content;
+}
+```
+
+---
+
+### ⚠️ **Track 2: Permissionless On-Chain Gaming** (FUTURE)
+
+**Potential Fit:**
+- **Collectible RDOs**: Rare "legendary" secrets tradable as NFTs
+- **RDO Battles**: Compete to unlock opponent's RDOs (PvP game)
+- **Staking**: Lock RDOs to earn yield (time-locked content)
+
+**Status:** Not implemented yet, but architecture supports it.
+
+---
+
+## Why Monad?
+
+**Performance Requirements:**
+- **Consumer UX**: Users expect < 1s confirmations (Ethereum's 12s is unacceptable)
+- **Monad's 10,000 TPS**: Instant RDO mints (feels like Web2)
+- **Low Fees**: < $0.01 per transaction (consumers won't pay $5 gas)
+
+**EVM Compatibility:**
+- **x402 SDK works natively** (no code changes)
+- **Solidity contracts**: Direct port from Ethereum
+- **Wagmi/Ethers.js**: Frontend libraries work out-of-box
+
+**Developer Experience:**
+- Same tooling as Ethereum (Hardhat, Remix)
+- Familiar RPC endpoints
+- Easy testnet deployment
+
+---
+
+## Technology Stack Summary
+
+| **Layer**              | **Technology**                          | **Purpose**                          |
+|------------------------|-----------------------------------------|--------------------------------------|
+| **Mobile App**         | React Native, Expo Router, NativeWind   | iOS/Android consumer interface       |
+| **Web App**            | Next.js 14, TypeScript, TailwindCSS     | Desktop dashboard                    |
+| **Blockchain**         | **Monad** (EVM-compatible Layer 1)      | High-performance smart contracts     |
+| **Smart Contracts**    | Solidity, Hardhat, Ethers.js            | On-chain rule enforcement            |
+| **Agent Payments**     | **x402 SDK**                            | Autonomous micropayments             |
+| **AI/ML**              | PyTorch GNN, ONNX Runtime               | PoEC anomaly detection               |
+| **Graph Processing**   | Graphology.js, NetworkX                 | Transaction graph analysis           |
+| **Storage**            | IPFS (Pinata), AES-GCM encryption       | Decentralized content storage        |
+| **Cryptography**       | Viem, Merkle Trees, Keccak256           | Proof generation & verification      |
+| **Wallets**            | WalletConnect (Mobile), RainbowKit (Web)| User authentication                  |
+
+---
+
+## Viral Growth Strategy
+
+**Phase 1: Campus Launch (Weeks 1-4)**
+- Target college parties, Greek life
+- QR codes at bars: "Scan for secret afterparty location"
+- Viral challenges: "Best RDO meme wins $100 in MONAD"
+
+**Phase 2: Influencer Seeding (Weeks 5-8)**
+- Give 100 influencers exclusive access
+- "Send your followers an RDO they can't leak"
+- Track virality via referral codes
+
+**Phase 3: Agent Economy Onboarding (Weeks 9-12)**
+- Launch agent SDK with sample code
+- Partner with AI agent platforms (AutoGPT, AgentGPT)
+- Create RDO marketplace for data/models
+
+**Phase 4: Global Rollout (Month 4+)**
+- Scale to mainstream (privacy-focused users)
+- Partner with privacy orgs (EFF, Signal)
+- "Snapchat but with real enforcement"
+
+---
+
+## Metrics for Success
+
+**Consumer KPIs:**
+- **MAU (Monthly Active Users)**: Target 100K in 6 months
+- **Viral Coefficient**: > 1.5 (each user brings 1.5 friends)
+- **Retention**: > 40% Day 7 retention
+- **RDOs Created**: > 1M in first year
+
+**Agent Economy KPIs:**
+- **Agent Adoption**: > 1,000 AI agents using x402 + RDO
+- **Transaction Volume**: > $1M in agent payments (via x402)
+- **PoEC Accuracy**: > 90% anomaly detection precision
+
+---
+
+## Why This Matters
+
+**For Consumers:**
+- **True privacy** (not fake Snapchat promises)
+- **Own your content** (blockchain-native ownership)
+- **Monetize secrets** (sell limited-access content)
+
+**For Agents:**
+- **Trustless commerce** (no intermediaries)
+- **Verifiable licensing** (cryptographic compliance proofs)
+- **Reputation systems** (PoEC scores)
+
+**For Monad Ecosystem:**
+- **Killer consumer app** (brings Web2 users to Web3)
+- **Agent infrastructure** (positions Monad as agent-native chain)
+- **Technical showcase** (proves 10K TPS enables new UX)
+
+---
+
+## Next Steps
+
+1. ✅ **Mobile App MVP** (Core features: create, share, view RDOs)
+2. 🔄 **Monad Testnet Deployment** (Port contracts from Sepolia)
+3. ⏳ **x402 Integration** (Agent payment flows)
+4. ⏳ **PoEC Training** (GNN on Monad transaction data)
+5. ⏳ **Campus Beta** (Launch at 3 universities)
+
+---
+
+**Built for Consumers. Powered by Agents. Secured by AI. Running on Monad.**
