@@ -1,6 +1,7 @@
+import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 
 export default function TabLayout() {
     return (
@@ -21,7 +22,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? "home" : "home-outline"}
-                            size={24}
+                            size={22}
                             color={color}
                         />
                     )
@@ -33,7 +34,7 @@ export default function TabLayout() {
                     title: 'Create',
                     tabBarIcon: ({ color, focused }) => (
                         <View style={styles.createButton}>
-                            <Ionicons name="add" size={28} color="white" />
+                            <Ionicons name="add" size={26} color="white" />
                         </View>
                     )
                 }}
@@ -45,7 +46,20 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? "flask" : "flask-outline"}
-                            size={24}
+                            size={22}
+                            color={color}
+                        />
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="about"
+                options={{
+                    title: 'About',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? "information-circle" : "information-circle-outline"}
+                            size={22}
                             color={color}
                         />
                     )
@@ -59,27 +73,47 @@ const styles = StyleSheet.create({
     tabBar: {
         backgroundColor: '#0a0a0a',
         borderTopWidth: 1,
-        borderTopColor: '#222',
-        height: 85,
+        borderTopColor: 'rgba(255,255,255,0.08)',
+        height: Platform.OS === 'web' ? 70 : 85,
         paddingTop: 8,
-        paddingBottom: 25,
+        paddingBottom: Platform.OS === 'web' ? 10 : 25,
+        ...Platform.select({
+            web: {
+                boxShadow: '0 -4px 20px rgba(0,0,0,0.5)',
+            },
+            default: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: -4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 20,
+            }
+        }),
     },
     tabLabel: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: '600',
+        marginTop: 2,
     },
     createButton: {
         backgroundColor: '#e11d48',
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: -15,
-        shadowColor: '#e11d48',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
+        marginTop: -12,
+        ...Platform.select({
+            web: {
+                boxShadow: '0 4px 16px rgba(225, 29, 72, 0.4)',
+            },
+            default: {
+                shadowColor: '#e11d48',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 10,
+            }
+        }),
     },
 });
