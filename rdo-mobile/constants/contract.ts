@@ -1,14 +1,15 @@
 import { ethers } from 'ethers';
 
-// Sepolia Config
-export const SEPOLIA_CONFIG = {
-    chainId: 11155111,
-    name: 'Sepolia',
-    rpcUrl: 'https://rpc.sepolia.org',
-    explorer: 'https://sepolia.etherscan.io'
+// Monad Testnet Config
+export const MONAD_TESTNET_CONFIG = {
+    chainId: 10143,
+    name: 'Monad Testnet',
+    rpcUrl: 'https://testnet-rpc.monad.xyz',
+    explorer: 'https://testnet.monadexplorer.com',
+    currency: 'MON'
 };
 
-// RDO Registry Address (Sepolia)
+// RDO Registry Address (Monad Testnet)
 export const CONTRACT_ADDRESS = "0xC7c2B004Dc5Ee30D3a1114b6f33E989c81dD0d2F";
 
 // Simplified ABI for RDO Interactions
