@@ -134,16 +134,10 @@
       <section class="space-y-5">
         <div class="flex items-center justify-between">
           <h2 class="text-[11px] font-bold tracking-widest uppercase text-secondary font-label">Section 1: Content</h2>
-          <div class="flex bg-surface-container-low/80 p-0.5 rounded border border-[#474750]/20">
-            <button id="tab-file" onclick="switchTab('file')" class="px-4 py-1.5 text-xs font-medium bg-surface-container-high text-primary rounded-sm shadow-sm">File</button>
-            <button id="tab-text" onclick="switchTab('text')" class="px-4 py-1.5 text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors">Text</button>
-          </div>
-        </div>
-
         <!-- File drop zone -->
-        <div id="view-file" class="content-view active">
+        <div id="view-file" class="content-view active mb-4">
           <div id="drop-zone" onclick="document.getElementById('file-input').click()"
-               class="w-full aspect-[21/9] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer">
+               class="w-full aspect-[21/9] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
             <span class="material-symbols-outlined text-[#474750] group-hover:text-primary mb-2 transition-colors">upload_file</span>
             <p class="text-sm text-on-surface-variant">Drop files here or <span class="text-primary">browse</span></p>
             <p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
@@ -160,7 +154,7 @@
         </div>
 
         <!-- Text input -->
-        <div id="view-text" class="content-view">
+        <div id="view-text" class="content-view active">
           <textarea id="text-content" class="w-full h-40 bg-surface-container-lowest border border-[#474750]/20 p-4 text-sm text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="Paste or type your text content here..."></textarea>
         </div>
       </section>
@@ -365,7 +359,9 @@
 <script src="js/background.js"></script>
 <script src="contractAddress.js"></script>
 <script src="js/wallet.js"></script>
+<script src="js/shared.js"></script>
 <script src="js/crypto.js"></script>
 <script src="js/ipfs.js"></script>
 <script src="js/contract.js"></script>
+<script src="js/create.js"></script>
 
