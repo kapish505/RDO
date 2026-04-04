@@ -132,30 +132,34 @@
 
       <!-- Section 1: Content -->
       <section class="space-y-5">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-4">
           <h2 class="text-[11px] font-bold tracking-widest uppercase text-secondary font-label">Section 1: Content</h2>
-        <!-- File drop zone -->
-        <div id="view-file" class="content-view active mb-4">
-          <div id="drop-zone" onclick="document.getElementById('file-input').click()"
-               class="w-full aspect-[21/9] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
-            <span class="material-symbols-outlined text-[#474750] group-hover:text-primary mb-2 transition-colors">upload_file</span>
-            <p class="text-sm text-on-surface-variant">Drop files here or <span class="text-primary">browse</span></p>
-            <p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
-          </div>
-          <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)"/>
-          <div id="file-info" class="hidden mt-3 flex items-center gap-3 p-3 bg-surface-container border border-[#474750]/20 rounded">
-            <span class="material-symbols-outlined text-primary text-sm">description</span>
-            <span id="file-name" class="text-xs text-on-surface font-mono flex-1 truncate"></span>
-            <span id="file-size" class="text-[10px] text-secondary"></span>
-            <button onclick="clearFile()" class="text-secondary hover:text-error transition-colors">
-              <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
         </div>
 
-        <!-- Text input -->
-        <div id="view-text" class="content-view active">
-          <textarea id="text-content" class="w-full h-40 bg-surface-container-lowest border border-[#474750]/20 p-4 text-sm text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="Paste or type your text content here..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- File drop zone -->
+          <div id="view-file" class="content-view active">
+            <div id="drop-zone" onclick="document.getElementById('file-input').click()"
+                 class="w-full h-full min-h-[160px] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
+              <span class="material-symbols-outlined text-[#474750] group-hover:text-primary mb-2 transition-colors">upload_file</span>
+              <p class="text-sm text-on-surface-variant">Drop file here or <span class="text-primary">browse</span></p>
+              <p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
+            </div>
+            <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)"/>
+            <div id="file-info" class="hidden mt-3 flex items-center gap-3 p-3 bg-surface-container border border-[#474750]/20 rounded">
+              <span class="material-symbols-outlined text-primary text-sm">description</span>
+              <span id="file-name" class="text-xs text-on-surface font-mono flex-1 truncate"></span>
+              <span id="file-size" class="text-[10px] text-secondary"></span>
+              <button onclick="clearFile()" class="text-secondary hover:text-error transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Text input -->
+          <div id="view-text" class="content-view active">
+            <textarea id="text-content" class="w-full h-full min-h-[160px] bg-surface-container-lowest border border-[#474750]/20 p-4 text-sm text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="Paste or type your text content here..."></textarea>
+          </div>
         </div>
       </section>
 
