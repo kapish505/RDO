@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#d3ceef",
+                    "on-tertiary-fixed": "#34314b",
+                    "surface-container": "#19191f",
+                    "inverse-surface": "#fcf8fd",
+                    "primary": "#adc6ff",
+                    "surface-container-lowest": "#000000",
+                    "on-primary": "#003d88",
+                    "secondary-container": "#3a3b41",
+                    "outline": "#75747f",
+                    "secondary-fixed-dim": "#d4d4db",
+                    "tertiary-fixed-dim": "#c5c0e0",
+                    "on-error-container": "#ff9993",
+                    "on-surface-variant": "#abaab5",
+                    "secondary-dim": "#9d9da4",
+                    "on-tertiary-container": "#47445f",
+                    "on-primary-fixed": "#003c86",
+                    "on-secondary-fixed-variant": "#5a5b61",
+                    "error": "#ee7d77",
+                    "secondary-fixed": "#e2e2e9",
+                    "tertiary-dim": "#c5c0e0",
+                    "surface-variant": "#25252d",
+                    "surface-tint": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed-variant": "#504e69",
+                    "on-secondary-fixed": "#3e3f45",
+                    "secondary": "#9d9da4",
+                    "background": "#0e0e11",
+                    "surface-dim": "#0e0e11",
+                    "on-surface": "#e6e4f0",
+                    "error-dim": "#bb5551",
+                    "on-secondary": "#1e2025",
+                    "primary-dim": "#98b8ff",
+                    "inverse-on-surface": "#555458",
+                    "on-error": "#490106",
+                    "on-primary-container": "#bdd0ff",
+                    "tertiary": "#e1dcfd",
+                    "tertiary-container": "#d3ceef",
+                    "on-secondary-container": "#bebfc5",
+                    "inverse-primary": "#005bc4",
+                    "on-tertiary": "#504d68",
+                    "on-background": "#e6e4f0",
+                    "error-container": "#7f2927",
+                    "surface-container-high": "#1f1f26",
+                    "surface-container-low": "#131317",
+                    "primary-fixed-dim": "#c3d4ff",
+                    "outline-variant": "#474750",
+                    "surface-container-highest": "#25252d",
+                    "surface-bright": "#2b2b35",
+                    "on-primary-fixed-variant": "#0057bd",
+                    "surface": "#0e0e11",
+                    "primary-container": "#004395"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e11;
+            font-family: 'Inter', sans-serif;
+            color: #e6e4f0;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .border-tonal {
+            border: 1px solid rgba(71, 71, 80, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0e0e11] border-b border-[#474750]/20 flex justify-between items-center h-16 px-6">
+<div class="text-lg font-semibold tracking-tighter text-[#e6e4f0] font-['Inter']">RDO Precision</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[#adc6ff] border-b-2 border-[#adc6ff] pb-1 font-['Inter'] tracking-tight font-medium transition-colors duration-150 active:scale-95" href="#">Assets</a>
+<a class="text-[#abaab5] hover:text-[#e6e4f0] font-['Inter'] tracking-tight font-medium transition-colors duration-150 active:scale-95" href="#">Activity</a>
+<a class="text-[#abaab5] hover:text-[#e6e4f0] font-['Inter'] tracking-tight font-medium transition-colors duration-150 active:scale-95" href="#">Docs</a>
+</nav>
+<button class="bg-[#e6e4f0] text-[#0e0e11] px-4 py-2 text-sm font-bold tracking-tight rounded-lg hover:opacity-90 transition-opacity active:scale-95">
+            Connect Wallet
+        </button>
+</header>
+<main class="flex-grow pt-24 pb-12 px-6 max-w-7xl mx-auto w-full">
+<!-- Top Input Row -->
+<section class="mb-8">
+<div class="flex gap-4 p-4 bg-surface-container-low border-tonal rounded-lg">
+<div class="flex-grow relative">
+<label class="absolute -top-2 left-3 bg-surface-container-low px-1 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">RDO ID</label>
+<input class="w-full bg-surface-container-lowest border-tonal rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-on-surface placeholder:text-outline/40" placeholder="Enter RDO Identifier..." type="text"/>
+</div>
+<button class="px-8 bg-surface-container-high border-tonal text-primary font-bold text-xs tracking-widest uppercase hover:bg-surface-container-highest transition-colors active:scale-95 rounded-lg">
+                    Load
+                </button>
+</div>
+</section>
+<!-- Two-Column Detail Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+<!-- Left: RDO Detail Card -->
+<div class="lg:col-span-2 bg-surface-container border-tonal rounded-lg overflow-hidden">
+<div class="p-8">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="text-[10px] font-bold text-secondary tracking-[0.1em] uppercase mb-2 block">Resource Decentralized Object</span>
+<h1 class="text-3xl font-semibold tracking-[-0.04em] text-on-surface">RDO-8821-X992-B01</h1>
+</div>
+<span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase rounded-full">Active</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+<div class="space-y-4">
+<div>
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1">Creator Address</label>
+<code class="text-sm text-primary font-mono bg-surface-container-lowest px-2 py-1 rounded">0x7a2...f9e2</code>
+</div>
+<div>
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1">IPFS CID</label>
+<code class="text-xs text-on-surface/70 font-mono break-all">QmXoyp...7VfWv97Ww</code>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1">Access Type</label>
+<span class="text-sm font-medium text-on-surface">Public</span>
+</div>
+<div>
+<div class="flex justify-between items-end mb-2">
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block">Open Count / Max</label>
+<span class="text-[10px] font-mono text-on-surface">1,242 / 5,000</span>
+</div>
+<div class="h-[2px] w-full bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 24.84%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-[#474750]/20">
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-3">Permissions</label>
+<div class="flex gap-2">
+<span class="px-3 py-1.5 bg-surface-container-high border-tonal text-[10px] font-bold tracking-tight text-on-surface uppercase rounded">Read</span>
+<span class="px-3 py-1.5 bg-surface-container-high border-tonal text-[10px] font-bold tracking-tight text-on-surface uppercase rounded">Copy</span>
+<span class="px-3 py-1.5 bg-surface-container-high border-tonal text-[10px] font-bold tracking-tight text-on-surface uppercase rounded">Download</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Action Panel -->
+<div class="flex flex-col gap-6">
+<div class="bg-surface-container border-tonal rounded-lg p-6 space-y-4">
+<button class="w-full py-4 bg-primary text-on-primary font-bold text-xs tracking-widest uppercase rounded-lg active:scale-[0.98] transition-all">
+                        READ
+                    </button>
+<button class="w-full py-4 bg-surface-container-high border-tonal text-on-surface font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-surface-container-highest active:scale-[0.98] transition-all">
+                        COPY
+                    </button>
+<button class="w-full py-4 bg-surface-container-high border-tonal text-on-surface font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-surface-container-highest active:scale-[0.98] transition-all">
+                        DOWNLOAD
+                    </button>
+</div>
+<div class="bg-surface-container-low border-tonal rounded-lg p-6">
+<label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-4">Access Result</label>
+<div class="space-y-4">
+<div class="flex items-center gap-2 text-emerald-400">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span class="text-sm font-semibold">Access Granted ✓</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Permission verified via cryptographic signature. Resource decrypted successfully.</p>
+<div class="pt-4 border-t border-[#474750]/10">
+<label class="text-[9px] font-bold text-on-surface-variant/60 tracking-widest uppercase block mb-1">TX Hash</label>
+<a class="text-[10px] text-primary font-mono truncate block hover:underline" href="#">0x9d4...3b21</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Table -->
+<section>
+<h2 class="text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase mb-4 pl-2">Access Log / History</h2>
+<div class="bg-surface-container border-tonal rounded-lg overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high">
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Time</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Action</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Result</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Tx Hash</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#474750]/10">
+<tr class="bg-surface-container-lowest hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 text-xs text-on-surface font-mono">2024.05.21 14:22:01</td>
+<td class="px-6 py-4 text-xs font-medium text-on-surface">READ</td>
+<td class="px-6 py-4 text-xs text-emerald-400">SUCCESS</td>
+<td class="px-6 py-4 text-xs text-primary font-mono">0x4a1...e92c</td>
+</tr>
+<tr class="bg-surface-container hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 text-xs text-on-surface font-mono">2024.05.21 12:05:44</td>
+<td class="px-6 py-4 text-xs font-medium text-on-surface">COPY</td>
+<td class="px-6 py-4 text-xs text-emerald-400">SUCCESS</td>
+<td class="px-6 py-4 text-xs text-primary font-mono">0x2b8...f31a</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 text-xs text-on-surface font-mono">2024.05.20 09:15:30</td>
+<td class="px-6 py-4 text-xs font-medium text-on-surface">DOWNLOAD</td>
+<td class="px-6 py-4 text-xs text-error">DENIED</td>
+<td class="px-6 py-4 text-xs text-primary font-mono">0x8f2...c091</td>
+</tr>
+<tr class="bg-surface-container hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 text-xs text-on-surface font-mono">2024.05.19 18:41:12</td>
+<td class="px-6 py-4 text-xs font-medium text-on-surface">READ</td>
+<td class="px-6 py-4 text-xs text-emerald-400">SUCCESS</td>
+<td class="px-6 py-4 text-xs text-primary font-mono">0x1d4...a882</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e11] border-t border-[#474750]/20 w-full py-8">
+<div class="flex flex-col md:flex-row justify-between items-center px-6 max-w-7xl mx-auto w-full">
+<span class="text-sm font-['Inter'] tracking-tight text-[#abaab5]">© 2024 RDO Precision. All rights reserved.</span>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="text-sm font-['Inter'] tracking-tight text-[#abaab5] hover:text-[#e6e4f0] underline transition-all opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-sm font-['Inter'] tracking-tight text-[#abaab5] hover:text-[#e6e4f0] underline transition-all opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-sm font-['Inter'] tracking-tight text-[#abaab5] hover:text-[#e6e4f0] underline transition-all opacity-80 hover:opacity-100" href="#">Legal</a>
+</div>
+</div>
+</footer>
+</body></html>

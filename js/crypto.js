@@ -1,0 +1,289 @@
+/* ============================================
+   crypto.js - AES-256-GCM Encryption/Decryption
+   Web Crypto API (browser-native, no library needed)
+   ============================================ */
+
+const CRYPTO_ALGORITHM = 'AES-GCM';
+const KEY_LENGTH = 256;
+
+// ── Generate Encryption Key ──────────────────
+async function generateEncryptionKey() {
+  const key = await window.crypto.subtle.generateKey(
+    { name: CRYPTO_ALGORITHM, length: KEY_LENGTH },
+    true,  // extractable
+    ['encrypt', 'decrypt']
+  );
+  return key;
+}
+
+// ── Export Key to Base64 ─────────────────────
+async function exportKey(key) {
+  const raw = await window.crypto.subtle.exportKey('raw', key);
+  return arrayBufferToBase64(raw);
+}
+
+// ── Import Key from Base64 ───────────────────
+async function importKey(base64Key) {
+  const raw = base64ToArrayBuffer(base64Key);
+  return await window.crypto.subtle.importKey(
+    'raw',
+    raw,
+    { name: CRYPTO_ALGORITHM },
+    false,
+    ['decrypt']
+  );
+}
+
+// ── Derive Key from Password ─────────────────
+async function deriveKeyFromPassword(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits', 'deriveKey']
+  );
+
+  return await window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    { name: CRYPTO_ALGORITHM, length: KEY_LENGTH },
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
+
+// ── Encrypt Text ─────────────────────────────
+async function encryptText(text, key) {
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: CRYPTO_ALGORITHM, iv },
+    key,
+    data
+  );
+
+  // Combine IV + cipher
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), iv.length);
+
+  return arrayBufferToBase64(combined.buffer);
+}
+
+// ── Encrypt File (ArrayBuffer) ───────────────
+async function encryptFile(arrayBuffer, key) {
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: CRYPTO_ALGORITHM, iv },
+    key,
+    arrayBuffer
+  );
+
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), iv.length);
+
+  return combined.buffer;
+}
+
+// ── Decrypt Text ─────────────────────────────
+async function decryptText(base64Cipher, key) {
+  const combined = base64ToArrayBuffer(base64Cipher);
+  const iv = combined.slice(0, 12);
+  const data = combined.slice(12);
+
+  const decrypted = await window.crypto.subtle.decrypt(
+    { name: CRYPTO_ALGORITHM, iv: new Uint8Array(iv) },
+    key,
+    data
+  );
+
+  const dec = new TextDecoder();
+  return dec.decode(decrypted);
+}
+
+// ── Decrypt File ─────────────────────────────
+async function decryptFile(encryptedBuffer, key) {
+  const iv = encryptedBuffer.slice(0, 12);
+  const data = encryptedBuffer.slice(12);
+
+  return await window.crypto.subtle.decrypt(
+    { name: CRYPTO_ALGORITHM, iv: new Uint8Array(iv) },
+    key,
+    data
+  );
+}
+
+// ── Encode/Decode Helpers ────────────────────
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToArrayBuffer(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+// ── Hash Content (SHA-256) ───────────────────
+async function hashContent(data) {
+  let buffer;
+  if (typeof data === 'string') {
+    buffer = new TextEncoder().encode(data);
+  } else {
+    buffer = data;
+  }
+
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ── Generate Random Salt ─────────────────────
+function generateSalt() {
+  return window.crypto.getRandomValues(new Uint8Array(16));
+}
+
+// ── Package Encrypted Content for IPFS ───────
+async function packageForIPFS(content, fileName, mimeType) {
+  const key = await generateEncryptionKey();
+  const exportedKey = await exportKey(key);
+
+  let encryptedContent;
+  if (typeof content === 'string') {
+    encryptedContent = await encryptText(content, key);
+  } else {
+    // ArrayBuffer (file)
+    const encBuf = await encryptFile(content, key);
+    encryptedContent = arrayBufferToBase64(encBuf);
+  }
+
+  const payload = {
+    encrypted: encryptedContent,
+    fileName: fileName || 'content',
+    mimeType: mimeType || 'text/plain',
+    timestamp: Date.now(),
+    version: '1.0'
+  };
+
+  return {
+    payload:     JSON.stringify(payload),
+    key:         exportedKey,
+    contentHash: await hashContent(encryptedContent)
+  };
+}
+
+// ── Unpackage and Decrypt from IPFS data ─────
+async function unpackageFromIPFS(ipfsData, exportedKey) {
+  const payload = JSON.parse(ipfsData);
+  const key = await importKey(exportedKey);
+
+  const decrypted = await decryptText(payload.encrypted, key);
+
+  return {
+    content:  decrypted,
+    fileName: payload.fileName,
+    mimeType: payload.mimeType
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  High-level wrappers used by create.html and view.html
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * encryptContent(content)
+ * Accepts a File, Uint8Array, or ArrayBuffer.
+ * Returns { encrypted: Uint8Array, key: CryptoKey, exportedKey: base64 }
+ * The `encrypted` Uint8Array is what you pass directly to uploadToIPFS().
+ */
+async function encryptContent(content) {
+  const key = await generateEncryptionKey();
+  const exportedKey = await exportKey(key);
+
+  let buffer;
+  if (content instanceof File) {
+    buffer = await content.arrayBuffer();
+  } else if (content instanceof Uint8Array) {
+    buffer = content.buffer;
+  } else {
+    buffer = content; // already ArrayBuffer
+  }
+
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encryptedBuffer = await window.crypto.subtle.encrypt(
+    { name: CRYPTO_ALGORITHM, iv },
+    key,
+    buffer
+  );
+
+  // Package: 12-byte IV prefix + ciphertext
+  const combined = new Uint8Array(12 + encryptedBuffer.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encryptedBuffer), 12);
+
+  return {
+    encrypted:   combined,     // Uint8Array — upload this to IPFS
+    key:         key,          // CryptoKey  — keep in memory
+    exportedKey: exportedKey   // base64 string — store securely
+  };
+}
+
+/**
+ * decryptContent(encryptedBytes, keyOrBase64)
+ * Accepts raw encrypted Uint8Array/ArrayBuffer/base64 from IPFS
+ * and the key (CryptoKey or base64 string).
+ * Returns decrypted string (text) or Uint8Array (binary).
+ */
+async function decryptContent(encryptedBytes, keyOrBase64) {
+  let cryptoKey;
+  if (typeof keyOrBase64 === 'string') {
+    cryptoKey = await importKey(keyOrBase64);
+  } else if (keyOrBase64 instanceof CryptoKey) {
+    cryptoKey = keyOrBase64;
+  } else {
+    throw new Error('decryptContent: invalid key type');
+  }
+
+  let combined;
+  if (typeof encryptedBytes === 'string') {
+    combined = new Uint8Array(base64ToArrayBuffer(encryptedBytes));
+  } else if (encryptedBytes instanceof Uint8Array) {
+    combined = encryptedBytes;
+  } else {
+    combined = new Uint8Array(encryptedBytes);
+  }
+
+  const iv   = combined.slice(0, 12);
+  const data = combined.slice(12);
+
+  const decrypted = await window.crypto.subtle.decrypt(
+    { name: CRYPTO_ALGORITHM, iv },
+    cryptoKey,
+    data
+  );
+
+  try {
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    return new Uint8Array(decrypted);
+  }
+}

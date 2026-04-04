@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RDO — Programmable Digital Rights. On-Chain.</title>
+<meta name="description" content="Establish sovereign ownership and automated licensing logic for digital assets. High-fidelity infrastructure for the next generation of institutional creative property."/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container-high": "#1f2020","secondary": "#9d9da4",
+          "primary-container": "#004395","on-surface": "#e7e5e4",
+          "surface-container-low": "#131313","surface-variant": "#262626",
+          "surface-container": "#191a1a","outline": "#767575",
+          "surface-dim": "#0e0e0e","surface": "#090909",
+          "primary": "#3B82F6","on-surface-variant": "#acabaa",
+          "surface-container-lowest": "#000000","surface-container-highest": "#262626",
+          "background": "#090909","on-background": "#e7e5e4",
+          "secondary-container": "#3a3b41","outline-variant": "#1a1a1a","error": "#ee7d77",
+        },
+        borderRadius: { "DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","2xl":"0.75rem","full":"9999px" },
+        fontFamily: { "headline":["Space Grotesk"],"body":["Inter"],"label":["Inter"] }
+      },
+    },
+  }
+</script>
+<link rel="stylesheet" href="css/animations.css?v=2"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  body { background-color: #090909; color: #e7e5e4; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+  nav.scrolled { background: rgba(9,9,9,0.92) !important; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.04); }
+  #hero-headline { line-height: 0.95; }
+  @keyframes slideIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
+
+  /* Architecture flow animated connectors */
+  .arch-connector { animation: fadeIn 1s ease 1.2s both; }
+  .arch-node { animation: scaleIn 0.5s cubic-bezier(.22,1,.36,1) both; }
+  .arch-node:nth-child(1) { animation-delay: 0.8s; }
+  .arch-node:nth-child(2) { animation-delay: 1s; }
+  .arch-node:nth-child(3) { animation-delay: 1.2s; }
+  .arch-node:nth-child(4) { animation-delay: 1.4s; }
+  .arch-node:nth-child(5) { animation-delay: 1.6s; }
+
+  /* Animated hex geo */
+  .hex-ring { transform-origin: center; }
+
+  /* Feature card hover */
+  .feature-card {
+    transition: transform 0.3s cubic-bezier(.22,1,.36,1), border-color 0.2s ease, box-shadow 0.3s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(59,130,246,0.15) !important;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.08);
+  }
+  .feature-card:hover .feature-icon {
+    animation: float 3s ease-in-out infinite;
+    color: #3b82f6;
+  }
+
+  /* Step card number pulse */
+  .step-num {
+    transition: color 0.2s ease;
+  }
+  .step-card:hover .step-num { color: #3b82f6; }
+  .step-card { transition: transform 0.25s ease; }
+  .step-card:hover { transform: translateY(-4px); }
+
+  /* CTA hover */
+  #cta-box {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  #cta-box:hover {
+    border-color: rgba(59,130,246,0.2);
+    box-shadow: 0 0 80px rgba(59,130,246,0.06);
+  }
+</style>
+</head>
+<body class="antialiased selection:bg-primary/20">
+
+</div>
+
+
+<!-- Navigation -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+  <div class="flex justify-between items-center px-10 py-5 w-full max-w-[1440px] mx-auto">
+    <div class="text-xl font-bold tracking-[-0.04em] text-on-surface font-headline hero-badge" style="animation-delay:0s">RDO</div>
+    <div class="hidden md:flex items-center gap-10">
+      <a class="nav-link text-secondary font-body text-sm font-medium hover:text-on-surface transition-colors duration-200" href="#how-it-works">How It Works</a>
+      <a class="nav-link text-secondary font-body text-sm font-medium hover:text-on-surface transition-colors duration-200" href="#features">Features</a>
+      <a class="nav-link text-secondary font-body text-sm font-medium hover:text-on-surface transition-colors duration-200" href="#architecture">Architecture</a>
+      <a class="nav-link text-secondary font-body text-sm font-medium hover:text-on-surface transition-colors duration-200" href="test.html">Test Console</a>
+    </div>
+    <div class="flex items-center gap-3 hero-badge" style="animation-delay:0.1s">
+      <button id="wallet-btn" onclick="toggleWallet()" class="flex items-center gap-2 px-4 py-2 bg-surface-container border border-[#262626] text-xs font-medium text-secondary hover:text-on-surface hover:border-[#3a3a3a] transition-all rounded-lg">
+        <span class="wallet-dot w-2 h-2 rounded-full bg-[#3a3a3a] transition-all"></span>
+        <span id="wallet-label">Connect</span>
+      </button>
+      <a href="create.html" class="btn-primary bg-primary text-white px-5 py-2 text-sm font-bold rounded-lg ripple-container">
+        Create RDO
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="relative pt-44 pb-28 px-10 max-w-[1440px] mx-auto z-10">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+    <div class="flex flex-col gap-8 max-w-xl">
+      <!-- Badge -->
+      <div class="hero-badge inline-flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-[#1f2020] rounded-full w-fit">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary glow-pulse-green"></span>
+        <span class="text-[10px] font-bold tracking-[0.15em] uppercase text-secondary font-label">Deployed on Sepolia — EVM Compatible</span>
+      </div>
+
+      <!-- Headline -->
+      <h1 id="hero-headline" class="hero-title text-[72px] font-bold leading-tight tracking-[-0.04em] text-on-surface font-headline">
+        Refuse Access.<br/>Keep Ownership.<br/>On-Chain.
+      </h1>
+
+      <p class="hero-subtitle text-[14px] text-secondary leading-relaxed max-w-md font-body">
+        RDO lets creators encrypt digital assets, set granular access rules — read, copy, download — and mint them as smart contract objects. Every access request is verified on-chain. No middlemen. No silent leaks.
+      </p>
+
+      <!-- Live stats bar -->
+      <div class="hero-stats flex gap-6 py-4 border-t border-b border-[#1a1a1a]">
+        <div class="flex flex-col gap-1">
+          <span class="stat-number text-2xl font-bold tracking-tight text-on-surface font-headline">AES-256</span>
+          <span class="text-[10px] font-bold tracking-[0.12em] uppercase text-secondary">Content Encryption</span>
+        </div>
+        <div class="w-px bg-[#1a1a1a]"></div>
+        <div class="flex flex-col gap-1">
+          <span class="stat-number text-2xl font-bold tracking-tight text-on-surface font-headline" style="animation-delay:1.1s">IPFS</span>
+          <span class="text-[10px] font-bold tracking-[0.12em] uppercase text-secondary">Encrypted Storage</span>
+        </div>
+        <div class="w-px bg-[#1a1a1a]"></div>
+        <div class="flex flex-col gap-1">
+          <span class="stat-number text-2xl font-bold tracking-tight text-on-surface font-headline" style="animation-delay:1.2s">ERC</span>
+          <span class="text-[10px] font-bold tracking-[0.12em] uppercase text-secondary">Custom On-Chain Object</span>
+        </div>
+      </div>
+
+      <div class="hero-actions flex gap-4 items-center">
+        <a href="create.html" class="btn-primary bg-primary text-white px-8 py-3.5 text-sm font-bold rounded-lg inline-block ripple-container">
+          Create RDO
+        </a>
+        <a href="view.html" class="bg-[#111115] text-on-surface px-8 py-3.5 text-sm font-bold rounded-lg border border-[#1f2020] hover:bg-[#1a1a22] hover:border-[#2a2a2a] active:scale-[0.98] transition-all inline-block">
+          Open RDO →
+        </a>
+      </div>
+    </div>
+
+    <!-- Animated Geometric Visual -->
+    <div class="flex justify-center md:justify-end pr-8 hero-visual">
+      <div class="relative w-[320px] h-[320px] flex items-center justify-center">
+        
+        <!-- Occlusion layers: Blocks the Three.js wave dots from passing through the text -->
+        <div class="absolute w-[200px] h-[200px] bg-[#090909] rounded-full blur-[40px] z-0"></div>
+        <div class="absolute w-[140px] h-[140px] bg-[#090909] rounded-full z-0 opacity-90 backdrop-blur-xl"></div>
+        
+        <!-- Outer rings -->
+        <svg class="absolute inset-0 w-full h-full z-10" viewBox="0 0 300 300" fill="none">
+          <!-- Slow outer ring -->
+          <g class="geo-spin-slow" style="transform-origin:150px 150px">
+            <polygon points="150,20 272,87 272,213 150,280 28,213 28,87" stroke="rgba(59,130,246,0.25)" stroke-width="1" fill="rgba(9,9,9,0.3)"/>
+          </g>
+          <!-- Medium ring -->
+          <g class="geo-spin-med" style="transform-origin:150px 150px">
+            <polygon points="150,50 237,100 237,200 150,250 63,200 63,100" stroke="rgba(59,130,246,0.4)" stroke-width="1.2" fill="none"/>
+          </g>
+          <!-- Inner spinning ring -->
+          <g class="geo-spin-fast" style="transform-origin:150px 150px">
+            <polygon points="150,90 192,115 192,165 150,190 108,165 108,115" stroke="rgba(59,130,246,0.8)" stroke-width="1.5" fill="none"/>
+          </g>
+          
+          <!-- Static lines (axis crosshairs) -->
+          <line x1="150" y1="20" x2="150" y2="280" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>
+          <line x1="28" y1="87" x2="272" y2="213" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>
+          <line x1="272" y1="87" x2="28" y2="213" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>
+          
+          <!-- Animated dash circle -->
+          <circle cx="150" cy="150" r="120" stroke="rgba(59,130,246,0.15)" stroke-width="1" stroke-dasharray="4 8"/>
+          <circle cx="150" cy="150" r="75" stroke="rgba(59,130,246,0.3)" stroke-width="1" stroke-dasharray="3 6"/>
+          
+          <!-- Center dot -->
+          <circle cx="150" cy="150" r="4" fill="rgba(59,130,246,1)" class="glow-pulse" style="filter: drop-shadow(0 0 8px rgba(59,130,246,0.8))" />
+          
+          <!-- Corner accent dots -->
+          <circle cx="150" cy="20" r="3" fill="rgba(59,130,246,0.8)"/>
+          <circle cx="272" cy="87" r="2.5" fill="rgba(59,130,246,0.6)"/>
+          <circle cx="272" cy="213" r="2.5" fill="rgba(59,130,246,0.6)"/>
+          <circle cx="150" cy="280" r="3" fill="rgba(59,130,246,0.8)"/>
+          <circle cx="28" cy="213" r="2.5" fill="rgba(59,130,246,0.6)"/>
+          <circle cx="28" cy="87" r="2.5" fill="rgba(59,130,246,0.6)"/>
+        </svg>
+        
+        <!-- Floating label -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center float-element z-20" style="margin-top:-2px">
+          <div class="text-[17px] font-extrabold tracking-[0.25em] uppercase text-primary font-label drop-shadow-md pb-0.5">RDO</div>
+          <div class="text-[9px] text-[#e6e4f0]/90 mt-0 tracking-[0.3em] font-medium uppercase drop-shadow-sm ml-[2px]">Protocol</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Separator -->
+<div class="px-10 max-w-[1440px] mx-auto">
+  <hr class="border-t border-[#1a1a1a]"/>
+</div>
+
+<!-- How It Works — staggered reveal -->
+<section id="how-it-works" class="py-28 px-10 max-w-[1440px] mx-auto">
+  <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-secondary mb-16 font-label reveal reveal-up">How It Works</p>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-12 reveal-stagger">
+    <div class="step-card flex flex-col gap-5 cursor-default">
+      <span class="step-num text-xs font-bold tracking-[0.2em] text-secondary font-label">01</span>
+      <span class="material-symbols-outlined text-primary text-3xl icon-hover feature-icon">lock</span>
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-bold tracking-tight font-headline">Encrypt</h3>
+        <p class="text-sm text-secondary leading-relaxed font-body">Your file or text is encrypted client-side with AES-256-GCM before leaving your browser. The key never touches a server.</p>
+      </div>
+    </div>
+    <div class="step-card flex flex-col gap-5 cursor-default">
+      <span class="step-num text-xs font-bold tracking-[0.2em] text-secondary font-label">02</span>
+      <span class="material-symbols-outlined text-primary text-3xl icon-hover feature-icon">cloud_upload</span>
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-bold tracking-tight font-headline">Pin to IPFS</h3>
+        <p class="text-sm text-secondary leading-relaxed font-body">The ciphertext is pinned to IPFS via Pinata. Nobody can read it — the CID is content-addressed and immutable.</p>
+      </div>
+    </div>
+    <div class="step-card flex flex-col gap-5 cursor-default">
+      <span class="step-num text-xs font-bold tracking-[0.2em] text-secondary font-label">03</span>
+      <span class="material-symbols-outlined text-primary text-3xl icon-hover feature-icon">receipt_long</span>
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-bold tracking-tight font-headline">Mint RDO</h3>
+        <p class="text-sm text-secondary leading-relaxed font-body">A smart contract object is minted on-chain encoding the IPFS CID, access type (public/whitelist), open limit, and violation policy.</p>
+      </div>
+    </div>
+    <div class="step-card flex flex-col gap-5 cursor-default">
+      <span class="step-num text-xs font-bold tracking-[0.2em] text-secondary font-label">04</span>
+      <span class="material-symbols-outlined text-primary text-3xl icon-hover feature-icon">policy</span>
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-bold tracking-tight font-headline">Access Gating</h3>
+        <p class="text-sm text-secondary leading-relaxed font-body">Every read, copy, or download is a contract call. Violations auto-lock the RDO. The creator can revoke or unlock at any time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Separator -->
+<div class="px-10 max-w-[1440px] mx-auto">
+  <hr class="border-t border-[#1a1a1a]"/>
+</div>
+
+<!-- Features Grid -->
+<section id="features" class="py-28 px-10 max-w-[1440px] mx-auto">
+  <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-secondary mb-16 font-label reveal reveal-up">What Makes RDO Different</p>
+  <div class="max-w-[1220px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+
+    <!-- Large Card — left -->
+    <div class="feature-card md:col-span-2 bg-[#0c0c10] border border-[#1a1a22] p-10 rounded-xl reveal reveal-left">
+      <div class="max-w-md flex flex-col gap-4">
+        <h2 class="text-3xl font-bold tracking-tight text-white font-headline">The Asset Stays Yours</h2>
+        <p class="text-secondary leading-relaxed font-body text-sm">Unlike traditional DRM, revoking access doesn't destroy or move the asset — it updates a single boolean in the contract. The encrypted payload stays on IPFS forever. Only the on-chain permission changes.</p>
+      </div>
+      <!-- Animated SVG diagram -->
+      <div class="mt-10 overflow-hidden rounded-lg border border-[#1a1a22]">
+        <div class="w-full h-52 bg-[#080810] flex items-center justify-center relative">
+          <svg class="w-full h-full" viewBox="0 0 400 200" fill="none" id="governance-svg">
+            <line x1="0" y1="100" x2="400" y2="100" stroke="rgba(59,130,246,0.08)" stroke-width="0.5"/>
+            <line x1="200" y1="0" x2="200" y2="200" stroke="rgba(59,130,246,0.08)" stroke-width="0.5"/>
+            <!-- Animated concentric circles -->
+            <circle cx="200" cy="100" r="80" stroke="rgba(59,130,246,0.15)" stroke-width="0.5"
+              stroke-dasharray="502" stroke-dashoffset="502" style="animation:drawLine 2s ease 0.5s forwards"/>
+            <circle cx="200" cy="100" r="50" stroke="rgba(59,130,246,0.25)" stroke-width="0.7"
+              stroke-dasharray="314" stroke-dashoffset="314" style="animation:drawLine 1.8s ease 0.8s forwards"/>
+            <circle cx="200" cy="100" r="20" stroke="rgba(59,130,246,0.5)" stroke-width="1"
+              stroke-dasharray="126" stroke-dashoffset="126" style="animation:drawLine 1.4s ease 1.1s forwards"/>
+            <!-- Center -->
+            <circle cx="200" cy="100" r="5" fill="rgba(59,130,246,0.9)" class="glow-pulse"/>
+            <!-- Arms -->
+            <line class="flow-line" x1="200" y1="100" x2="120" y2="50" stroke="rgba(59,130,246,0.4)" stroke-width="0.5"/>
+            <line class="flow-line" x1="200" y1="100" x2="280" y2="50" stroke="rgba(59,130,246,0.4)" stroke-width="0.5" style="animation-delay:0.3s"/>
+            <line class="flow-line" x1="200" y1="100" x2="120" y2="150" stroke="rgba(59,130,246,0.4)" stroke-width="0.5" style="animation-delay:0.6s"/>
+            <line class="flow-line" x1="200" y1="100" x2="280" y2="150" stroke="rgba(59,130,246,0.4)" stroke-width="0.5" style="animation-delay:0.9s"/>
+            <circle cx="120" cy="50" r="3" fill="rgba(59,130,246,0.4)"/>
+            <circle cx="280" cy="50" r="3" fill="rgba(59,130,246,0.4)"/>
+            <circle cx="120" cy="150" r="3" fill="rgba(59,130,246,0.4)"/>
+            <circle cx="280" cy="150" r="3" fill="rgba(59,130,246,0.4)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Small card — Violation Lock -->
+    <div class="feature-card bg-[#0c0c10] border border-[#1a1a22] p-10 rounded-xl flex flex-col justify-between reveal reveal-right">
+      <div class="flex flex-col gap-4">
+        <h2 class="text-3xl font-bold tracking-tight text-white font-headline">Auto-Lock on Violation</h2>
+        <p class="text-secondary leading-relaxed font-body text-sm">Exceed the open limit or trigger a policy breach — the contract self-locks without any creator intervention. You set the rules once.</p>
+      </div>
+      <div class="text-primary mt-10 float-element-2 feature-icon">
+        <span class="material-symbols-outlined text-6xl">shield_lock</span>
+      </div>
+    </div>
+
+    <!-- Small card — Whitelist Gating -->
+    <div class="feature-card bg-[#0c0c10] border border-[#1a1a22] p-10 rounded-xl flex flex-col justify-between reveal reveal-left" style="transition-delay:0.1s">
+      <div class="flex flex-col gap-4">
+        <h2 class="text-3xl font-bold tracking-tight text-white font-headline">Whitelist Gating</h2>
+        <p class="text-secondary leading-relaxed font-body text-sm">Restrict access to specific wallet addresses. Only wallets you approve can submit a valid access request — everyone else gets rejected at the contract level.</p>
+      </div>
+      <div class="text-primary mt-10 float-element-3 feature-icon">
+        <span class="material-symbols-outlined text-6xl">verified_user</span>
+      </div>
+    </div>
+
+    <!-- Large card — Scalability -->
+    <div class="feature-card md:col-span-2 bg-[#0c0c10] border border-[#1a1a22] p-10 rounded-xl flex items-center gap-12 reveal reveal-right" style="transition-delay:0.1s">
+      <div class="flex-1 flex flex-col gap-4">
+        <h2 class="text-3xl font-bold tracking-tight text-white font-headline">Global Scalability</h2>
+        <p class="text-secondary leading-relaxed font-body text-sm">Our L2 architecture supports millions of simultaneous right-claims with sub-cent transaction fees, built for global adoption.</p>
+        <!-- Animated progress bars -->
+        <div class="mt-4 space-y-3">
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] font-bold tracking-widest uppercase text-secondary w-20">Throughput</span>
+            <div class="flex-1 h-px bg-[#1a1a22] relative">
+              <div class="absolute top-1/2 -translate-y-1/2 h-[2px] bg-primary rounded progress-bar-fill" style="--pct:85%; width:0"></div>
+            </div>
+            <span class="text-[10px] text-primary font-mono">85%</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] font-bold tracking-widest uppercase text-secondary w-20">Security</span>
+            <div class="flex-1 h-px bg-[#1a1a22] relative">
+              <div class="absolute top-1/2 -translate-y-1/2 h-[2px] bg-primary rounded progress-bar-fill" style="--pct:100%; width:0; animation-delay:0.2s"></div>
+            </div>
+            <span class="text-[10px] text-primary font-mono">100%</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] font-bold tracking-widest uppercase text-secondary w-20">Latency</span>
+            <div class="flex-1 h-px bg-[#1a1a22] relative">
+              <div class="absolute top-1/2 -translate-y-1/2 h-[2px] bg-primary rounded progress-bar-fill" style="--pct:60%; width:0; animation-delay:0.4s"></div>
+            </div>
+            <span class="text-[10px] text-primary font-mono">Low</span>
+          </div>
+        </div>
+      </div>
+      <div class="hidden md:flex w-36 h-36 bg-[#080812] rounded-xl items-center justify-center p-5 border border-[#1a1a22] flex-shrink-0 float-element">
+        <span class="material-symbols-outlined text-primary text-6xl feature-icon">public</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture Flow -->
+<section id="architecture" class="py-36 px-10 max-w-[1440px] mx-auto text-center">
+  <h2 class="text-[0.6875rem] uppercase tracking-[0.4em] text-secondary mb-4 font-bold font-label reveal reveal-up">On-Chain Access Flow</h2>
+  <p class="text-secondary text-sm mb-16 reveal reveal-up" style="transition-delay:0.1s">Every access call hits the contract. No off-chain trust required.</p>
+  <div class="flex flex-col md:flex-row items-center justify-center gap-3 font-headline">
+    <div class="arch-node w-44 py-7 border border-[#1a1a22] bg-[#0c0c10] rounded-lg hover:border-[#252530] transition-all hover:scale-105 cursor-default">
+      <span class="material-symbols-outlined text-primary/50 text-2xl block mb-2">person</span>
+      <span class="text-sm font-bold tracking-widest text-on-surface uppercase">Creator</span>
+    </div>
+    <span class="arch-connector material-symbols-outlined text-primary/30 rotate-90 md:rotate-0 text-2xl">arrow_forward</span>
+    <div class="arch-node w-44 py-7 border border-[#1a1a22] bg-[#0c0c10] rounded-lg hover:border-[#252530] transition-all hover:scale-105 cursor-default">
+      <span class="material-symbols-outlined text-primary/50 text-2xl block mb-2">lock</span>
+      <span class="text-sm font-bold tracking-widest text-on-surface uppercase">AES-256</span>
+    </div>
+    <span class="arch-connector material-symbols-outlined text-primary/30 rotate-90 md:rotate-0 text-2xl">arrow_forward</span>
+    <div class="arch-node w-44 py-7 border border-[#1a1a22] bg-[#0c0c10] rounded-lg hover:border-[#252530] transition-all hover:scale-105 cursor-default">
+      <span class="material-symbols-outlined text-primary/50 text-2xl block mb-2">cloud</span>
+      <span class="text-sm font-bold tracking-widest text-on-surface uppercase">IPFS Pin</span>
+    </div>
+    <span class="arch-connector material-symbols-outlined text-primary/30 rotate-90 md:rotate-0 text-2xl">arrow_forward</span>
+    <div class="arch-node w-64 py-9 border border-primary/25 bg-[#0c0c10] rounded-lg relative hover:border-primary/50 transition-all hover:scale-105 cursor-default glow-pulse">
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-[10px] font-bold text-white px-3 py-1 rounded-full">Core</div>
+      <span class="material-symbols-outlined text-primary text-2xl block mb-2">receipt_long</span>
+      <span class="text-sm font-bold tracking-widest text-on-surface uppercase">RDO Contract</span>
+    </div>
+    <span class="arch-connector material-symbols-outlined text-primary/30 rotate-90 md:rotate-0 text-2xl">arrow_forward</span>
+    <div class="arch-node w-44 py-7 border border-[#1a1a22] bg-[#0c0c10] rounded-lg hover:border-[#252530] transition-all hover:scale-105 cursor-default">
+      <span class="material-symbols-outlined text-primary/50 text-2xl block mb-2">policy</span>
+      <span class="text-sm font-bold tracking-widest text-on-surface uppercase">Gated</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 px-10 max-w-[1440px] mx-auto reveal reveal-scale">
+  <div id="cta-box" class="border border-[#1a1a22] rounded-xl p-16 bg-[#0a0a0e] text-center relative overflow-hidden">
+    <!-- Subtle background orb inside card -->
+    <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 50% 120%, rgba(59,130,246,0.07) 0%, transparent 60%)"></div>
+    <h2 class="text-4xl font-bold tracking-tight font-headline mb-4 relative">Mint your first RDO in under 60 seconds.</h2>
+    <p class="text-secondary font-body text-sm mb-8 max-w-sm mx-auto relative">Encrypt a file or text, set your access rules, and deploy — all from your browser. No backend. No sign-up.</p>
+    <div class="flex gap-4 justify-center relative">
+      <a href="create.html" class="btn-primary inline-block bg-primary text-white px-10 py-4 text-sm font-bold rounded-lg ripple-container">
+        Create RDO →
+      </a>
+      <a href="view.html" class="inline-block bg-transparent text-on-surface px-10 py-4 text-sm font-bold rounded-lg border border-[#262626] hover:border-[#3a3a3a] transition-all">
+        View RDO
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-[#0e0e0e] border-t border-[#111115] py-8">
+  <div class="flex flex-col md:flex-row justify-between items-center px-10 w-full max-w-[1440px] mx-auto opacity-60">
+    <div class="font-label text-[0.6875rem] uppercase tracking-wider text-secondary">
+      © 2024 RDO Protocol. All rights reserved.
+    </div>
+    <div class="flex gap-8 mt-4 md:mt-0">
+      <a href="create.html" class="font-label text-[0.6875rem] uppercase tracking-wider text-secondary hover:text-primary transition-colors">Create</a>
+      <a href="view.html" class="font-label text-[0.6875rem] uppercase tracking-wider text-secondary hover:text-primary transition-colors">View</a>
+      <a href="test.html" class="font-label text-[0.6875rem] uppercase tracking-wider text-secondary hover:text-primary transition-colors">Test Console</a>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+<script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+<script src="js/background.js"></script>
+<script src="contractAddress.js"></script>
+<script src="js/wallet.js"></script>

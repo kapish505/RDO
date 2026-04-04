@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RDO Protocol | Create Asset</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#504d68",
+                    "on-background": "#e6e4f0",
+                    "error-dim": "#bb5551",
+                    "on-tertiary-fixed-variant": "#504e69",
+                    "secondary-fixed": "#e2e2e9",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-container-high": "#1f1f26",
+                    "surface-dim": "#0e0e11",
+                    "inverse-on-surface": "#555458",
+                    "on-tertiary-fixed": "#34314b",
+                    "on-secondary": "#1e2025",
+                    "tertiary-fixed": "#d3ceef",
+                    "secondary-dim": "#9d9da4",
+                    "primary": "#adc6ff",
+                    "surface-container": "#19191f",
+                    "on-secondary-fixed-variant": "#5a5b61",
+                    "secondary-fixed-dim": "#d4d4db",
+                    "on-tertiary-container": "#47445f",
+                    "on-error-container": "#ff9993",
+                    "tertiary-fixed-dim": "#c5c0e0",
+                    "on-error": "#490106",
+                    "error": "#ee7d77",
+                    "surface-container-highest": "#25252d",
+                    "primary-dim": "#98b8ff",
+                    "on-primary": "#003d88",
+                    "on-primary-fixed": "#003c86",
+                    "inverse-surface": "#fcf8fd",
+                    "on-primary-container": "#bdd0ff",
+                    "tertiary-container": "#d3ceef",
+                    "primary-container": "#004395",
+                    "surface-container-lowest": "#000000",
+                    "surface-variant": "#25252d",
+                    "background": "#0e0e11",
+                    "on-surface": "#e6e4f0",
+                    "secondary": "#9d9da4",
+                    "on-primary-fixed-variant": "#0057bd",
+                    "primary-fixed-dim": "#c3d4ff",
+                    "outline-variant": "#474750",
+                    "on-secondary-fixed": "#3e3f45",
+                    "surface-container-low": "#131317",
+                    "surface": "#0e0e11",
+                    "surface-bright": "#2b2b35",
+                    "secondary-container": "#3a3b41",
+                    "on-secondary-container": "#bebfc5",
+                    "inverse-primary": "#005bc4",
+                    "outline": "#75747f",
+                    "tertiary": "#e1dcfd",
+                    "on-surface-variant": "#abaab5",
+                    "tertiary-dim": "#c5c0e0",
+                    "error-container": "#7f2927",
+                    "surface-tint": "#adc6ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px;
+            height: 8px;
+            background: #adc6ff;
+            cursor: pointer;
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- TopNavBar -->
+<nav class="bg-black text-blue-500 dark:text-blue-400 docked full-width top-0 sticky border-b border-white/10 flex justify-between items-center w-full px-6 py-3 max-w-full mx-auto z-50">
+<div class="text-xl font-bold tracking-tighter text-white">RDO</div>
+<div class="flex items-center gap-8">
+<div class="flex gap-6">
+<a class="text-white border-b-2 border-blue-500 pb-1 text-[11px] font-bold tracking-widest uppercase" href="#">Assets</a>
+<a class="text-zinc-500 hover:text-zinc-300 transition-colors text-[11px] font-bold tracking-widest uppercase" href="#">Activity</a>
+<a class="text-zinc-500 hover:text-zinc-300 transition-colors text-[11px] font-bold tracking-widest uppercase" href="#">Docs</a>
+</div>
+<button class="bg-white text-black px-4 py-1.5 text-[11px] font-bold tracking-widest uppercase hover:bg-zinc-200 transition-all active:scale-95 duration-100">Connect</button>
+</div>
+</nav>
+<main class="max-w-[1200px] mx-auto px-6 py-12">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Main Form (Left) -->
+<div class="lg:col-span-8 space-y-12">
+<!-- Section 1: Content -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-[11px] font-bold tracking-widest uppercase text-secondary">Section 1: Content</h2>
+<div class="flex bg-surface-container-low p-1 rounded">
+<button class="px-4 py-1.5 text-xs font-medium bg-surface-container-high text-primary rounded-sm shadow-sm">File</button>
+<button class="px-4 py-1.5 text-xs font-medium text-on-surface-variant hover:text-on-surface">Text</button>
+</div>
+</div>
+<div class="w-full aspect-[21/9] bg-surface-container-lowest border border-dashed border-outline-variant/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary mb-2">upload_file</span>
+<p class="text-sm text-on-surface-variant">Drop files here or <span class="text-primary">browse</span></p>
+<p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
+</div>
+</section>
+<!-- Section 2: Access Rules -->
+<section class="space-y-6">
+<h2 class="text-[11px] font-bold tracking-widest uppercase text-secondary">Section 2: Access Rules</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 bg-surface-container border border-primary flex items-start gap-4 cursor-pointer">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">public</span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-on-surface">Public Access</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mt-1">Anyone with the link can request decryption via the RDO network.</p>
+</div>
+</div>
+<div class="p-4 bg-surface-container border border-outline-variant/20 hover:border-outline-variant/50 flex items-start gap-4 cursor-pointer transition-colors">
+<div class="mt-1">
+<span class="material-symbols-outlined text-outline-variant">verified_user</span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-on-surface">Whitelist Only</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed mt-1">Only specific wallet addresses can access the decrypted content.</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-1 border border-outline-variant/20 divide-y divide-outline-variant/10">
+<div class="flex items-center justify-between p-4">
+<div>
+<div class="text-sm font-medium text-on-surface">Allow Read</div>
+<div class="text-[11px] text-on-surface-variant">Permit viewing of the decrypted data shell</div>
+</div>
+<div class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-3 h-3 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4">
+<div>
+<div class="text-sm font-medium text-on-surface">Allow Copy</div>
+<div class="text-[11px] text-on-surface-variant">Enable clipboard actions for text content</div>
+</div>
+<div class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-3 h-3 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4">
+<div>
+<div class="text-sm font-medium text-on-surface-variant">Allow Download</div>
+<div class="text-[11px] text-on-surface-variant">Export raw data to local storage</div>
+</div>
+<div class="w-10 h-5 bg-surface-container-highest rounded-full relative flex items-center px-1">
+<div class="w-3 h-3 bg-outline rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 border border-outline-variant/20 space-y-6">
+<div class="flex justify-between items-end">
+<div>
+<label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">Max Opens</label>
+<p class="text-[10px] text-outline">Total decryption limit for this RDO</p>
+</div>
+<span class="text-2xl font-mono text-primary leading-none">100</span>
+</div>
+<input class="w-full h-0.5 bg-surface-container-highest appearance-none cursor-pointer accent-primary" max="500" min="0" type="range" value="100"/>
+<div class="flex items-center justify-between pt-4 border-t border-outline-variant/10">
+<span class="text-sm text-on-surface-variant">Lock on Violation</span>
+<div class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-3 h-3 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Deploy -->
+<section class="space-y-4">
+<h2 class="text-[11px] font-bold tracking-widest uppercase text-secondary">Section 3: Deploy</h2>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container border border-outline-variant/20 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-500 text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium text-on-surface-variant line-through">Encrypt Content</span>
+</div>
+<span class="text-[10px] text-green-500 uppercase font-bold tracking-widest">Success</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container border border-primary group active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-lg animate-pulse">cloud_upload</span>
+<span class="text-sm font-medium text-on-surface">Upload to IPFS</span>
+</div>
+<span class="text-[10px] text-primary uppercase font-bold tracking-widest">In Progress</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container border border-outline-variant/10 opacity-50 cursor-not-allowed">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline text-lg">database</span>
+<span class="text-sm font-medium text-on-surface-variant">Create RDO</span>
+</div>
+<span class="text-[10px] text-outline uppercase font-bold tracking-widest">Queued</span>
+</button>
+</section>
+<!-- Success State (Optional) -->
+<div class="p-8 bg-surface-container-lowest border border-primary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">verified</span>
+</div>
+<div class="relative z-10">
+<div class="text-[11px] font-bold tracking-widest uppercase text-primary mb-4">RDO Deployment Complete</div>
+<div class="flex items-center justify-between group">
+<div class="text-3xl font-mono tracking-tighter text-on-surface">RDO-8821-X992-B01</div>
+<button class="p-2 hover:bg-surface-container-high rounded transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">content_copy</span>
+</button>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant/10 flex items-center gap-4">
+<span class="text-xs text-on-surface-variant">Transaction Hash:</span>
+<a class="text-xs text-primary underline underline-offset-4 font-mono" href="#">0x7a2...f9e2</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar (Right) -->
+<div class="lg:col-span-4">
+<div class="sticky top-24 space-y-6">
+<div class="bg-surface-container-low border border-outline-variant/20 p-6">
+<h3 class="text-[11px] font-bold tracking-widest uppercase text-on-surface mb-6">Preview Summary</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-baseline border-b border-outline-variant/5 pb-3">
+<span class="text-[11px] text-on-surface-variant uppercase tracking-wider">Access</span>
+<span class="text-sm font-medium text-primary">Public</span>
+</div>
+<div class="flex justify-between items-baseline border-b border-outline-variant/5 pb-3">
+<span class="text-[11px] text-on-surface-variant uppercase tracking-wider">Reads</span>
+<span class="text-sm font-medium text-on-surface">Allowed</span>
+</div>
+<div class="flex justify-between items-baseline border-b border-outline-variant/5 pb-3">
+<span class="text-[11px] text-on-surface-variant uppercase tracking-wider">Max Opens</span>
+<span class="text-sm font-mono text-on-surface">100</span>
+</div>
+<div class="flex justify-between items-baseline border-b border-outline-variant/5 pb-3">
+<span class="text-[11px] text-on-surface-variant uppercase tracking-wider">Storage</span>
+<span class="text-sm font-medium text-on-surface">IPFS (Pending)</span>
+</div>
+<div class="flex justify-between items-baseline pb-3">
+<span class="text-[11px] text-on-surface-variant uppercase tracking-wider">Violation Lock</span>
+<span class="text-sm font-medium text-green-500">Enabled</span>
+</div>
+</div>
+<div class="mt-8 p-4 bg-surface-container-lowest border border-outline-variant/20">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">info</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface">Network Fees</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-lg font-mono text-on-surface">0.0042</span>
+<span class="text-[11px] text-on-surface-variant font-bold">ETH</span>
+</div>
+</div>
+</div>
+<div class="relative w-full aspect-video border border-outline-variant/20">
+<img alt="Abstract blockchain visualization" class="w-full h-full object-cover grayscale opacity-40" data-alt="Futuristic 3D visualization of interconnected data nodes in deep blue and black space with sharp geometric lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIkOjhodU4DsOrN9bKbkQLApujLrW2BE9ffcn7KcjODeHKagcZkvCigfRamrtAaSmyzUQR0B57t2sEn_-wz64UAosR0Y-Arj3Pd4uxldoPVVQu7K4Dd1KEu3XZvcUP8WseoELe0RttMMBwqEOPoMYA2KkEqX5jxencaG8bE5TQwiqDW3MY-JsJh0FanMExsp8S3SsAGWnRnJYRqfopapT1ffGgIBAHdJRZgmJZhR6UPoPhuBSODAhoJhNzR5ah9Voj4dNplCNUoWmy"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+<p class="text-[10px] text-on-surface-variant leading-tight">Secure RDO encapsulation uses AES-256-GCM encryption before distributed node propagation.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 px-6 text-center text-xs bg-black text-zinc-600 border-t border-white/5 font-body">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<p>© 2024 RDO Protocol. All rights reserved.</p>
+<div class="flex gap-8">
+<a class="hover:text-zinc-400 transition-all" href="#">Security Audit</a>
+<a class="hover:text-zinc-400 transition-all" href="#">Status</a>
+<a class="hover:text-zinc-400 transition-all" href="#">Terms</a>
+</div>
+</div>
+</footer>
+</body></html>
