@@ -110,7 +110,7 @@
     <div class="flex gap-5">
       <a class="text-white border-b border-[#3b82f6] pb-1 text-[11px] font-bold tracking-widest uppercase" href="create.html">Create</a>
       <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
-      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="test.html">Test</a>
+      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="dashboard.html">My RDOs</a>
     </div>
     <button id="wallet-btn" data-action="connect-wallet" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-[#474750]/30 text-[11px] font-bold tracking-widest uppercase hover:border-[#474750] transition-all rounded">
       <span id="wallet-dot" class="w-1.5 h-1.5 rounded-full bg-[#3a3a3a]"></span>
@@ -192,15 +192,6 @@
 
         <!-- Toggles -->
         <div class="bg-surface-container-low border border-[#474750]/20 divide-y divide-[#474750]/10 rounded">
-          <div class="flex items-center justify-between p-4">
-            <div>
-              <div class="text-sm font-medium text-on-surface">Allow Read</div>
-              <div class="text-[11px] text-on-surface-variant">Permit viewing of the decrypted data shell</div>
-            </div>
-            <button onclick="togglePerm(this, 'allowRead', true)" data-state="on" class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1 transition-colors perm-toggle">
-              <div class="w-3 h-3 bg-white rounded-full ml-auto transition-all"></div>
-            </button>
-          </div>
           <div class="flex items-center justify-between p-4">
             <div>
               <div class="text-sm font-medium text-on-surface">Allow Copy</div>

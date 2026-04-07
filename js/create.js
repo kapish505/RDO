@@ -1,10 +1,10 @@
 let selectedFile = null;
 
 let rdoConfig = {
-  maxOpens: 10,
-  accessType: 'whitelist', // default
-  allowRead: true,
-  allowCopy: false,
+  maxOpens: 100,
+  accessType: 'public',
+  allowRead: true,   // always true — read toggle removed from UI
+  allowCopy: true,
   allowDownload: false,
   lockOnViolation: true
 };
@@ -56,7 +56,6 @@ function updateSummary() {
     el.className = allowed ? 'text-sm font-medium text-on-surface' : 'text-sm font-medium text-secondary';
   };
   
-  setStatus('s-reads', rdoConfig.allowRead);
   setStatus('s-copy', rdoConfig.allowCopy);
   setStatus('s-download', rdoConfig.allowDownload);
   

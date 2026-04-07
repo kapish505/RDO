@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RDO | My Digital Objects</title>
+<meta name="description" content="View and manage all your Refusable Digital Objects created on-chain."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/animations.css?v=2"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container": "#19191f", "surface-container-lowest": "#000000",
+          "on-primary": "#003d88", "secondary-container": "#3a3b41",
+          "outline": "#75747f", "on-surface-variant": "#abaab5",
+          "secondary": "#9d9da4", "background": "#0e0e11",
+          "on-surface": "#e6e4f0", "error": "#ee7d77",
+          "surface-container-high": "#1f1f26", "surface-container-low": "#131317",
+          "outline-variant": "#474750", "surface-container-highest": "#25252d",
+          "surface": "#0e0e11", "primary": "#3b82f6", "primary-container": "#004395",
+        },
+        borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        fontFamily: { "headline": ["Space Grotesk"], "body": ["Inter"], "label": ["Inter"] }
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #0e0e11; color: #e6e4f0; overflow-x: hidden; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  #toast-container { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+  .toast { pointer-events:all; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; background:#1a1a22; border-radius:8px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,.6); animation:slideIn .2s ease; }
+  @keyframes slideIn { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:none} }
+  .skeleton { background: linear-gradient(90deg, #19191f 25%, #1f1f26 50%, #19191f 75%); background-size:300% 100%; animation: shimmer 1.5s ease infinite; }
+  @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+  main { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) 0.1s both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+<div></div>
+
+<!-- TopNavBar -->
+<nav class="bg-[#0e0e11]/90 backdrop-blur-sm text-on-surface sticky top-0 border-b border-[#474750]/20 flex justify-between items-center w-full px-6 py-3.5 z-50">
+  <a href="index.html" class="text-lg font-bold tracking-tighter text-white font-headline">RDO</a>
+  <div class="flex items-center gap-6">
+    <div class="flex gap-5">
+      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="create.html">Create</a>
+      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
+      <a class="text-white border-b border-[#3b82f6] pb-1 text-[11px] font-bold tracking-widest uppercase" href="dashboard.html">My RDOs</a>
+    </div>
+    <button id="wallet-btn" data-action="connect-wallet" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-[#474750]/30 text-[11px] font-bold tracking-widest uppercase hover:border-[#474750] transition-all rounded">
+      <span id="wallet-dot" class="w-1.5 h-1.5 rounded-full bg-[#3a3a3a]"></span>
+      <span id="wallet-label">Connect</span>
+    </button>
+  </div>
+</nav>
+
+<main class="max-w-[1200px] mx-auto px-6 py-10 flex-grow w-full">
+  <!-- Header -->
+  <div class="flex items-end justify-between mb-10">
+    <div>
+      <div class="text-[10px] font-bold tracking-[0.15em] uppercase text-secondary mb-2 font-label">RDO Protocol</div>
+      <h1 class="text-2xl font-bold tracking-tight text-on-surface font-headline">My Digital Objects</h1>
+      <p class="text-sm text-on-surface-variant mt-1">All RDOs created by your connected wallet.</p>
+    </div>
+    <a href="create.html" class="flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
+      <span class="material-symbols-outlined text-sm">add</span>
+      New RDO
+    </a>
+  </div>
+
+  <!-- Transfer V2 Banner -->
+  <div class="mb-8 flex items-center gap-4 p-4 bg-amber-400/5 border border-amber-400/20 rounded-lg">
+    <span class="material-symbols-outlined text-amber-400 text-xl">swap_horiz</span>
+    <div class="flex-1">
+      <div class="text-sm font-semibold text-amber-400">Ownership Transfer — Coming in V2</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">The current smart contract does not support on-chain RDO ownership transfer. This feature will be available after the V2 contract upgrade. Your RDOs are safely locked to your wallet address until then.</div>
+    </div>
+    <span class="px-3 py-1 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[10px] font-bold tracking-widest uppercase rounded-full whitespace-nowrap">V2 Feature</span>
+  </div>
+
+  <!-- Loading skeletons -->
+  <div id="loading-state" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="skeleton h-72 rounded-lg"></div>
+    <div class="skeleton h-72 rounded-lg"></div>
+    <div class="skeleton h-72 rounded-lg"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-[#474750] mb-4">inventory_2</span>
+    <h2 class="text-lg font-semibold text-on-surface mb-2">No digital objects yet</h2>
+    <p class="text-sm text-on-surface-variant mb-6 max-w-sm">Create your first Refusable Digital Object to control who can read, copy, or download your content.</p>
+    <a href="create.html" class="px-5 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
+      Create your first RDO →
+    </a>
+  </div>
+
+  <!-- Wallet required -->
+  <div id="wallet-required" class="flex flex-col items-center justify-center py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-[#474750] mb-4">account_balance_wallet</span>
+    <h2 class="text-lg font-semibold text-on-surface mb-2">Connect your wallet</h2>
+    <p class="text-sm text-on-surface-variant mb-6">Connect MetaMask to view and manage your digital objects.</p>
+    <button data-action="connect-wallet" class="px-5 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
+      Connect Wallet
+    </button>
+  </div>
+
+  <!-- RDO Grid -->
+  <div id="rdo-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-6 px-6 text-center text-xs bg-[#0e0e11] text-[#3a3a3a] border-t border-[#474750]/10 mt-8">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <p>© 2024 RDO Protocol. All rights reserved.</p>
+    <div class="flex gap-6">
+      <a class="hover:text-on-surface-variant transition-all" href="index.html">Home</a>
+      <a class="hover:text-on-surface-variant transition-all" href="create.html">Create RDO</a>
+      <a class="hover:text-on-surface-variant transition-all" href="view.html">View RDO</a>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+<canvas id="webgl-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.4;"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+<script src="js/background.js"></script>
+<script src="contractAddress.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/contract.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  // Show wallet-required state initially, hide once connected
+  document.addEventListener('DOMContentLoaded', () => {
+    const walletRequired = document.getElementById('wallet-required');
+    if (!window.ethereum || !window.walletState.address) {
+      walletRequired.classList.remove('hidden');
+    }
+  });
+
+  // Hook into wallet connect button to update state
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="connect-wallet"]');
+    if (btn) {
+      setTimeout(() => {
+        if (window.walletState.address) {
+          document.getElementById('wallet-required').classList.add('hidden');
+          loadMyRDOs();
+        }
+      }, 1500);
+    }
+  });
+</script>
+</body>
+</html>

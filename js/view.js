@@ -29,11 +29,12 @@ function populateRdoDetails(rdo) {
   document.getElementById('rdo-creator').innerText = truncateAddress(rdo.creator);
   document.getElementById('rdo-access').innerText = formatAccessType(rdo.accessType);
   
-  if(rdo.locked) {
-    document.getElementById('rdo-status').innerText = 'LOCKED';
-    document.getElementById('rdo-status').classList.replace('text-primary', 'text-error');
-    document.getElementById('rdo-status').classList.replace('bg-primary/10', 'bg-error/10');
-    document.getElementById('rdo-status').classList.replace('border-primary/20', 'border-error/20');
+  if(rdo.isLocked || rdo.isRevoked) {
+    const statusEl = document.getElementById('rdo-status');
+    statusEl.innerText = rdo.isRevoked ? 'REVOKED' : 'LOCKED';
+    statusEl.classList.replace('text-primary', 'text-error');
+    statusEl.classList.replace('bg-primary/10', 'bg-error/10');
+    statusEl.classList.replace('border-primary/20', 'border-error/20');
   }
 
   const maxOpensStr = rdo.maxOpens == 0 ? '&infin;' : rdo.maxOpens;
@@ -86,7 +87,10 @@ async function doAction(action) {
       throw new Error(`Access Denied to ${action.toUpperCase()}`);
     }
 
-    // 2. Fetch IPFS Data
+    // 2. Fetch IPFS Data — need rdoDetails populated first
+    if (!rdoDetails || !rdoDetails.ipfsCid) {
+      throw new Error('RDO details not loaded yet. Please wait a moment and try again.');
+    }
     resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Fetching IPFS Payload...</span>';
     const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
