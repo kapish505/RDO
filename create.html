@@ -183,6 +183,13 @@
           </div>
         </div>
 
+        <!-- Whitelist Address Input (Hidden by default) -->
+        <div id="whitelist-input-container" class="hidden mt-3 bg-surface-container-low border border-[#474750]/20 p-4 rounded">
+          <label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant font-label block mb-2">Allowed Wallet Addresses</label>
+          <p class="text-[10px] text-outline mb-3">Enter Ethereum addresses separated by commas. Only these will be able to decrypt the object.</p>
+          <textarea id="whitelist-addresses" class="w-full h-24 bg-surface-container-lowest border border-[#474750]/30 p-3 text-xs text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="0x123..., 0xabc..."></textarea>
+        </div>
+
         <!-- Toggles -->
         <div class="bg-surface-container-low border border-[#474750]/20 divide-y divide-[#474750]/10 rounded">
           <div class="flex items-center justify-between p-4">

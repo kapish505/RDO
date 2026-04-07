@@ -15,6 +15,10 @@ let rdoState = {
   ipfsCid: null
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+  updateSummary();
+});
+
 // ── File Selection ───────────────────────────────────────
 function handleFileSelect(event) {
   const file = event.target.files[0];
@@ -35,16 +39,42 @@ function clearFile() {
 // ── UI Config ─────────────────────────────────────────────
 function updateMaxOpens(val) {
   rdoConfig.maxOpens = val;
-  const valEl = document.getElementById('max-opens-val');
+  const valEl = document.getElementById('max-opens-display');
   if (valEl) {
     valEl.innerText = val == 0 ? 'Unlimited' : val;
   }
+  updateSummary();
 }
+
+function updateSummary() {
+  document.getElementById('s-access').innerText = rdoConfig.accessType === 'public' ? 'Public' : 'Whitelist';
+  
+  const setStatus = (id, allowed) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerText = allowed ? 'Allowed' : 'Denied';
+    el.className = allowed ? 'text-sm font-medium text-on-surface' : 'text-sm font-medium text-secondary';
+  };
+  
+  setStatus('s-reads', rdoConfig.allowRead);
+  setStatus('s-copy', rdoConfig.allowCopy);
+  setStatus('s-download', rdoConfig.allowDownload);
+  
+  document.getElementById('s-max').innerText = rdoConfig.maxOpens == 0 ? 'Unlimited' : rdoConfig.maxOpens;
+  
+  const lockEl = document.getElementById('s-lock');
+  if (lockEl) {
+    lockEl.innerText = rdoConfig.lockOnViolation ? 'Enabled' : 'Disabled';
+    lockEl.className = rdoConfig.lockOnViolation ? 'text-sm font-medium text-emerald-400' : 'text-sm font-medium text-secondary';
+  }
+}
+
 
 function selectAccess(type) {
   rdoConfig.accessType = type;
   const btnPublic = document.getElementById('card-public');
   const btnWhitelist = document.getElementById('card-whitelist');
+  const whitelistInput = document.getElementById('whitelist-input-container');
   
   if (type === 'public') {
     btnPublic.classList.add('border-primary');
@@ -52,13 +82,18 @@ function selectAccess(type) {
     
     btnWhitelist.classList.add('border-[#474750]/20', 'hover:border-[#474750]/50');
     btnWhitelist.classList.remove('border-primary');
+    
+    if (whitelistInput) whitelistInput.classList.add('hidden');
   } else {
     btnWhitelist.classList.add('border-primary');
     btnWhitelist.classList.remove('border-[#474750]/20', 'hover:border-[#474750]/50');
     
     btnPublic.classList.add('border-[#474750]/20', 'hover:border-[#474750]/50');
     btnPublic.classList.remove('border-primary');
+    
+    if (whitelistInput) whitelistInput.classList.remove('hidden');
   }
+  updateSummary();
 }
 
 function togglePerm(btn, perm, defaultVal) {
@@ -87,6 +122,7 @@ function togglePerm(btn, perm, defaultVal) {
       innerDot.classList.add('bg-outline');
     }
   }
+  updateSummary();
 }
 
 // ── Step Execution ────────────────────────────────────────
@@ -163,16 +199,28 @@ async function runStep(step) {
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';
       
-      // Contract call
-      const tx = await createRDO(
-        rdoState.ipfsCid, 
-        rdoConfig.maxOpens, 
-        isWhitelist, 
-        rdoConfig.lockOnViolation, 
-        rdoConfig.allowRead, 
-        rdoConfig.allowCopy, 
-        rdoConfig.allowDownload
-      );
+      // Parse whitelist addresses
+      let parsedWhitelist = [];
+      if (isWhitelist) {
+        const rawAdds = document.getElementById('whitelist-addresses').value;
+        if (rawAdds) {
+          parsedWhitelist = rawAdds.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        }
+      }
+      
+      // Contract call using params object
+      const paramsObj = {
+        ipfsCid: rdoState.ipfsCid,
+        accessType: isWhitelist ? 1 : 0,
+        allowRead: rdoConfig.allowRead,
+        allowCopy: rdoConfig.allowCopy,
+        allowDownload: rdoConfig.allowDownload,
+        maxOpens: rdoConfig.maxOpens,
+        lockOnViolation: rdoConfig.lockOnViolation,
+        whitelist: parsedWhitelist
+      };
+
+      const tx = await createRDO(paramsObj);
 
       statusEl.innerHTML = '<span class="text-xs text-[#00E5FF] w-full text-right block font-bold">Done ✓</span>';
       if(typeof showToast === 'function') showToast('RDO Created Successfully!', 'success');
