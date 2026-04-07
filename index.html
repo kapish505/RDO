@@ -431,3 +431,34 @@
 <script src="js/background.js"></script>
 <script src="contractAddress.js"></script>
 <script src="js/wallet.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  // ── Scroll Reveal ────────────────────────────────────────────
+  (function() {
+    const els = document.querySelectorAll('.reveal');
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+  })();
+
+  // ── Navbar scroll glass ──────────────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 30);
+  });
+
+  // ── Ripple effect ────────────────────────────────────────────
+  document.querySelectorAll('.ripple-container').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const r = document.createElement('span');
+      r.className = 'ripple-effect';
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      btn.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    });
+  });
+</script>
