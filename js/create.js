@@ -192,9 +192,9 @@ async function runStep(step) {
       statusEl.innerHTML = '<span class="text-xs text-primary animate-pulse w-full text-right block">Confirming Transaction...</span>';
       if(!statusEl.parentNode) document.getElementById('step-mint').appendChild(statusEl);
 
-      if (!window.walletAddress) {
+      if (!window.walletState.address) {
         if(typeof connectWallet === 'function') await connectWallet();
-        if (!window.walletAddress) throw new Error("Wallet not connected");
+        if (!window.walletState.address) throw new Error("Wallet not connected");
       }
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';

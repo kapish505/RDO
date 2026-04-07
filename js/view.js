@@ -54,7 +54,7 @@ function populateRdoDetails(rdo) {
   if (rdo.lockOnViolation) addChip(pc, 'gavel', 'LOCK ON VIOLATION', 'bg-purple-400/10 text-purple-400 border-purple-400/20');
 
   // Check owner actions
-  if (window.walletAddress && window.walletAddress.toLowerCase() === rdo.creator.toLowerCase()) {
+  if (window.walletState.address && window.walletState.address.toLowerCase() === rdo.creator.toLowerCase()) {
     document.getElementById('owner-actions').classList.remove('hidden');
   }
 }
@@ -74,9 +74,9 @@ async function doAction(action) {
   resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting access...</span>';
 
   try {
-    if(!window.walletAddress) {
+    if(!window.walletState.address) {
       await connectWallet();
-      if(!window.walletAddress) throw new Error("Wallet connection required.");
+      if(!window.walletState.address) throw new Error("Wallet connection required.");
     }
 
     // 1. Check Smart Contract Permission
