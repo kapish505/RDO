@@ -209,11 +209,16 @@ async function isWhitelisted(rdoId, address) {
   return await contract.isWhitelisted(rdoId, address);
 }
 
-// ── Get RDO Counter ─────────────────────────
-async function getRdoCounter() {
+// ── Get My RDO IDs ───────────────────────────
+async function getMyRDOIds() {
   const contract = await getContract(false);
-  const count = await contract.rdoCounter();
-  return Number(count);
+  // Using the RDOCreated event: event RDOCreated(uint256 indexed rdoId, address indexed creator, string ipfsCid, uint8 accessType, uint256 maxOpens)
+  const filter = contract.filters.RDOCreated(null, window.walletState.address);
+  const logs = await contract.queryFilter(filter, 0, 'latest');
+  
+  // Extract unique numeric IDs, reverse so newest are first
+  const ids = logs.map(log => Number(log.args.rdoId));
+  return [...new Set(ids)].reverse();
 }
 
 // ── Get Event Logs ──────────────────────────

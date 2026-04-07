@@ -24,22 +24,24 @@ async function loadMyRDOs() {
   emptyState.classList.add('hidden');
 
   try {
-    const total = await getRdoCounter();
-    if (total === 0) {
+    const ids = await getMyRDOIds();
+    if (ids.length === 0) {
       loadingState.classList.add('hidden');
       emptyState.classList.remove('hidden');
       return;
     }
 
     myRDOs = [];
-    // Scan from newest to oldest
-    for (let i = total; i >= 1; i--) {
+    
+    // Fetch details for each ID the user has created
+    for (const i of ids) {
       try {
         const rdo = await getRDO(i);
+        // Safety check, though the event filter already checked creator
         if (rdo.creator.toLowerCase() === window.walletState.address.toLowerCase()) {
           myRDOs.push({ ...rdo, numericId: i });
         }
-      } catch { /* skip */ }
+      } catch { /* skip missing ones */ }
     }
 
     loadingState.classList.add('hidden');
