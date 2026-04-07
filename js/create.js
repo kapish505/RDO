@@ -225,10 +225,30 @@ async function runStep(step) {
       statusEl.innerHTML = '<span class="text-xs text-[#00E5FF] w-full text-right block font-bold">Done ✓</span>';
       if(typeof showToast === 'function') showToast('RDO Created Successfully!', 'success');
       
-      // Redirect to view
-      setTimeout(() => {
-        window.location.href = `view.html?id=${rdoState.ipfsCid}&key=${encodeURIComponent(rdoState.exportedKey)}`;
-      }, 2000);
+      document.getElementById('step-mint').classList.add('hidden');
+      document.getElementById('step-encrypt').classList.add('hidden');
+      document.getElementById('step-ipfs').classList.add('hidden');
+      
+      const successCard = document.getElementById('success-card');
+      if (successCard) {
+        successCard.classList.remove('hidden');
+        document.getElementById('rdo-id-display').innerText = tx.rdoId || 'Pending...';
+        
+        const txLink = document.getElementById('tx-link');
+        if (txLink && tx.txHash) {
+           txLink.innerText = tx.txHash.slice(0,10) + '...' + tx.txHash.slice(-8);
+           txLink.href = `https://sepolia.etherscan.io/tx/${tx.txHash}`;
+        }
+        
+        const viewLink = successCard.querySelector('a[href="view.html"]');
+        if (viewLink && tx.rdoId) {
+           viewLink.href = `view.html?id=${tx.rdoId}&key=${encodeURIComponent(rdoState.exportedKey)}`;
+        }
+      } else {
+        setTimeout(() => {
+          window.location.href = `view.html?id=${tx.rdoId}&key=${encodeURIComponent(rdoState.exportedKey)}`;
+        }, 2000);
+      }
     }
   } catch(err) {
     console.error(err);

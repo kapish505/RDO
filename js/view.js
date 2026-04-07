@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   
-  document.getElementById('rdo-id-title').innerText = `${rdoId.slice(0,8)}...${rdoId.slice(-8)}`;
-  document.getElementById('rdo-cid').innerText = rdoId;
+  document.getElementById('rdo-id-title').innerText = `RDO #${rdoId}`;
+  document.getElementById('rdo-cid').innerText = 'Loading...';
 
   // Attempt to load RDO details from contract immediately
   try {
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function populateRdoDetails(rdo) {
+  document.getElementById('rdo-cid').innerText = `${rdo.ipfsCid.slice(0,10)}...${rdo.ipfsCid.slice(-10)}`;
   document.getElementById('rdo-creator').innerText = truncateAddress(rdo.creator);
   document.getElementById('rdo-access').innerText = formatAccessType(rdo.accessType);
   
@@ -87,7 +88,7 @@ async function doAction(action) {
 
     // 2. Fetch IPFS Data
     resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Fetching IPFS Payload...</span>';
-    const payload = await fetchJSONFromIPFS(rdoId);
+    const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
     // 3. Decrypt Payload
     if (!decryptionKey) throw new Error("Missing decryption key in URL.");
