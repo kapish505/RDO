@@ -176,5 +176,3 @@ async function unlockRDOAction() {
   }
 }
 
-window.revokeRDO = revokeRDOAction;
-window.unlockRDO = unlockRDOAction;

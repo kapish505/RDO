@@ -43,32 +43,49 @@ function updateMaxOpens(val) {
 
 function selectAccess(type) {
   rdoConfig.accessType = type;
-  const btnPublic = document.getElementById('btn-access-public');
-  const btnWhitelist = document.getElementById('btn-access-whitelist');
+  const btnPublic = document.getElementById('card-public');
+  const btnWhitelist = document.getElementById('card-whitelist');
   
   if (type === 'public') {
-    btnPublic.classList.add('border-primary', 'bg-surface-container-high');
-    btnWhitelist.classList.remove('border-primary', 'bg-surface-container-high');
+    btnPublic.classList.add('border-primary');
+    btnPublic.classList.remove('border-[#474750]/20', 'hover:border-[#474750]/50');
+    
+    btnWhitelist.classList.add('border-[#474750]/20', 'hover:border-[#474750]/50');
+    btnWhitelist.classList.remove('border-primary');
   } else {
-    btnWhitelist.classList.add('border-primary', 'bg-surface-container-high');
-    btnPublic.classList.remove('border-primary', 'bg-surface-container-high');
+    btnWhitelist.classList.add('border-primary');
+    btnWhitelist.classList.remove('border-[#474750]/20', 'hover:border-[#474750]/50');
+    
+    btnPublic.classList.add('border-[#474750]/20', 'hover:border-[#474750]/50');
+    btnPublic.classList.remove('border-primary');
   }
 }
 
 function togglePerm(btn, perm, defaultVal) {
   rdoConfig[perm] = !rdoConfig[perm];
   
-  // Update UI visually
-  const toggleIcon = btn.querySelector('.perm-toggle') || btn.querySelector('.material-symbols-outlined.text-primary');
+  const innerDot = btn.querySelector('div');
   
   if (rdoConfig[perm]) {
-    btn.classList.add('border-primary');
-    btn.classList.remove('border-[#474750]/20');
-    if (toggleIcon) toggleIcon.classList.remove('hidden');
+    // ON state
+    btn.classList.add('bg-primary');
+    btn.classList.remove('bg-surface-container-highest');
+    btn.dataset.state = 'on';
+    
+    if (innerDot) {
+      innerDot.classList.add('ml-auto', 'bg-white');
+      innerDot.classList.remove('bg-outline');
+    }
   } else {
-    btn.classList.remove('border-primary');
-    btn.classList.add('border-[#474750]/20');
-    if (toggleIcon) toggleIcon.classList.add('hidden');
+    // OFF state
+    btn.classList.add('bg-surface-container-highest');
+    btn.classList.remove('bg-primary');
+    btn.dataset.state = 'off';
+    
+    if (innerDot) {
+      innerDot.classList.remove('ml-auto', 'bg-white');
+      innerDot.classList.add('bg-outline');
+    }
   }
 }
 
