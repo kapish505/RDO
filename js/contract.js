@@ -58,6 +58,24 @@ async function createRDO(ipfsCidOrParams, maxOpens, isWhitelist, lockOnViolation
   const contract = await getContract(true);
   if (signerOverride) walletState.signer = origSigner;
 
+  // Pre-calculate the ID by doing a static call before sending the transaction!
+  let rdoId = null;
+  try {
+    const predictedId = await contract.createRDO.staticCall(
+      ipfsCid,
+      accessType !== undefined ? accessType : (params.isWhitelist ? 1 : 0),
+      params.allowRead,
+      params.allowCopy,
+      params.allowDownload,
+      params.maxOpens,
+      params.lockOnViolation,
+      whitelist
+    );
+    rdoId = predictedId.toString();
+  } catch (e) {
+    console.warn("staticCall failed to predict rdoId:", e);
+  }
+
   const tx = await contract.createRDO(
     ipfsCid,
     accessType !== undefined ? accessType : (params.isWhitelist ? 1 : 0),
@@ -71,18 +89,32 @@ async function createRDO(ipfsCidOrParams, maxOpens, isWhitelist, lockOnViolation
 
   const receipt = await tx.wait();
 
-  // Parse RDOCreated event
-  const event = receipt.logs.find(log => {
-    try {
-      const parsed = contract.interface.parseLog(log);
-      return parsed && parsed.name === 'RDOCreated';
-    } catch { return false; }
-  });
+  // Try parsing from event if staticCall failed
+  if (!rdoId) {
+    const event = receipt.logs.find(log => {
+      try {
+        const parsed = contract.interface.parseLog(log);
+        return parsed && parsed.name === 'RDOCreated';
+      } catch { return false; }
+    });
 
-  let rdoId = null;
-  if (event) {
-    const parsed = contract.interface.parseLog(event);
-    rdoId = parsed.args.rdoId.toString();
+    if (event) {
+      const parsed = contract.interface.parseLog(event);
+      rdoId = parsed.args.rdoId.toString();
+    }
+  }
+  
+  // Last resort fallback: try to scrape the first topic of any log
+  if (!rdoId && receipt.logs && receipt.logs.length > 0) {
+    for (const log of receipt.logs) {
+      if (log.topics && log.topics.length > 1) {
+        // usually indexed rdoId is topics[1]
+        try {
+          rdoId = parseInt(log.topics[1], 16).toString();
+          if (rdoId && rdoId !== 'NaN') break;
+        } catch(err) { /* skip */ }
+      }
+    }
   }
 
   return {
@@ -212,13 +244,43 @@ async function isWhitelisted(rdoId, address) {
 // ── Get My RDO IDs ───────────────────────────
 async function getMyRDOIds() {
   const contract = await getContract(false);
-  // Using the RDOCreated event: event RDOCreated(uint256 indexed rdoId, address indexed creator, string ipfsCid, uint8 accessType, uint256 maxOpens)
-  const filter = contract.filters.RDOCreated(null, window.walletState.address);
-  const logs = await contract.queryFilter(filter, 0, 'latest');
   
-  // Extract unique numeric IDs, reverse so newest are first
-  const ids = logs.map(log => Number(log.args.rdoId));
-  return [...new Set(ids)].reverse();
+  // Since rdoCounter reverts and event signatures have deployed ABI mismatches,
+  // we do a fast binary search on getRDO to find the exact number of minted RDOs.
+  let maxFound = 0;
+  let low = 1;
+  let high = 4096; // sufficiently high max for this phase
+  
+  while (low <= high) {
+    let mid = Math.floor((low + high) / 2);
+    try {
+      const rdo = await contract.getRDO(mid);
+      if (rdo && rdo.creator && rdo.creator !== '0x0000000000000000000000000000000000000000') {
+        maxFound = mid;
+        low = mid + 1; // Try higher
+      } else {
+        high = mid - 1; // It's empty, try lower
+      }
+    } catch {
+      high = mid - 1; // Reverted, try lower
+    }
+  }
+  
+  if (maxFound === 0) return [];
+  
+  // Now fetch all to find which belong to user
+  const promises = [];
+  for (let i = 1; i <= maxFound; i++) {
+    promises.push(contract.getRDO(i).then(rdo => {
+      if (rdo && rdo.creator && rdo.creator.toLowerCase() === window.walletState.address.toLowerCase()) {
+        return i;
+      }
+      return null;
+    }).catch(() => null));
+  }
+  
+  const results = await Promise.all(promises);
+  return results.filter(id => id !== null).reverse();
 }
 
 // ── Get Event Logs ──────────────────────────

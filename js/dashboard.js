@@ -18,10 +18,12 @@ async function loadMyRDOs() {
   const grid = document.getElementById('rdo-grid');
   const emptyState = document.getElementById('empty-state');
   const loadingState = document.getElementById('loading-state');
+  const walletRequired = document.getElementById('wallet-required');
 
   loadingState.classList.remove('hidden');
   grid.innerHTML = '';
   emptyState.classList.add('hidden');
+  if (walletRequired) walletRequired.classList.add('hidden');
 
   try {
     const ids = await getMyRDOIds();
