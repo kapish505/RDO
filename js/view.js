@@ -110,9 +110,13 @@ async function doAction(action) {
     const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
     // 3. Decrypt Payload
-    if (!decryptionKey) throw new Error("Missing decryption key in URL.");
+    let keyToUse = decryptionKey;
+    if (!keyToUse) {
+      keyToUse = prompt("Enter the Decryption Key to view this content:");
+      if (!keyToUse) throw new Error("Missing decryption key.");
+    }
     resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Decrypting content...</span>';
-    const decryptedJSON = await unpackageFromIPFS(JSON.stringify(payload), decryptionKey);
+    const decryptedJSON = await unpackageFromIPFS(JSON.stringify(payload), keyToUse);
     
     // Decrypted Content logic - parse the bundle we made in create.js
     const bundle = JSON.parse(decryptedJSON.content);
