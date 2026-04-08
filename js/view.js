@@ -5,7 +5,14 @@ let rdoDetails = null; // Store fetched RDO from contract
 
 function loadRDO() {
   const val = document.getElementById('rdo-input').value.trim();
-  if(val) window.location.href = `view.html?id=${val}`;
+  if (!val) return;
+  // Check if we have a stored key for this RDO
+  let storedKey = '';
+  try {
+    const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+    if (keys[val]) storedKey = '&key=' + encodeURIComponent(keys[val]);
+  } catch(e) {}
+  window.location.href = `view.html?id=${val}${storedKey}`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -111,6 +118,14 @@ async function doAction(action) {
     
     // 3. Decrypt Payload
     let keyToUse = decryptionKey;
+    // Try localStorage if key isn't in URL
+    if (!keyToUse && rdoId) {
+      try {
+        const storedKeys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+        if (storedKeys[rdoId.toString()]) keyToUse = storedKeys[rdoId.toString()];
+      } catch(e) {}
+    }
+    // Last resort: ask the user
     if (!keyToUse) {
       keyToUse = prompt("Enter the Decryption Key to view this content:");
       if (!keyToUse) throw new Error("Missing decryption key.");

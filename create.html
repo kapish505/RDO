@@ -281,6 +281,21 @@
             <a id="tx-link" href="#" target="_blank" class="text-xs text-primary underline underline-offset-4 font-mono"></a>
             <a href="view.html" class="ml-auto text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">View RDO →</a>
           </div>
+          <!-- Decryption Key Display -->
+          <div class="mt-4 p-4 bg-surface-container border border-amber-400/20 rounded">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-symbols-outlined text-amber-400 text-sm">key</span>
+              <span class="text-[10px] font-bold tracking-widest uppercase text-amber-400 font-label">Decryption Key</span>
+              <span class="ml-auto px-2 py-0.5 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Save This</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <code id="decryption-key-display" class="flex-1 text-[11px] text-on-surface font-mono break-all bg-surface-container-lowest px-3 py-2 rounded border border-[#474750]/20 select-all"></code>
+              <button onclick="copyDecryptionKey()" class="p-2 hover:bg-surface-container-high rounded transition-colors shrink-0" title="Copy Key">
+                <span class="material-symbols-outlined text-on-surface-variant text-sm">content_copy</span>
+              </button>
+            </div>
+            <p class="text-[10px] text-on-surface-variant mt-2 leading-relaxed">⚠ Save this key! Without it, your encrypted content cannot be decrypted. It is stored in your browser, but clearing browser data will erase it.</p>
+          </div>
         </div>
       </div>
 

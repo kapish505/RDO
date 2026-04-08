@@ -1,5 +1,15 @@
 let selectedFile = null;
 
+// Copy helpers for success card
+function copyRdoId() {
+  const text = document.getElementById('rdo-id-display')?.innerText;
+  if (text) { navigator.clipboard.writeText(text); if(typeof showToast === 'function') showToast('RDO ID copied!', 'success'); }
+}
+function copyDecryptionKey() {
+  const text = document.getElementById('decryption-key-display')?.innerText;
+  if (text) { navigator.clipboard.writeText(text); if(typeof showToast === 'function') showToast('Decryption key copied!', 'success'); }
+}
+
 let rdoConfig = {
   maxOpens: 100,
   accessType: 'public',
@@ -228,6 +238,15 @@ async function runStep(step) {
       document.getElementById('step-encrypt').classList.add('hidden');
       document.getElementById('step-ipfs').classList.add('hidden');
       
+      // Save decryption key to local storage so the creator doesn't lose it!
+      if (tx.rdoId && rdoState.exportedKey) {
+        try {
+          const storedKeys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+          storedKeys[tx.rdoId.toString()] = rdoState.exportedKey;
+          localStorage.setItem('rdo_keys', JSON.stringify(storedKeys));
+        } catch(e) { console.warn("Failed to store key locally", e); }
+      }
+      
       const successCard = document.getElementById('success-card');
       if (successCard) {
         successCard.classList.remove('hidden');
@@ -242,6 +261,12 @@ async function runStep(step) {
         const viewLink = successCard.querySelector('a[href="view.html"]');
         if (viewLink && tx.rdoId) {
            viewLink.href = `view.html?id=${tx.rdoId}&key=${encodeURIComponent(rdoState.exportedKey)}`;
+        }
+        
+        // Show decryption key
+        const keyDisplay = document.getElementById('decryption-key-display');
+        if (keyDisplay && rdoState.exportedKey) {
+           keyDisplay.innerText = rdoState.exportedKey;
         }
       } else {
         setTimeout(() => {

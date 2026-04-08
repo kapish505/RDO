@@ -1,5 +1,14 @@
 let myRDOs = [];
 
+// Helper: get stored decryption key param for URL
+function getStoredKeyParam(rdoId) {
+  try {
+    const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+    if (keys[rdoId.toString()]) return '&key=' + encodeURIComponent(keys[rdoId.toString()]);
+  } catch(e) {}
+  return '';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.ethereum) {
     await connectWallet(false);
@@ -103,7 +112,7 @@ function buildCard(rdo) {
 
       <!-- Actions -->
       <div class="flex gap-2 flex-wrap">
-        <a href="view.html?id=${rdo.numericId}" class="flex-1 text-center py-2 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase rounded hover:bg-primary/20 transition-all">
+        <a href="view.html?id=${rdo.numericId}${getStoredKeyParam(rdo.numericId)}" class="flex-1 text-center py-2 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase rounded hover:bg-primary/20 transition-all">
           View
         </a>
         ${!rdo.isRevoked ? `
