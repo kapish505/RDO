@@ -3,14 +3,22 @@ const rdoId = urlParams.get('id');
 const decryptionKey = urlParams.get('key'); // Exported key in Base64
 let rdoDetails = null; // Store fetched RDO from contract
 
+function loadRDO() {
+  const val = document.getElementById('rdo-input').value.trim();
+  if(val) window.location.href = `view.html?id=${val}`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (!rdoId) {
-    if(typeof showToast === 'function') showToast('No RDO ID specified', 'error');
     return;
   }
   
   document.getElementById('rdo-id-title').innerText = `RDO #${rdoId}`;
-  document.getElementById('rdo-cid').innerText = 'Loading...';
+  
+  const loadingState = document.getElementById('loading-state');
+  const detailState = document.getElementById('rdo-detail');
+  
+  loadingState.classList.remove('hidden');
 
   // Attempt to load RDO details from contract immediately
   try {
@@ -18,9 +26,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       await connectWallet(false); // Connect wallet silently
       rdoDetails = await getRDO(rdoId);
       populateRdoDetails(rdoDetails);
+      
+      loadingState.classList.add('hidden');
+      detailState.classList.remove('hidden-section');
+    } else {
+      if(typeof showToast === 'function') showToast('Wallet required to fetch on-chain data', 'error');
     }
   } catch (err) {
     console.error("Failed to load RDO from contract:", err);
+    loadingState.classList.add('hidden');
+    if(typeof showToast === 'function') showToast('Failed to load RDO. Is the ID correct?', 'error');
   }
 });
 
