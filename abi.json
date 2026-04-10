@@ -1,75 +1,22 @@
 [
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
 			},
 			{
-				"internalType": "address[]",
-				"name": "addresses",
-				"type": "address[]"
-			}
-		],
-		"name": "addToWhitelist",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
+				"indexed": false,
 				"internalType": "string",
-				"name": "ipfsCid",
+				"name": "pubKey",
 				"type": "string"
-			},
-			{
-				"internalType": "enum RDO.AccessType",
-				"name": "accessType",
-				"type": "uint8"
-			},
-			{
-				"internalType": "bool",
-				"name": "allowRead",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "allowCopy",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "allowDownload",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "maxOpens",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "lockOnViolation",
-				"type": "bool"
-			},
-			{
-				"internalType": "address[]",
-				"name": "initialWhitelist",
-				"type": "address[]"
 			}
 		],
-		"name": "createRDO",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"name": "EncryptionKeyRegistered",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -203,79 +150,6 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address[]",
-				"name": "addresses",
-				"type": "address[]"
-			}
-		],
-		"name": "removeFromWhitelist",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "action",
-				"type": "string"
-			}
-		],
-		"name": "requestAccess",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "allowed",
-				"type": "bool"
-			},
-			{
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
-			}
-		],
-		"name": "revokeRDO",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "rdoId",
-				"type": "uint256"
-			}
-		],
-		"name": "unlockRDO",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -299,6 +173,143 @@
 		],
 		"name": "WhitelistUpdated",
 		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address[]",
+				"name": "addresses",
+				"type": "address[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "encryptedKeys",
+				"type": "string[]"
+			}
+		],
+		"name": "addToWhitelist",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "ipfsCid",
+						"type": "string"
+					},
+					{
+						"internalType": "enum RDO.AccessType",
+						"name": "accessType",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bool",
+						"name": "allowRead",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "allowCopy",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "allowDownload",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "maxOpens",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "lockOnViolation",
+						"type": "bool"
+					},
+					{
+						"internalType": "address[]",
+						"name": "initialWhitelist",
+						"type": "address[]"
+					},
+					{
+						"internalType": "string[]",
+						"name": "encryptedKeys",
+						"type": "string[]"
+					},
+					{
+						"internalType": "string",
+						"name": "creatorEncryptedKey",
+						"type": "string"
+					}
+				],
+				"internalType": "struct RDO.CreateRDOParams",
+				"name": "params",
+				"type": "tuple"
+			}
+		],
+		"name": "createRDO",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "encryptionPubKeys",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getEncryptedKey",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -523,6 +534,92 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "pubKey",
+				"type": "string"
+			}
+		],
+		"name": "registerEncryptionKey",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address[]",
+				"name": "addresses",
+				"type": "address[]"
+			}
+		],
+		"name": "removeFromWhitelist",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "action",
+				"type": "string"
+			}
+		],
+		"name": "requestAccess",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "allowed",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			}
+		],
+		"name": "revokeRDO",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "rdoId",
+				"type": "uint256"
+			}
+		],
+		"name": "unlockRDO",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

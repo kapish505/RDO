@@ -168,20 +168,20 @@ async function doAction(action) {
     const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
     // 3. Decrypt Payload
-    let keyToUse = decryptionKey;
-    // Try localStorage if key isn't in URL
-    if (!keyToUse && rdoId) {
-      try {
-        const storedKeys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
-        if (storedKeys[rdoId.toString()]) keyToUse = storedKeys[rdoId.toString()];
-      } catch(e) {}
+    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting encrypted key shard from contract...</span>';
+    const encryptedKeyShard = await getEncryptedAESKey(rdoId, window.walletState.address);
+    if (!encryptedKeyShard || encryptedKeyShard.trim() === '') {
+        throw new Error("You do not have a registered encrypted AES key for this RDO.");
     }
-    // Last resort: ask the user
-    if (!keyToUse) {
-      keyToUse = prompt("Enter the Decryption Key to view this content:");
-      if (!keyToUse) throw new Error("Missing decryption key.");
-    }
-    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Decrypting content...</span>';
+
+    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Waiting for MetaMask signature to decrypt key via PKI...</span>';
+    const profileStr = await getEncryptionProfile(window.walletState.address);
+    if (!profileStr) throw new Error("No PKI profile found for your wallet. Please register in the Dashboard first.");
+
+    const rsaPrivKey = await recoverRSAPrivateKey(profileStr, window.walletState.signer);
+    const keyToUse = await decryptAESKeyWithRSA(rsaPrivKey, encryptedKeyShard);
+
+    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Decrypting content payload...</span>';
     const decryptedJSON = await unpackageFromIPFS(JSON.stringify(payload), keyToUse);
     
     // Decrypted Content logic - parse the bundle we made in create.js

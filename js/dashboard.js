@@ -23,6 +23,34 @@ window.addEventListener('walletConnected', async () => {
   await loadMyRDOs();
 });
 
+// Setup UI handlers specifically for dashboard
+document.addEventListener('DOMContentLoaded', () => {
+  const btnPKI = document.getElementById('btn-register-pki');
+  if (btnPKI) {
+    btnPKI.addEventListener('click', async () => {
+      try {
+        if (!window.walletState.signer) {
+           showToast('Signer not found. Refresh and reconnect wallet.', 'error');
+           return;
+        }
+        btnPKI.innerText = 'WAITING...';
+        btnPKI.disabled = true;
+
+        const profileJson = await generateEncryptionProfile(window.walletState.signer);
+        await registerEncryptionProfile(profileJson);
+        
+        showToast('PKI Profile Registered Successfully!', 'success');
+        document.getElementById('pki-banner').classList.add('hidden');
+      } catch (err) {
+        console.error(err);
+        showToast(err.message, 'error');
+        btnPKI.innerText = 'REGISTER PROFILE';
+        btnPKI.disabled = false;
+      }
+    });
+  }
+});
+
 async function loadMyRDOs() {
   const grid = document.getElementById('rdo-grid');
   const emptyState = document.getElementById('empty-state');
@@ -35,6 +63,15 @@ async function loadMyRDOs() {
   if (walletRequired) walletRequired.classList.add('hidden');
 
   try {
+    // 1. Check PKI Registration Status First
+    const profile = await getEncryptionProfile(window.walletState.address);
+    if (!profile) {
+      document.getElementById('pki-banner').classList.remove('hidden');
+    } else {
+      document.getElementById('pki-banner').classList.add('hidden');
+    }
+
+    // 2. Fetch RDO IDs
     const ids = await getMyRDOIds();
     if (ids.length === 0) {
       loadingState.classList.add('hidden');

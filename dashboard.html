@@ -77,13 +77,25 @@
   </div>
 
   <!-- Transfer V2 Banner -->
-  <div class="mb-8 flex items-center gap-4 p-4 bg-amber-400/5 border border-amber-400/20 rounded-lg">
+  <div class="mb-4 flex items-center gap-4 p-4 bg-amber-400/5 border border-amber-400/20 rounded-lg">
     <span class="material-symbols-outlined text-amber-400 text-xl">swap_horiz</span>
     <div class="flex-1">
       <div class="text-sm font-semibold text-amber-400">Ownership Transfer — Coming in V2</div>
       <div class="text-[11px] text-on-surface-variant mt-0.5">The current smart contract does not support on-chain RDO ownership transfer. This feature will be available after the V2 contract upgrade. Your RDOs are safely locked to your wallet address until then.</div>
     </div>
     <span class="px-3 py-1 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[10px] font-bold tracking-widest uppercase rounded-full whitespace-nowrap">V2 Feature</span>
+  </div>
+
+  <!-- PKI Registration Banner -->
+  <div id="pki-banner" class="hidden mb-8 flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+    <span class="material-symbols-outlined text-primary text-xl">shield_lock</span>
+    <div class="flex-1">
+      <div class="text-sm font-semibold text-primary">Self-Sovereign PKI Not Initialized</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">You must register an encryption profile on-chain before someone can whitelist you for an encrypted RDO. Your private key will be securely backed up via a MetaMask signature.</div>
+    </div>
+    <button id="btn-register-pki" class="px-4 py-2 bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 hover:border-primary/50 transition-all text-xs font-bold tracking-widest uppercase rounded">
+      Register Profile
+    </button>
   </div>
 
   <!-- Loading skeletons -->

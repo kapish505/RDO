@@ -31,62 +31,19 @@ async function loadABI() {
 }
 
 // ── Create RDO ──────────────────────────────
-// Accepts either (params object) or (ipfsCid, maxOpens, isWhitelist, lockOnViolation, read, copy, download, signer)
-async function createRDO(ipfsCidOrParams, maxOpens, isWhitelist, lockOnViolation, allowRead, allowCopy, allowDownload, signerOverride) {
-  let params;
-  if (typeof ipfsCidOrParams === 'object' && !ipfsCidOrParams.length) {
-    params = ipfsCidOrParams;
-  } else {
-    params = {
-      ipfsCid: ipfsCidOrParams,
-      accessType: isWhitelist ? 1 : 0,
-      allowRead,
-      allowCopy,
-      allowDownload,
-      maxOpens,
-      lockOnViolation,
-      whitelist: []
-    };
-  }
-
-  const { ipfsCid, accessType, whitelist = [] } = params;
-
-  // Temporarily override signer if provided
-  const origSigner = walletState.signer;
-  if (signerOverride) walletState.signer = signerOverride;
-
+async function createRDO(paramsObj) {
   const contract = await getContract(true);
-  if (signerOverride) walletState.signer = origSigner;
 
   // Pre-calculate the ID by doing a static call before sending the transaction!
   let rdoId = null;
   try {
-    const predictedId = await contract.createRDO.staticCall(
-      ipfsCid,
-      accessType !== undefined ? accessType : (params.isWhitelist ? 1 : 0),
-      params.allowRead,
-      params.allowCopy,
-      params.allowDownload,
-      params.maxOpens,
-      params.lockOnViolation,
-      whitelist
-    );
+    const predictedId = await contract.createRDO.staticCall(paramsObj);
     rdoId = predictedId.toString();
   } catch (e) {
     console.warn("staticCall failed to predict rdoId:", e);
   }
 
-  const tx = await contract.createRDO(
-    ipfsCid,
-    accessType !== undefined ? accessType : (params.isWhitelist ? 1 : 0),
-    params.allowRead,
-    params.allowCopy,
-    params.allowDownload,
-    params.maxOpens,
-    params.lockOnViolation,
-    whitelist
-  );
-
+  const tx = await contract.createRDO(paramsObj);
   const receipt = await tx.wait();
 
   // Try parsing from event if staticCall failed
@@ -223,6 +180,37 @@ async function unlockRDOContract(rdoId, signer) {
   const result = await unlockRDO(rdoId);
   walletState.signer = origSigner;
   return result.txHash;
+}
+
+// ── Encryption Profile API ──────────────────
+async function getEncryptionProfile(address) {
+  const contract = await getContract(false);
+  try {
+    const jsonStr = await contract.encryptionPubKeys(address);
+    if (!jsonStr || jsonStr.trim() === '') return null;
+    return jsonStr;
+  } catch (err) {
+    console.error("Failed to load profile:", err);
+    return null;
+  }
+}
+
+async function registerEncryptionProfile(jsonProfileStr) {
+  const contract = await getContract(true);
+  showToast('Registering Encryption Profile on-chain...', 'info');
+  const tx = await contract.registerEncryptionKey(jsonProfileStr);
+  const receipt = await tx.wait();
+  return receipt.hash;
+}
+
+async function getEncryptedAESKey(rdoId, address) {
+  const contract = await getContract(false);
+  try {
+    return await contract.getEncryptedKey(rdoId, address);
+  } catch (err) {
+    console.error("Failed to load encrypted AES key:", err);
+    return null;
+  }
 }
 
 // ── Add to Whitelist ────────────────────────

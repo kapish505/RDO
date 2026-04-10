@@ -249,10 +249,41 @@
       <span class="step-num text-xs font-bold tracking-[0.2em] text-secondary font-label">04</span>
       <span class="material-symbols-outlined text-primary text-3xl icon-hover feature-icon">policy</span>
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-bold tracking-tight font-headline">Access Gating</h3>
-        <p class="text-sm text-secondary leading-relaxed font-body">Every read, copy, or download is a contract call. Violations auto-lock the RDO. The creator can revoke or unlock at any time.</p>
+        <h3 class="text-lg font-bold tracking-tight font-headline">Consume</h3>
+        <p class="text-sm text-secondary leading-relaxed font-body">Recipients request access. If they meet the criteria, the contract emits a signal. They decrypt and consume the content locally.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- Separator -->
+<div class="px-10 max-w-[1440px] mx-auto">
+  <hr class="border-t border-[#1a1a1a]"/>
+</div>
+
+<!-- PKI Section -->
+<section class="py-28 px-10 max-w-[1440px] mx-auto">
+  <div class="max-w-4xl">
+    <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-primary mb-6 font-label reveal reveal-up">Self-Sovereign Encryption</p>
+    <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-on-surface font-headline mb-8 reveal reveal-up leading-snug">
+      Solving the <span class="text-error">Decryption Key Problem</span>
+    </h2>
+    
+    <div class="flex flex-col gap-8 reveal-stagger">
+      <p class="text-lg text-secondary leading-relaxed font-body">
+        Traditionally, end-to-end encrypted files face a massive delivery flaw: the creator must manually send the AES decryption password to the authorized recipients via Slack, Email, or Telegram. Handing over the key manually entirely defeats the purpose of on-chain trustless access controls.
+      </p>
+      <div class="p-8 border border-white/5 bg-[#131415] rounded-xl relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+        <h3 class="text-xl font-bold text-white mb-4">Our On-Chain PKI Solution</h3>
+        <p class="text-[15px] text-on-surface-variant leading-relaxed">
+          RDO v2 implements <b>Per-Recipient Wallet Encryption</b> using a Self-Sovereign Public Key Infrastructure (PKI). <br><br>
+          Recipients register a free RSA Profile on the smart contract. Their private key is backed up locally, shielded by a deterministic AES-GCM vault derived from a secure MetaMask wallet signature. When an RDO is created, the creator's browser automatically fetches the RSA public keys belonging to every whitelisted wallet and wraps the AES decryption shard for each user.<br><br>
+          <b>Result:</b> Decryption keys are routed directly to authorized wallets—no manual sharing, no link copying, and zero dependence on centralized key management systems.
+        </p>
+      </div>
+    </div>
+  </div>
   </div>
 </section>
 

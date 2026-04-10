@@ -208,16 +208,45 @@ async function runStep(step) {
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';
       
-      // Parse whitelist addresses
+      // Parse whitelist addresses and fetch their encryption profiles
       let parsedWhitelist = [];
+      let encryptedKeysArray = [];
+      let creatorEncryptedKey = "";
+
+      // We must get the creator's profile!
+      const creatorProfileStr = await getEncryptionProfile(window.walletState.address);
+      if (creatorProfileStr) {
+          try {
+              const profile = JSON.parse(creatorProfileStr);
+              creatorEncryptedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
+          } catch(e) { console.error("Could not encrypt key for creator:", e); }
+      }
+
       if (isWhitelist) {
         const rawAdds = document.getElementById('whitelist-addresses').value;
         if (rawAdds) {
           parsedWhitelist = rawAdds.split(',').map(s => s.trim()).filter(s => s.length > 0);
+          
+          for (const addr of parsedWhitelist) {
+              const profStr = await getEncryptionProfile(addr);
+              if (profStr) {
+                  try {
+                      const profile = JSON.parse(profStr);
+                      const shieldedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
+                      encryptedKeysArray.push(shieldedKey);
+                  } catch(e) {
+                      console.warn("Invalid profile for", addr);
+                      encryptedKeysArray.push("");
+                  }
+              } else {
+                  console.warn("No profile found for", addr);
+                  encryptedKeysArray.push("");
+              }
+          }
         }
       }
       
-      // Contract call using params object
+      // Contract call using struct matching params
       const paramsObj = {
         ipfsCid: rdoState.ipfsCid,
         accessType: isWhitelist ? 1 : 0,
@@ -226,7 +255,9 @@ async function runStep(step) {
         allowDownload: rdoConfig.allowDownload,
         maxOpens: rdoConfig.maxOpens,
         lockOnViolation: rdoConfig.lockOnViolation,
-        whitelist: parsedWhitelist
+        initialWhitelist: parsedWhitelist,
+        encryptedKeys: encryptedKeysArray,
+        creatorEncryptedKey: creatorEncryptedKey
       };
 
       const tx = await createRDO(paramsObj);
@@ -237,15 +268,6 @@ async function runStep(step) {
       document.getElementById('step-mint').classList.add('hidden');
       document.getElementById('step-encrypt').classList.add('hidden');
       document.getElementById('step-ipfs').classList.add('hidden');
-      
-      // Save decryption key to local storage so the creator doesn't lose it!
-      if (tx.rdoId && rdoState.exportedKey) {
-        try {
-          const storedKeys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
-          storedKeys[tx.rdoId.toString()] = rdoState.exportedKey;
-          localStorage.setItem('rdo_keys', JSON.stringify(storedKeys));
-        } catch(e) { console.warn("Failed to store key locally", e); }
-      }
       
       const successCard = document.getElementById('success-card');
       if (successCard) {
@@ -258,19 +280,18 @@ async function runStep(step) {
            txLink.href = `https://sepolia.etherscan.io/tx/${tx.txHash}`;
         }
         
-        const viewLink = successCard.querySelector('a[href="view.html"]');
+        const viewLink = successCard.querySelector('a[href*="view.html"]');
         if (viewLink && tx.rdoId) {
-           viewLink.href = `view.html?id=${tx.rdoId}&key=${encodeURIComponent(rdoState.exportedKey)}`;
+           viewLink.href = `view.html?id=${tx.rdoId}`;
         }
         
-        // Show decryption key
         const keyDisplay = document.getElementById('decryption-key-display');
-        if (keyDisplay && rdoState.exportedKey) {
-           keyDisplay.innerText = rdoState.exportedKey;
+        if (keyDisplay) {
+           keyDisplay.parentElement.innerHTML = '<span class="text-[10px] text-green-400 font-bold uppercase tracking-widest block mb-2">Decryption Keys Delivered Automatically via On-Chain PKI</span><div class="text-xs text-on-surface-variant font-mono break-all opacity-70">No strings to copy. The contract has securely routed your AES decryption key directly into the authorized wallets.</div>';
         }
       } else {
         setTimeout(() => {
-          window.location.href = `view.html?id=${tx.rdoId}&key=${encodeURIComponent(rdoState.exportedKey)}`;
+          window.location.href = `view.html?id=${tx.rdoId}`;
         }, 2000);
       }
     }

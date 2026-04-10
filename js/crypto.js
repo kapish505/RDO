@@ -287,3 +287,122 @@ async function decryptContent(encryptedBytes, keyOrBase64) {
     return new Uint8Array(decrypted);
   }
 }
+
+// ─────────────────────────────────────────────────────────
+//  SELF-SOVEREIGN AES KEY WRAPPING (RSA-OAEP PKI)
+// ─────────────────────────────────────────────────────────
+
+// 1. Generate RSA-OAEP keypair
+async function generateRSAKeyPair() {
+  return await crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true, // extractable
+    ["encrypt", "decrypt"]
+  );
+}
+
+// 2. Export RSA Key to string
+async function exportRSAKey(key) {
+  const exported = await crypto.subtle.exportKey(key.type === 'private' ? 'pkcs8' : 'spki', key);
+  return arrayBufferToBase64(exported);
+}
+
+// 3. Import RSA Key from string
+async function importRSAKey(base64, type) {
+  const raw = base64ToArrayBuffer(base64);
+  return await crypto.subtle.importKey(
+    type === 'private' ? 'pkcs8' : 'spki',
+    raw,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    true,
+    type === 'private' ? ["decrypt"] : ["encrypt"]
+  );
+}
+
+// 4. Encrypt AES Key with Recipient's RSA Public Key
+async function encryptAESKeyWithRSA(publicKeyStr, aesKeyBase64) {
+    const pubKey = await importRSAKey(publicKeyStr, 'public');
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(aesKeyBase64);
+    const encrypted = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, pubKey, encoded);
+    return arrayBufferToBase64(encrypted);
+}
+
+// 5. Decrypt AES Key with Own RSA Private Key
+async function decryptAESKeyWithRSA(privateKeyStr, encryptedBase64) {
+    const privKey = await importRSAKey(privateKeyStr, 'private');
+    const encryptedBytes = base64ToArrayBuffer(encryptedBase64);
+    const decrypted = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, privKey, encryptedBytes);
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
+}
+
+// 6. Generate Profile & Backup PrivKey via Wallet Signature
+const RECOVERY_MESSAGE = "RDO KEY RECOVERY\n\nSign this message to securely back up or recover your invisible decryption private key.";
+
+async function generateEncryptionProfile(signer) {
+    // A. Generate fresh RSA
+    const keyPair = await generateRSAKeyPair();
+    const pubKeyStr = await exportRSAKey(keyPair.publicKey);
+    const privKeyStr = await exportRSAKey(keyPair.privateKey);
+
+    // B. Prompt user to sign a deterministic string to derive a KEK (Key Encryption Key)
+    const signature = await signer.signMessage(RECOVERY_MESSAGE);
+    
+    // C. Derive AES KEK from signature hash
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(signature));
+    const kek = await window.crypto.subtle.importKey(
+        'raw', hashBuffer, { name: CRYPTO_ALGORITHM }, false, ['encrypt', 'decrypt']
+    );
+
+    // D. Encrypt the Private Key string with KEK
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encryptedPrivKeyBuffer = await window.crypto.subtle.encrypt(
+        { name: CRYPTO_ALGORITHM, iv: iv },
+        kek,
+        new TextEncoder().encode(privKeyStr)
+    );
+
+    const combined = new Uint8Array(12 + encryptedPrivKeyBuffer.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(encryptedPrivKeyBuffer), 12);
+    
+    const encryptedPrivKeyStr = arrayBufferToBase64(combined.buffer);
+
+    // E. Return the combined JSON payload to store on-chain
+    return JSON.stringify({
+        pubKey: pubKeyStr,
+        encPrivKey: encryptedPrivKeyStr
+    });
+}
+
+// 7. Recover Private Key from On-Chain Profile
+async function recoverRSAPrivateKey(profileJsonStr, signer) {
+    const profile = JSON.parse(profileJsonStr);
+    
+    // A. Ask user to sign the exact same message to redraw the KEK
+    const signature = await signer.signMessage(RECOVERY_MESSAGE);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(signature));
+    const kek = await window.crypto.subtle.importKey(
+        'raw', hashBuffer, { name: CRYPTO_ALGORITHM }, false, ['encrypt', 'decrypt']
+    );
+
+    // B. Decrypt the wrapped private key
+    const combined = base64ToArrayBuffer(profile.encPrivKey);
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+
+    const decryptedBuffer = await window.crypto.subtle.decrypt(
+        { name: CRYPTO_ALGORITHM, iv: new Uint8Array(iv) },
+        kek,
+        data
+    );
+
+    // C. Return the plaintext RSA private key
+    return new TextDecoder().decode(decryptedBuffer);
+}
