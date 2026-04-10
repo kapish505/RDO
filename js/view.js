@@ -59,6 +59,16 @@ function populateRdoDetails(rdo) {
     statusEl.classList.replace('border-primary/20', 'border-error/20');
   }
 
+  // Check if max opens exhausted
+  const isMaxed = rdo.maxOpens > 0 && rdo.openCount >= rdo.maxOpens;
+  if (isMaxed) {
+    const statusEl = document.getElementById('rdo-status');
+    statusEl.innerText = 'MAX OPENS';
+    statusEl.classList.replace('text-primary', 'text-amber-400');
+    statusEl.classList.replace('bg-primary/10', 'bg-amber-400/10');
+    statusEl.classList.replace('border-primary/20', 'border-amber-400/20');
+  }
+
   const maxOpensStr = rdo.maxOpens == 0 ? '&infin;' : rdo.maxOpens;
   document.getElementById('rdo-opens').innerHTML = `${rdo.openCount} / ${maxOpensStr}`;
   
@@ -77,9 +87,39 @@ function populateRdoDetails(rdo) {
   if (rdo.allowDownload) addChip(pc, 'download', 'DOWNLOAD', 'bg-green-400/10 text-green-400 border-green-400/20');
   if (rdo.lockOnViolation) addChip(pc, 'gavel', 'LOCK ON VIOLATION', 'bg-purple-400/10 text-purple-400 border-purple-400/20');
 
-  // Check owner actions
-  if (window.walletState.address && window.walletState.address.toLowerCase() === rdo.creator.toLowerCase()) {
+  // Disable action buttons for non-owners when RDO is inactive
+  const isOwner = window.walletState.address && window.walletState.address.toLowerCase() === rdo.creator.toLowerCase();
+  const isInactive = rdo.isRevoked || rdo.isLocked || isMaxed;
+
+  if (isInactive && !isOwner) {
+    ['btn-read', 'btn-copy', 'btn-download'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-40', 'cursor-not-allowed');
+      }
+    });
+  }
+
+  // Owner actions — show contextually
+  if (isOwner) {
     document.getElementById('owner-actions').classList.remove('hidden');
+    const revokeBtn = document.querySelector('#owner-actions button:nth-child(1)');
+    const unlockBtn = document.querySelector('#owner-actions button:nth-child(2)');
+    // Hide revoke if already revoked
+    if (rdo.isRevoked && revokeBtn) {
+      revokeBtn.disabled = true;
+      revokeBtn.innerText = 'ALREADY REVOKED';
+      revokeBtn.classList.add('opacity-40', 'cursor-not-allowed');
+    }
+    // Only show unlock if actually locked
+    if (unlockBtn) {
+      if (rdo.isLocked && !rdo.isRevoked) {
+        unlockBtn.classList.remove('hidden');
+      } else {
+        unlockBtn.classList.add('hidden');
+      }
+    }
   }
 }
 
@@ -103,11 +143,21 @@ async function doAction(action) {
       if(!window.walletState.address) throw new Error("Wallet connection required.");
     }
 
-    // 1. Check Smart Contract Permission
-    const accessResult = await requestAccess(rdoId, action);
-    if (!accessResult || !accessResult.allowed) {
-      const reason = accessResult?.reason || 'Permission denied';
-      throw new Error(`Access Denied: ${reason}`);
+    const isOwner = rdoDetails && rdoDetails.creator && 
+      window.walletState.address.toLowerCase() === rdoDetails.creator.toLowerCase();
+
+    // 1. Check Smart Contract Permission (skip for owner — their opens shouldn't count)
+    if (!isOwner) {
+      const accessResult = await requestAccess(rdoId, action);
+      if (!accessResult || !accessResult.allowed) {
+        const reason = accessResult?.reason || 'Permission denied';
+        throw new Error(`Access Denied: ${reason}`);
+      }
+    } else {
+      // Owner still needs to check if their permission type is enabled
+      if (action === 'read' && rdoDetails && !rdoDetails.allowRead) throw new Error('Read not enabled on this RDO');
+      if (action === 'copy' && rdoDetails && !rdoDetails.allowCopy) throw new Error('Copy not enabled on this RDO');
+      if (action === 'download' && rdoDetails && !rdoDetails.allowDownload) throw new Error('Download not enabled on this RDO');
     }
 
     // 2. Fetch IPFS Data — need rdoDetails populated first
