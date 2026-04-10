@@ -104,9 +104,10 @@ async function doAction(action) {
     }
 
     // 1. Check Smart Contract Permission
-    const hasAccess = await requestAccess(rdoId, action);
-    if (!hasAccess) {
-      throw new Error(`Access Denied to ${action.toUpperCase()}`);
+    const accessResult = await requestAccess(rdoId, action);
+    if (!accessResult || !accessResult.allowed) {
+      const reason = accessResult?.reason || 'Permission denied';
+      throw new Error(`Access Denied: ${reason}`);
     }
 
     // 2. Fetch IPFS Data — need rdoDetails populated first
