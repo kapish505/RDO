@@ -66,12 +66,12 @@
   <!-- Header -->
   <div class="flex items-end justify-between mb-10">
     <div>
-      <div class="text-[10px] font-bold tracking-[0.15em] uppercase text-secondary mb-2 font-label">RDO Protocol</div>
+      <div class="text-[15px] font-bold tracking-[0.15em] uppercase text-secondary mb-2 font-label">RDO Protocol</div>
       <h1 class="text-2xl font-bold tracking-tight text-on-surface font-headline">My Digital Objects</h1>
-      <p class="text-sm text-on-surface-variant mt-1">All RDOs created by your connected wallet.</p>
+      <p class="text-[15px] text-on-surface-variant mt-1">All RDOs created by your connected wallet.</p>
     </div>
     <a href="create.html" class="flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
-      <span class="material-symbols-outlined text-sm">add</span>
+      <span class="material-symbols-outlined text-[15px]">add</span>
       New RDO
     </a>
   </div>
@@ -80,20 +80,20 @@
   <div class="mb-4 flex items-center gap-4 p-4 bg-amber-400/5 border border-amber-400/20 rounded-lg">
     <span class="material-symbols-outlined text-amber-400 text-xl">swap_horiz</span>
     <div class="flex-1">
-      <div class="text-sm font-semibold text-amber-400">Ownership Transfer — Coming in V2</div>
+      <div class="text-[15px] font-semibold text-amber-400">Ownership Transfer — Coming in V2</div>
       <div class="text-[11px] text-on-surface-variant mt-0.5">The current smart contract does not support on-chain RDO ownership transfer. This feature will be available after the V2 contract upgrade. Your RDOs are safely locked to your wallet address until then.</div>
     </div>
-    <span class="px-3 py-1 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[10px] font-bold tracking-widest uppercase rounded-full whitespace-nowrap">V2 Feature</span>
+    <span class="px-3 py-1 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[15px] font-bold tracking-widest uppercase rounded-full whitespace-nowrap">V2 Feature</span>
   </div>
 
   <!-- PKI Registration Banner -->
   <div id="pki-banner" class="hidden mb-8 flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
     <span class="material-symbols-outlined text-primary text-xl">shield_lock</span>
     <div class="flex-1">
-      <div class="text-sm font-semibold text-primary">Self-Sovereign PKI Not Initialized</div>
+      <div class="text-[15px] font-semibold text-primary">Self-Sovereign PKI Not Initialized</div>
       <div class="text-[11px] text-on-surface-variant mt-0.5">You must register an encryption profile on-chain before someone can whitelist you for an encrypted RDO. Your private key will be securely backed up via a MetaMask signature.</div>
     </div>
-    <button id="btn-register-pki" class="px-4 py-2 bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 hover:border-primary/50 transition-all text-xs font-bold tracking-widest uppercase rounded">
+    <button id="btn-register-pki" class="px-4 py-2 bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 hover:border-primary/50 transition-all text-[15px] font-bold tracking-widest uppercase rounded">
       Register Profile
     </button>
   </div>
@@ -109,7 +109,7 @@
   <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-center">
     <span class="material-symbols-outlined text-5xl text-[#474750] mb-4">inventory_2</span>
     <h2 class="text-lg font-semibold text-on-surface mb-2">No digital objects yet</h2>
-    <p class="text-sm text-on-surface-variant mb-6 max-w-sm">Create your first Refusable Digital Object to control who can read, copy, or download your content.</p>
+    <p class="text-[15px] text-on-surface-variant mb-6 max-w-sm">Create your first Refusable Digital Object to control who can read, copy, or download your content.</p>
     <a href="create.html" class="px-5 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
       Create your first RDO →
     </a>
@@ -119,7 +119,7 @@
   <div id="wallet-required" class="flex flex-col items-center justify-center py-24 text-center">
     <span class="material-symbols-outlined text-5xl text-[#474750] mb-4">account_balance_wallet</span>
     <h2 class="text-lg font-semibold text-on-surface mb-2">Connect your wallet</h2>
-    <p class="text-sm text-on-surface-variant mb-6">Connect MetaMask to view and manage your digital objects.</p>
+    <p class="text-[15px] text-on-surface-variant mb-6">Connect MetaMask to view and manage your digital objects.</p>
     <button data-action="connect-wallet" class="px-5 py-2.5 bg-primary text-white text-[11px] font-bold tracking-widest uppercase rounded hover:bg-blue-500 transition-all">
       Connect Wallet
     </button>
@@ -130,7 +130,7 @@
 </main>
 
 <!-- Footer -->
-<footer class="w-full py-6 px-6 text-center text-xs bg-[#0e0e11] text-[#3a3a3a] border-t border-[#474750]/10 mt-8">
+<footer class="w-full py-6 px-6 text-center text-[15px] bg-[#0e0e11] text-[#3a3a3a] border-t border-[#474750]/10 mt-8">
   <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
     <p>© 2024 RDO Protocol. All rights reserved.</p>
     <div class="flex gap-6">

@@ -77,8 +77,8 @@ body {
   background: var(--bg);
   color: var(--text-1);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.65;
   overflow-x: hidden;
   min-height: 100vh;
 }
@@ -112,25 +112,25 @@ body > * { position: relative; z-index: 1; }
 h1,h2,h3,h4,h5,h6 {
   font-family: var(--font-display);
   font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--text-1);
 }
 
 .display {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(3rem, 7.5vw, 6rem);
+  font-size: clamp(3.5rem, 8vw, 7rem);
   letter-spacing: -0.04em;
   line-height: 0.95;
 }
 
-h1 { font-size: clamp(2rem, 4.5vw, 3.25rem); }
-h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
-h3 { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; }
-h4 { font-size: 1rem; font-weight: 600; }
+h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); }
+h3 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.015em; }
+h4 { font-size: 1.15rem; font-weight: 600; }
 
-p { color: var(--text-2); line-height: 1.7; }
+p { color: var(--text-2); line-height: 1.75; }
 
 .text-1 { color: var(--text-1); }
 .text-2 { color: var(--text-2); }

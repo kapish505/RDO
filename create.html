@@ -122,7 +122,7 @@
 <main class="max-w-[1200px] mx-auto px-6 py-10">
   <!-- Page header -->
   <div class="mb-10">
-    <div class="text-[10px] font-bold tracking-[0.15em] uppercase text-secondary mb-2 font-label">RDO Protocol</div>
+    <div class="text-[15px] font-bold tracking-[0.15em] uppercase text-secondary mb-2 font-label">RDO Protocol</div>
     <h1 class="text-2xl font-bold tracking-tight text-on-surface font-headline">Create Digital Object</h1>
   </div>
 
@@ -142,23 +142,23 @@
             <div id="drop-zone" onclick="document.getElementById('file-input').click()"
                  class="w-full flex-1 min-h-[160px] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
               <span class="material-symbols-outlined text-[#474750] group-hover:text-primary mb-2 transition-colors">upload_file</span>
-              <p class="text-sm text-on-surface-variant">Drop file here or <span class="text-primary">browse</span></p>
-              <p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
+              <p class="text-[15px] text-on-surface-variant">Drop file here or <span class="text-primary">browse</span></p>
+              <p class="text-[15px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
             </div>
             <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)"/>
             <div id="file-info" class="hidden mt-3 flex items-center gap-3 p-3 bg-surface-container border border-[#474750]/20 rounded">
-              <span class="material-symbols-outlined text-primary text-sm">description</span>
-              <span id="file-name" class="text-xs text-on-surface font-mono flex-1 truncate"></span>
-              <span id="file-size" class="text-[10px] text-secondary"></span>
+              <span class="material-symbols-outlined text-primary text-[15px]">description</span>
+              <span id="file-name" class="text-[15px] text-on-surface font-mono flex-1 truncate"></span>
+              <span id="file-size" class="text-[15px] text-secondary"></span>
               <button onclick="clearFile()" class="text-secondary hover:text-error transition-colors">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <span class="material-symbols-outlined text-[15px]">close</span>
               </button>
             </div>
           </div>
 
           <!-- Text input -->
           <div id="view-text" class="content-view active">
-            <textarea id="text-content" class="w-full h-full min-h-[160px] bg-surface-container-lowest border border-[#474750]/20 p-4 text-sm text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="Paste or type your text content here..."></textarea>
+            <textarea id="text-content" class="w-full h-full min-h-[160px] bg-surface-container-lowest border border-[#474750]/20 p-4 text-[15px] text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="Paste or type your text content here..."></textarea>
           </div>
         </div>
       </section>
@@ -170,15 +170,15 @@
           <div id="card-public" onclick="selectAccess('public')" class="p-4 bg-surface-container border border-primary flex items-start gap-3 cursor-pointer rounded transition-all selected-access">
             <span class="material-symbols-outlined text-primary mt-0.5 text-lg" style="font-variation-settings:'FILL' 1">public</span>
             <div>
-              <h3 class="text-sm font-semibold text-on-surface">Public Access</h3>
-              <p class="text-xs text-on-surface-variant leading-relaxed mt-1">Anyone with the link can request decryption via the RDO network.</p>
+              <h3 class="text-[15px] font-semibold text-on-surface">Public Access</h3>
+              <p class="text-[15px] text-on-surface-variant leading-relaxed mt-1">Anyone with the link can request decryption via the RDO network.</p>
             </div>
           </div>
           <div id="card-whitelist" onclick="selectAccess('whitelist')" class="p-4 bg-surface-container border border-[#474750]/20 hover:border-[#474750]/50 flex items-start gap-3 cursor-pointer transition-colors rounded">
             <span class="material-symbols-outlined text-on-surface-variant mt-0.5 text-lg">verified_user</span>
             <div>
-              <h3 class="text-sm font-semibold text-on-surface">Whitelist Only</h3>
-              <p class="text-xs text-on-surface-variant leading-relaxed mt-1">Only specific wallet addresses can access the decrypted content.</p>
+              <h3 class="text-[15px] font-semibold text-on-surface">Whitelist Only</h3>
+              <p class="text-[15px] text-on-surface-variant leading-relaxed mt-1">Only specific wallet addresses can access the decrypted content.</p>
             </div>
           </div>
         </div>
@@ -186,15 +186,15 @@
         <!-- Whitelist Address Input (Hidden by default) -->
         <div id="whitelist-input-container" class="hidden mt-3 bg-surface-container-low border border-[#474750]/20 p-4 rounded">
           <label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant font-label block mb-2">Allowed Wallet Addresses</label>
-          <p class="text-[10px] text-outline mb-3">Enter Ethereum addresses separated by commas. Only these will be able to decrypt the object.</p>
-          <textarea id="whitelist-addresses" class="w-full h-24 bg-surface-container-lowest border border-[#474750]/30 p-3 text-xs text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="0x123..., 0xabc..."></textarea>
+          <p class="text-[15px] text-outline mb-3">Enter Ethereum addresses separated by commas. Only these will be able to decrypt the object.</p>
+          <textarea id="whitelist-addresses" class="w-full h-24 bg-surface-container-lowest border border-[#474750]/30 p-3 text-[15px] text-on-surface font-mono focus:border-primary focus:outline-none transition-colors resize-none rounded" placeholder="0x123..., 0xabc..."></textarea>
         </div>
 
         <!-- Toggles -->
         <div class="bg-surface-container-low border border-[#474750]/20 divide-y divide-[#474750]/10 rounded">
           <div class="flex items-center justify-between p-4">
             <div>
-              <div class="text-sm font-medium text-on-surface">Allow Copy</div>
+              <div class="text-[15px] font-medium text-on-surface">Allow Copy</div>
               <div class="text-[11px] text-on-surface-variant">Enable clipboard actions for text content</div>
             </div>
             <button onclick="togglePerm(this, 'allowCopy', true)" data-state="on" class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1 transition-colors perm-toggle">
@@ -203,7 +203,7 @@
           </div>
           <div class="flex items-center justify-between p-4">
             <div>
-              <div class="text-sm font-medium text-on-surface-variant">Allow Download</div>
+              <div class="text-[15px] font-medium text-on-surface-variant">Allow Download</div>
               <div class="text-[11px] text-on-surface-variant">Export raw data to local storage</div>
             </div>
             <button onclick="togglePerm(this, 'allowDownload', false)" data-state="off" class="w-10 h-5 bg-surface-container-highest rounded-full relative flex items-center px-1 transition-colors perm-toggle">
@@ -217,15 +217,15 @@
           <div class="flex justify-between items-end">
             <div>
               <label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant font-label">Max Opens</label>
-              <p class="text-[10px] text-outline">Total decryption limit for this RDO</p>
+              <p class="text-[15px] text-outline">Total decryption limit for this RDO</p>
             </div>
             <span id="max-opens-display" class="text-2xl font-mono text-primary leading-none">100</span>
           </div>
           <input id="max-opens-slider" oninput="updateMaxOpens(this.value)" class="w-full h-0.5 bg-surface-container-highest appearance-none cursor-pointer" max="500" min="1" type="range" value="100"/>
           <div class="flex items-center justify-between pt-4 border-t border-[#474750]/10">
             <div>
-              <span class="text-sm text-on-surface-variant">Lock on Violation</span>
-              <div class="text-[10px] text-outline">Auto-lock when usage rules are breached</div>
+              <span class="text-[15px] text-on-surface-variant">Lock on Violation</span>
+              <div class="text-[15px] text-outline">Auto-lock when usage rules are breached</div>
             </div>
             <button onclick="togglePerm(this, 'lockOnViolation', true)" data-state="on" class="w-10 h-5 bg-primary rounded-full relative flex items-center px-1 transition-colors perm-toggle">
               <div class="w-3 h-3 bg-white rounded-full ml-auto transition-all"></div>
@@ -241,25 +241,25 @@
         <button id="step-encrypt" onclick="runStep('encrypt')" class="step-btn w-full flex items-center justify-between p-4 bg-surface-container border border-[#474750]/20 hover:border-primary/40 transition-all group rounded">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-on-surface-variant text-lg" id="icon-encrypt">lock</span>
-            <span class="text-sm font-medium text-on-surface">Encrypt Content</span>
+            <span class="text-[15px] font-medium text-on-surface">Encrypt Content</span>
           </div>
-          <span id="label-encrypt" class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Ready</span>
+          <span id="label-encrypt" class="text-[15px] text-on-surface-variant uppercase font-bold tracking-widest">Ready</span>
         </button>
 
         <button id="step-ipfs" onclick="runStep('ipfs')" disabled class="step-btn w-full flex items-center justify-between p-4 bg-surface-container border border-[#474750]/10 opacity-50 cursor-not-allowed rounded" id="step-ipfs">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-outline text-lg" id="icon-ipfs">cloud_upload</span>
-            <span class="text-sm font-medium text-on-surface-variant">Upload to IPFS</span>
+            <span class="text-[15px] font-medium text-on-surface-variant">Upload to IPFS</span>
           </div>
-          <span id="label-ipfs" class="text-[10px] text-outline uppercase font-bold tracking-widest">Queued</span>
+          <span id="label-ipfs" class="text-[15px] text-outline uppercase font-bold tracking-widest">Queued</span>
         </button>
 
         <button id="step-mint" onclick="runStep('mint')" disabled class="step-btn w-full flex items-center justify-between p-4 bg-surface-container border border-[#474750]/10 opacity-50 cursor-not-allowed rounded">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-outline text-lg" id="icon-mint">database</span>
-            <span class="text-sm font-medium text-on-surface-variant">Create RDO</span>
+            <span class="text-[15px] font-medium text-on-surface-variant">Create RDO</span>
           </div>
-          <span id="label-mint" class="text-[10px] text-outline uppercase font-bold tracking-widest">Queued</span>
+          <span id="label-mint" class="text-[15px] text-outline uppercase font-bold tracking-widest">Queued</span>
         </button>
       </section>
 
@@ -273,28 +273,28 @@
           <div class="flex items-center justify-between">
             <div id="rdo-id-display" class="text-2xl font-mono tracking-tighter text-on-surface"></div>
             <button onclick="copyRdoId()" class="p-2 hover:bg-surface-container-high rounded transition-colors">
-              <span class="material-symbols-outlined text-on-surface-variant text-sm">content_copy</span>
+              <span class="material-symbols-outlined text-on-surface-variant text-[15px]">content_copy</span>
             </button>
           </div>
           <div class="mt-5 pt-5 border-t border-[#474750]/10 flex items-center gap-4 flex-wrap">
-            <span class="text-xs text-on-surface-variant">Tx Hash:</span>
-            <a id="tx-link" href="#" target="_blank" class="text-xs text-primary underline underline-offset-4 font-mono"></a>
-            <a href="view.html" class="ml-auto text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">View RDO →</a>
+            <span class="text-[15px] text-on-surface-variant">Tx Hash:</span>
+            <a id="tx-link" href="#" target="_blank" class="text-[15px] text-primary underline underline-offset-4 font-mono"></a>
+            <a href="view.html" class="ml-auto text-[15px] font-bold uppercase tracking-widest text-primary hover:underline">View RDO →</a>
           </div>
           <!-- Decryption Key Display -->
           <div class="mt-4 p-4 bg-surface-container border border-amber-400/20 rounded">
             <div class="flex items-center gap-2 mb-2">
-              <span class="material-symbols-outlined text-amber-400 text-sm">key</span>
-              <span class="text-[10px] font-bold tracking-widest uppercase text-amber-400 font-label">Decryption Key</span>
+              <span class="material-symbols-outlined text-amber-400 text-[15px]">key</span>
+              <span class="text-[15px] font-bold tracking-widest uppercase text-amber-400 font-label">Decryption Key</span>
               <span class="ml-auto px-2 py-0.5 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Save This</span>
             </div>
             <div class="flex items-center gap-2">
               <code id="decryption-key-display" class="flex-1 text-[11px] text-on-surface font-mono break-all bg-surface-container-lowest px-3 py-2 rounded border border-[#474750]/20 select-all"></code>
               <button onclick="copyDecryptionKey()" class="p-2 hover:bg-surface-container-high rounded transition-colors shrink-0" title="Copy Key">
-                <span class="material-symbols-outlined text-on-surface-variant text-sm">content_copy</span>
+                <span class="material-symbols-outlined text-on-surface-variant text-[15px]">content_copy</span>
               </button>
             </div>
-            <p class="text-[10px] text-on-surface-variant mt-2 leading-relaxed">⚠ Save this key! Without it, your encrypted content cannot be decrypted. It is stored in your browser, but clearing browser data will erase it.</p>
+            <p class="text-[15px] text-on-surface-variant mt-2 leading-relaxed">⚠ Save this key! Without it, your encrypted content cannot be decrypted. It is stored in your browser, but clearing browser data will erase it.</p>
           </div>
         </div>
       </div>
@@ -309,37 +309,37 @@
           <div class="space-y-3">
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Access</span>
-              <span id="s-access" class="text-sm font-medium text-primary">Public</span>
+              <span id="s-access" class="text-[15px] font-medium text-primary">Public</span>
             </div>
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Reads</span>
-              <span id="s-reads" class="text-sm font-medium text-on-surface">Allowed</span>
+              <span id="s-reads" class="text-[15px] font-medium text-on-surface">Allowed</span>
             </div>
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Copy</span>
-              <span id="s-copy" class="text-sm font-medium text-on-surface">Allowed</span>
+              <span id="s-copy" class="text-[15px] font-medium text-on-surface">Allowed</span>
             </div>
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Download</span>
-              <span id="s-download" class="text-sm font-medium text-secondary">Denied</span>
+              <span id="s-download" class="text-[15px] font-medium text-secondary">Denied</span>
             </div>
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Max Opens</span>
-              <span id="s-max" class="text-sm font-mono text-on-surface">100</span>
+              <span id="s-max" class="text-[15px] font-mono text-on-surface">100</span>
             </div>
             <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Storage</span>
-              <span class="text-sm font-medium text-on-surface">IPFS</span>
+              <span class="text-[15px] font-medium text-on-surface">IPFS</span>
             </div>
             <div class="flex justify-between items-baseline pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Violation Lock</span>
-              <span id="s-lock" class="text-sm font-medium text-emerald-400">Enabled</span>
+              <span id="s-lock" class="text-[15px] font-medium text-emerald-400">Enabled</span>
             </div>
           </div>
           <div class="mt-6 p-4 bg-surface-container-lowest border border-[#474750]/20 rounded">
             <div class="flex items-center gap-2 mb-2">
-              <span class="material-symbols-outlined text-primary text-sm">info</span>
-              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface font-label">Network Fees</span>
+              <span class="material-symbols-outlined text-primary text-[15px]">info</span>
+              <span class="text-[15px] font-bold uppercase tracking-widest text-on-surface font-label">Network Fees</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-lg font-mono text-on-surface">~0.004</span>
@@ -351,7 +351,7 @@
         <!-- Content info -->
         <div id="content-info-card" class="hidden bg-surface-container-low border border-[#474750]/20 p-5 rounded">
           <div class="text-[11px] font-bold tracking-widest uppercase text-secondary mb-3 font-label">Content</div>
-          <div id="content-summary" class="text-xs text-on-surface font-mono text-on-surface-variant"></div>
+          <div id="content-summary" class="text-[15px] text-on-surface font-mono text-on-surface-variant"></div>
         </div>
       </div>
     </div>
@@ -359,7 +359,7 @@
 </main>
 
 <!-- Footer -->
-<footer class="w-full py-6 px-6 text-center text-xs bg-[#0e0e11] text-[#3a3a3a] border-t border-[#474750]/10 mt-8">
+<footer class="w-full py-6 px-6 text-center text-[15px] bg-[#0e0e11] text-[#3a3a3a] border-t border-[#474750]/10 mt-8">
   <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
     <p>© 2024 RDO Protocol. All rights reserved.</p>
     <div class="flex gap-6">

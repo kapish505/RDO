@@ -142,8 +142,8 @@
   <section class="mb-7">
     <div class="flex gap-3 p-4 bg-surface-container-low border-tonal rounded-lg">
       <div class="flex-grow relative">
-        <label class="absolute -top-2 left-3 bg-surface-container-low px-1 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">RDO ID</label>
-        <input id="rdo-input" class="w-full bg-surface-container-lowest border-tonal rounded px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50 border transition-colors text-on-surface placeholder:text-[#3a3a3a] font-mono" placeholder="Enter RDO ID (e.g. 42)" type="text"/>
+        <label class="absolute -top-2 left-3 bg-surface-container-low px-1 text-[15px] font-bold tracking-widest text-on-surface-variant uppercase">RDO ID</label>
+        <input id="rdo-input" class="w-full bg-surface-container-lowest border-tonal rounded px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary/50 border transition-colors text-on-surface placeholder:text-[#3a3a3a] font-mono" placeholder="Enter RDO ID (e.g. 42)" type="text"/>
       </div>
       <button onclick="loadRDO()" id="load-btn" class="px-7 bg-surface-container-high border-tonal text-primary font-bold text-[11px] tracking-widest uppercase hover:bg-surface-container-highest transition-colors active:scale-95 rounded border">
         Load
@@ -173,32 +173,32 @@
       <div class="p-7">
         <div class="flex justify-between items-start mb-5">
           <div>
-            <span class="text-[10px] font-bold text-secondary tracking-[0.1em] uppercase mb-2 block font-label">Resource Decentralized Object</span>
+            <span class="text-[15px] font-bold text-secondary tracking-[0.1em] uppercase mb-2 block font-label">Resource Decentralized Object</span>
             <h1 id="rdo-id-title" class="text-3xl font-semibold tracking-[-0.04em] text-on-surface font-mono"></h1>
           </div>
-          <span id="rdo-status" class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase rounded-full">Active</span>
+          <span id="rdo-status" class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[15px] font-bold tracking-widest uppercase rounded-full">Active</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-7 mb-7">
           <div class="space-y-4">
             <div>
-              <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">Creator Address</label>
-              <code id="rdo-creator" class="text-sm text-primary font-mono bg-surface-container-lowest px-2 py-1 rounded text-xs"></code>
+              <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">Creator Address</label>
+              <code id="rdo-creator" class="text-[15px] text-primary font-mono bg-surface-container-lowest px-2 py-1 rounded text-[15px]"></code>
             </div>
             <div>
-              <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">IPFS CID</label>
-              <code id="rdo-cid" class="text-xs text-on-surface/60 font-mono break-all"></code>
+              <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">IPFS CID</label>
+              <code id="rdo-cid" class="text-[15px] text-on-surface/60 font-mono break-all"></code>
             </div>
           </div>
           <div class="space-y-4">
             <div>
-              <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">Access Type</label>
-              <span id="rdo-access" class="text-sm font-medium text-on-surface"></span>
+              <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-1 font-label">Access Type</label>
+              <span id="rdo-access" class="text-[15px] font-medium text-on-surface"></span>
             </div>
             <div>
               <div class="flex justify-between items-end mb-2">
-                <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block font-label">Open Count / Max</label>
-                <span id="rdo-opens" class="text-[10px] font-mono text-on-surface"></span>
+                <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block font-label">Open Count / Max</label>
+                <span id="rdo-opens" class="text-[15px] font-mono text-on-surface"></span>
               </div>
               <div class="h-[2px] w-full bg-surface-container-lowest rounded-full overflow-hidden">
                 <div id="opens-bar" class="h-full bg-primary transition-all duration-700" style="width:0%"></div>
@@ -208,7 +208,7 @@
         </div>
 
         <div class="pt-5 border-t border-[#474750]/20">
-          <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-3 font-label">Permissions</label>
+          <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-3 font-label">Permissions</label>
           <div id="permissions-chips" class="flex gap-2 flex-wrap"></div>
         </div>
       </div>
@@ -217,36 +217,36 @@
     <!-- Right: Action Panel -->
     <div class="flex flex-col gap-5">
       <div class="bg-surface-container border-tonal border rounded-lg p-5 space-y-3">
-        <button id="btn-read" onclick="doAction('read')" class="w-full py-3.5 bg-primary text-white font-bold text-xs tracking-widest uppercase rounded active:scale-[0.98] transition-all hover:bg-blue-400 flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined text-sm">visibility</span>
+        <button id="btn-read" onclick="doAction('read')" class="w-full py-3.5 bg-primary text-white font-bold text-[15px] tracking-widest uppercase rounded active:scale-[0.98] transition-all hover:bg-blue-400 flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[15px]">visibility</span>
           Read
         </button>
-        <button id="btn-copy" onclick="doAction('copy')" class="w-full py-3.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-xs tracking-widest uppercase rounded hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined text-sm">content_copy</span>
+        <button id="btn-copy" onclick="doAction('copy')" class="w-full py-3.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-[15px] tracking-widest uppercase rounded hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[15px]">content_copy</span>
           Copy
         </button>
-        <button id="btn-download" onclick="doAction('download')" class="w-full py-3.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-xs tracking-widest uppercase rounded hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined text-sm">download</span>
+        <button id="btn-download" onclick="doAction('download')" class="w-full py-3.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-[15px] tracking-widest uppercase rounded hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[15px]">download</span>
           Download
         </button>
       </div>
 
       <!-- Access result -->
       <div class="bg-surface-container-low border-tonal border rounded-lg p-5">
-        <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-4 font-label">Access Result</label>
+        <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-4 font-label">Access Result</label>
         <div id="access-result-content">
-          <p class="text-xs text-on-surface-variant">No access attempt yet. Click READ, COPY, or DOWNLOAD to interact with this RDO.</p>
+          <p class="text-[15px] text-on-surface-variant">No access attempt yet. Click READ, COPY, or DOWNLOAD to interact with this RDO.</p>
         </div>
       </div>
 
       <!-- Revoke (owner only) -->
       <div id="owner-actions" class="hidden bg-surface-container-low border border-[#474750]/20 rounded-lg p-5">
-        <label class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase block mb-4 font-label">Owner Actions</label>
+        <label class="text-[15px] font-bold text-on-surface-variant tracking-widest uppercase block mb-4 font-label">Owner Actions</label>
         <div class="flex flex-col gap-2">
-          <button onclick="revokeRDOAction()" class="w-full py-2.5 bg-error/10 border border-error/20 text-error font-bold text-xs tracking-widest uppercase rounded hover:bg-error/20 transition-all">
+          <button onclick="revokeRDOAction()" class="w-full py-2.5 bg-error/10 border border-error/20 text-error font-bold text-[15px] tracking-widest uppercase rounded hover:bg-error/20 transition-all">
             Revoke RDO
           </button>
-          <button onclick="unlockRDOAction()" class="w-full py-2.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-xs tracking-widest uppercase rounded hover:bg-surface-container-highest transition-all">
+          <button onclick="unlockRDOAction()" class="w-full py-2.5 bg-surface-container-high border-tonal border text-on-surface font-bold text-[15px] tracking-widest uppercase rounded hover:bg-surface-container-highest transition-all">
             Unlock RDO
           </button>
         </div>
@@ -258,31 +258,31 @@
   <div id="content-viewer" class="hidden-section mb-10">
     <div class="bg-surface-container-low border-tonal border rounded-lg overflow-hidden">
       <div class="flex items-center justify-between px-5 py-3 border-b border-[#474750]/10">
-        <span class="text-xs font-bold tracking-[0.05em] uppercase text-on-surface font-label">Decrypted Content</span>
-        <button onclick="document.getElementById('content-viewer').classList.add('hidden-section')" class="text-on-surface-variant hover:text-on-surface text-xs">✕ Close</button>
+        <span class="text-[15px] font-bold tracking-[0.05em] uppercase text-on-surface font-label">Decrypted Content</span>
+        <button onclick="document.getElementById('content-viewer').classList.add('hidden-section')" class="text-on-surface-variant hover:text-on-surface text-[15px]">✕ Close</button>
       </div>
-      <div id="content-display" class="p-5 font-mono text-sm text-primary leading-relaxed max-h-80 overflow-auto bg-surface-container-lowest"></div>
+      <div id="content-display" class="p-5 font-mono text-[15px] text-primary leading-relaxed max-h-80 overflow-auto bg-surface-container-lowest"></div>
     </div>
   </div>
 
   <!-- Access Log table -->
   <section id="access-log-section" class="hidden-section">
-    <h2 class="text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase mb-4 font-label">Access Log / History</h2>
+    <h2 class="text-[15px] font-bold text-on-surface-variant tracking-[0.2em] uppercase mb-4 font-label">Access Log / History</h2>
     <div class="bg-surface-container border-tonal border rounded-lg overflow-hidden">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-surface-container-high">
-            <th class="px-5 py-3.5 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Time</th>
-            <th class="px-5 py-3.5 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Action</th>
-            <th class="px-5 py-3.5 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Result</th>
-            <th class="px-5 py-3.5 text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Tx Hash</th>
+            <th class="px-5 py-3.5 text-[15px] font-bold text-on-surface-variant tracking-widest uppercase">Time</th>
+            <th class="px-5 py-3.5 text-[15px] font-bold text-on-surface-variant tracking-widest uppercase">Action</th>
+            <th class="px-5 py-3.5 text-[15px] font-bold text-on-surface-variant tracking-widest uppercase">Result</th>
+            <th class="px-5 py-3.5 text-[15px] font-bold text-on-surface-variant tracking-widest uppercase">Tx Hash</th>
           </tr>
         </thead>
         <tbody id="log-body" class="divide-y divide-[#474750]/10">
           <!-- Populated by JS -->
         </tbody>
       </table>
-      <div id="log-empty" class="hidden px-5 py-8 text-center text-xs text-on-surface-variant">No access events recorded for this RDO.</div>
+      <div id="log-empty" class="hidden px-5 py-8 text-center text-[15px] text-on-surface-variant">No access events recorded for this RDO.</div>
     </div>
   </section>
 </main>
@@ -290,10 +290,10 @@
 <!-- Footer -->
 <footer class="bg-[#0e0e11] border-t border-[#474750]/20 w-full py-6">
   <div class="flex flex-col md:flex-row justify-between items-center px-6 max-w-7xl mx-auto w-full">
-    <span class="text-xs text-secondary">© 2024 RDO Protocol. All rights reserved.</span>
+    <span class="text-[15px] text-secondary">© 2024 RDO Protocol. All rights reserved.</span>
     <div class="flex gap-5 mt-3 md:mt-0">
-      <a class="text-xs text-secondary hover:text-on-surface transition-all" href="create.html">Create RDO</a>
-      <a class="text-xs text-secondary hover:text-on-surface transition-all" href="test.html">Test Console</a>
+      <a class="text-[15px] text-secondary hover:text-on-surface transition-all" href="create.html">Create RDO</a>
+      <a class="text-[15px] text-secondary hover:text-on-surface transition-all" href="test.html">Test Console</a>
     </div>
   </div>
 </footer>
