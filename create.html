@@ -138,9 +138,9 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- File drop zone -->
-          <div id="view-file" class="content-view active">
+          <div id="view-file" class="content-view active flex flex-col h-full">
             <div id="drop-zone" onclick="document.getElementById('file-input').click()"
-                 class="w-full h-full min-h-[160px] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
+                 class="w-full flex-1 min-h-[160px] bg-surface-container-lowest border border-dashed border-[#474750]/30 flex flex-col items-center justify-center group hover:border-primary/50 transition-colors cursor-pointer rounded">
               <span class="material-symbols-outlined text-[#474750] group-hover:text-primary mb-2 transition-colors">upload_file</span>
               <p class="text-sm text-on-surface-variant">Drop file here or <span class="text-primary">browse</span></p>
               <p class="text-[10px] text-outline mt-1 uppercase tracking-tighter">Max size: 100MB</p>
