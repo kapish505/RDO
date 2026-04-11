@@ -179,6 +179,14 @@
         ) external rdoExists(rdoId) returns (bool allowed, string memory reason) {
             DigitalObject storage rdo = _rdos[rdoId];
 
+            // ── Creator Bypass ──
+            if (msg.sender == rdo.creator) {
+                // Creator always has unconditional access to their own RDO.
+                // Does NOT consume openCount or get blocked by locks/revocations.
+                emit RDOAccessed(rdoId, msg.sender, action, true, "Creator access bypass");
+                return (true, "");
+            }
+
             // ── Check revocation / lock ──
             if (rdo.isRevoked) {
                 emit RDOAccessed(rdoId, msg.sender, action, false, "RDO revoked");

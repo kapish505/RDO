@@ -101,23 +101,31 @@ async function uploadJSONToIPFS(jsonData, name, metadata = {}) {
 async function fetchFromIPFS(cid) {
   const gateways = [
     `https://gateway.pinata.cloud/ipfs/${cid}`,
-    `https://cloudflare-ipfs.com/ipfs/${cid}`,
     `https://ipfs.io/ipfs/${cid}`,
+    `https://nftstorage.link/ipfs/${cid}`,
+    `https://w3s.link/ipfs/${cid}`,
+    `https://4everland.io/ipfs/${cid}`,
+    `https://cf-ipfs.com/ipfs/${cid}`,
     `https://dweb.link/ipfs/${cid}`
   ];
 
   for (const gateway of gateways) {
     try {
+      console.log(`[IPFS] Trying gateway: ${gateway}`);
       const response = await fetch(gateway, {
         signal: AbortSignal.timeout(60000) // 60s timeout for large images
       });
 
       if (response.ok) {
         const text = await response.text();
+        console.log(`[IPFS] Success from ${gateway}`);
         return text;
+      } else {
+        const errText = await response.text().catch(() => 'no text');
+        console.warn(`[IPFS] Gateway ${gateway} returned HTTP ${response.status}: ${errText.slice(0, 100)}...`);
       }
     } catch (err) {
-      console.warn(`Gateway ${gateway} failed:`, err.message);
+      console.warn(`[IPFS] Gateway ${gateway} failed with exception:`, err.message);
     }
   }
 
