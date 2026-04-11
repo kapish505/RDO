@@ -168,18 +168,36 @@ async function doAction(action) {
     const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
     // 3. Decrypt Payload
-    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting encrypted key shard from contract...</span>';
-    const encryptedKeyShard = await getEncryptedAESKey(rdoId, window.walletState.address);
-    if (!encryptedKeyShard || encryptedKeyShard.trim() === '') {
-        throw new Error("You do not have a registered encrypted AES key for this RDO.");
+    let keyToUse = null;
+
+    // Check URL Hash first (used for Public RDO links)
+    const hashKey = window.location.hash.substring(1);
+    if (hashKey) {
+        keyToUse = decodeURIComponent(hashKey);
+    } 
+    // Check Local Storage next (Creator fallback)
+    else {
+        try {
+            const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+            if (keys[rdoId]) keyToUse = keys[rdoId];
+        } catch(e) {}
     }
 
-    resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Waiting for MetaMask signature to decrypt key via PKI...</span>';
-    const profileStr = await getEncryptionProfile(window.walletState.address);
-    if (!profileStr) throw new Error("No PKI profile found for your wallet. Please register in the Dashboard first.");
+    // Fallback to PKI if no raw key is available locally
+    if (!keyToUse) {
+        resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting encrypted key shard from contract...</span>';
+        const encryptedKeyShard = await getEncryptedAESKey(rdoId, window.walletState.address);
+        if (!encryptedKeyShard || encryptedKeyShard.trim() === '') {
+            throw new Error("You do not have a registered encrypted AES key for this RDO.");
+        }
 
-    const rsaPrivKey = await recoverRSAPrivateKey(profileStr, window.walletState.signer);
-    const keyToUse = await decryptAESKeyWithRSA(rsaPrivKey, encryptedKeyShard);
+        resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Waiting for MetaMask signature to decrypt key via PKI...</span>';
+        const profileStr = await getEncryptionProfile(window.walletState.address);
+        if (!profileStr) throw new Error("No PKI profile found for your wallet. Please register in the Dashboard first.");
+
+        const rsaPrivKey = await recoverRSAPrivateKey(profileStr, window.walletState.signer);
+        keyToUse = await decryptAESKeyWithRSA(rsaPrivKey, encryptedKeyShard);
+    }
 
     resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Decrypting content payload...</span>';
     const decryptedJSON = await unpackageFromIPFS(JSON.stringify(payload), keyToUse);
