@@ -184,9 +184,8 @@ async function runStep(step) {
       statusEl.innerHTML = '<span class="text-xs text-primary animate-pulse w-full text-right block">Uploading to IPFS...</span>';
       if(!statusEl.parentNode) document.getElementById('step-ipfs').appendChild(statusEl);
 
-      // Upload the JSON string as an IPFS JSON object
-      const parsedPayload = JSON.parse(rdoState.encryptedPayload);
-      const cid = await uploadJSONToIPFS(parsedPayload, "rdo-encrypted.json");
+      // Upload the JSON string directly as a file (supports large file uploads)
+      const cid = await uploadToIPFS(rdoState.encryptedPayload, "rdo-encrypted.json");
       rdoState.ipfsCid = cid;
 
       statusEl.innerHTML = '<span class="text-xs text-[#00E5FF] w-full text-right block font-bold">Done ✓</span>';

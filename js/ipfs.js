@@ -43,8 +43,13 @@ async function uploadToIPFS(content, fileName, metadata = {}) {
   });
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(`IPFS upload failed: ${err.error?.details || response.statusText}`);
+    let errText = await response.text();
+    let errDesc = response.statusText;
+    try { 
+       const errObj = JSON.parse(errText); 
+       if (errObj.error) errDesc = errObj.error.details || errObj.error;
+    } catch(e) { }
+    throw new Error(`IPFS upload failed (${response.status}): ${errDesc}`);
   }
 
   const result = await response.json();
@@ -79,8 +84,13 @@ async function uploadJSONToIPFS(jsonData, name, metadata = {}) {
   });
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(`IPFS JSON upload failed: ${err.error?.details || response.statusText}`);
+    let errText = await response.text();
+    let errDesc = response.statusText;
+    try { 
+       const errObj = JSON.parse(errText); 
+       if (errObj.error) errDesc = errObj.error.details || errObj.error;
+    } catch(e) { }
+    throw new Error(`IPFS JSON upload failed (${response.status}): ${errDesc}`);
   }
 
   const result = await response.json();
