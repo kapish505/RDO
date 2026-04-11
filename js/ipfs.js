@@ -109,7 +109,7 @@ async function fetchFromIPFS(cid) {
   for (const gateway of gateways) {
     try {
       const response = await fetch(gateway, {
-        signal: AbortSignal.timeout(10000) // 10s timeout
+        signal: AbortSignal.timeout(60000) // 60s timeout for large images
       });
 
       if (response.ok) {
