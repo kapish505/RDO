@@ -122,15 +122,17 @@
 </div>
 
 <!-- TopNavBar -->
-<nav class="fixed top-0 w-full z-50 bg-[#0e0e11]/90 backdrop-blur-sm border-b border-[#474750]/20 flex justify-between items-center h-14 px-6 text-on-surface">
-  <a href="index.html" class="text-base font-semibold tracking-tighter text-on-surface">RDO</a>
-  <div class="flex items-center gap-6">
-    <div class="hidden md:flex items-center gap-7">
-      <a class="text-[#abaab5] hover:text-on-surface text-[11px] font-bold tracking-widest uppercase transition-colors" href="create.html">Create</a>
-      <a class="text-primary border-b border-primary pb-0.5 text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
-      <a class="text-[#abaab5] hover:text-on-surface text-[11px] font-bold tracking-widest uppercase transition-colors" href="dashboard.html">My RDOs</a>
-    </div>
-    <button data-action="connect-wallet" id="wallet-btn" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container border-tonal text-[11px] font-bold tracking-widest uppercase hover:border-[#474750] transition-all text-[#abaab5] hover:text-on-surface rounded">
+<nav class="bg-[#0e0e11]/90 backdrop-blur-sm text-on-surface sticky top-0 border-b border-[#474750]/20 flex justify-between items-center w-full px-6 h-16 z-50 relative">
+  <a href="index.html" class="text-base font-semibold tracking-tighter text-white font-headline">RDO</a>
+  
+  <div class="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+    <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="create.html">Create</a>
+    <a class="text-white border-b border-[#3b82f6] pb-1 text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
+    <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="dashboard.html">My RDOs</a>
+  </div>
+
+  <div class="flex items-center">
+    <button data-action="connect-wallet" id="wallet-btn" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container border-tonal text-[11px] font-bold tracking-widest uppercase hover:border-[#474750] transition-all text-[#abaab5] hover:text-white rounded">
       <span id="wallet-dot" class="w-1.5 h-1.5 rounded-full bg-[#3a3a3a]"></span>
       <span id="wallet-label">Connect Wallet</span>
     </button>

@@ -104,14 +104,16 @@
 </div>
 
 <!-- TopNavBar -->
-<nav class="bg-[#0e0e11]/90 backdrop-blur-sm text-on-surface sticky top-0 border-b border-[#474750]/20 flex justify-between items-center w-full px-6 py-3.5 z-50">
+<nav class="bg-[#0e0e11]/90 backdrop-blur-sm text-on-surface sticky top-0 border-b border-[#474750]/20 flex justify-between items-center w-full px-6 h-16 z-50 relative">
   <a href="index.html" class="text-lg font-bold tracking-tighter text-white font-headline">RDO</a>
-  <div class="flex items-center gap-6">
-    <div class="flex gap-5">
-      <a class="text-white border-b border-[#3b82f6] pb-1 text-[11px] font-bold tracking-widest uppercase" href="create.html">Create</a>
-      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
-      <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="dashboard.html">My RDOs</a>
-    </div>
+  
+  <div class="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+    <a class="text-white border-b border-[#3b82f6] pb-1 text-[11px] font-bold tracking-widest uppercase" href="create.html">Create</a>
+    <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="view.html">View</a>
+    <a class="text-[#abaab5] hover:text-white transition-colors text-[11px] font-bold tracking-widest uppercase" href="dashboard.html">My RDOs</a>
+  </div>
+  
+  <div class="flex items-center">
     <button id="wallet-btn" data-action="connect-wallet" class="flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-[#474750]/30 text-[11px] font-bold tracking-widest uppercase hover:border-[#474750] transition-all rounded">
       <span id="wallet-dot" class="w-1.5 h-1.5 rounded-full bg-[#3a3a3a]"></span>
       <span id="wallet-label">Connect</span>
