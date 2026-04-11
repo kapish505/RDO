@@ -261,29 +261,58 @@
   <hr class="border-t border-[#1a1a1a]"/>
 </div>
 
-<!-- PKI Section -->
+<!-- PKI & FAQ Section -->
 <section class="py-28 px-10 max-w-[1440px] mx-auto">
-  <div class="max-w-4xl">
-    <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-primary mb-6 font-label reveal reveal-up">Self-Sovereign Encryption</p>
-    <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-on-surface font-headline mb-8 reveal reveal-up leading-snug">
-      Solving the <span class="text-error">Decryption Key Problem</span>
-    </h2>
-    
-    <div class="flex flex-col gap-8 reveal-stagger">
-      <p class="text-lg text-secondary leading-relaxed font-body">
-        Traditionally, end-to-end encrypted files face a massive delivery flaw: the creator must manually send the AES decryption password to the authorized recipients via Slack, Email, or Telegram. Handing over the key manually entirely defeats the purpose of on-chain trustless access controls.
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+    <!-- Left Column: PKI -->
+    <div class="reveal reveal-left">
+      <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-primary mb-6 font-label">Self-Sovereign Encryption</p>
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-on-surface font-headline mb-6 leading-snug">
+        Solving the <span class="text-error">Key Delivery</span> Problem
+      </h2>
+      <p class="text-[15px] text-secondary leading-relaxed font-body mb-8">
+        Traditionally, end-to-end encrypted files face a massive delivery flaw: the creator must manually send the AES decryption password to authorized recipients via Slack or Email. Handing over the key manually entirely defeats the purpose of trustless on-chain access controls.
       </p>
-      <div class="p-8 border border-white/5 bg-[#131415] rounded-xl relative overflow-hidden group">
-        <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-        <h3 class="text-xl font-bold text-white mb-4">Our On-Chain PKI Solution</h3>
-        <p class="text-[15px] text-on-surface-variant leading-relaxed">
-          RDO v2 implements <b>Per-Recipient Wallet Encryption</b> using a Self-Sovereign Public Key Infrastructure (PKI). <br><br>
-          Recipients register a free RSA Profile on the smart contract. Their private key is backed up locally, shielded by a deterministic AES-GCM vault derived from a secure MetaMask wallet signature. When an RDO is created, the creator's browser automatically fetches the RSA public keys belonging to every whitelisted wallet and wraps the AES decryption shard for each user.<br><br>
-          <b>Result:</b> Decryption keys are routed directly to authorized wallets—no manual sharing, no link copying, and zero dependence on centralized key management systems.
+      
+      <div class="p-8 border border-primary/20 bg-[#0c0c10] rounded-xl relative overflow-hidden group shadow-[0_0_30px_rgba(59,130,246,0.05)] hover:shadow-[0_0_40px_rgba(59,130,246,0.1)] transition-all">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
+        <span class="material-symbols-outlined text-primary text-4xl mb-4 block">vpn_key</span>
+        <h3 class="text-lg font-bold text-white mb-2 font-headline">Invisible On-Chain PKI</h3>
+        <p class="text-[13.5px] text-[#a0a0b0] leading-relaxed">
+          RDO v2 implements <b>Per-Recipient Wallet Encryption</b>.
+          Recipients register a free RSA Profile on the smart contract. Their private key is backed up locally, shielded by a deterministic vault derived from a secure wallet signature. When an RDO is created, the AES decryption shard is wrapped specifically for each whitelisted user natively in the browser. No manual sharing required.
         </p>
       </div>
     </div>
-  </div>
+
+    <!-- Right Column: Skeptics Corner -->
+    <div class="reveal reveal-right pt-2 lg:pt-14">
+      <h3 class="text-xl font-bold text-white mb-6 font-headline flex items-center gap-3">
+        <span class="material-symbols-outlined text-error">gavel</span> The Skeptic's Corner
+      </h3>
+      
+      <div class="flex flex-col gap-4">
+        <!-- FAQ 1 -->
+        <div class="bg-[#111115] border border-[#1f2020] rounded-lg p-6 hover:border-[#2a2a2a] transition-all">
+          <h4 class="text-[15px] font-bold text-white mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[18px]">forum</span> Why not just use WhatsApp?
+          </h4>
+          <p class="text-[13px] text-[#8a8a9a] leading-relaxed">
+            Standard messenger platforms control the key infrastructure and allow recipients to use modified clients to intercept data. RDO keys are completely self-sovereign—you interact directly with the smart contract, allowing you to execute absolute, mathematically-provable, instantaneous revocation globally that forces the file to lock down.
+          </p>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="bg-[#111115] border border-[#1f2020] rounded-lg p-6 hover:border-[#2a2a2a] transition-all">
+          <h4 class="text-[15px] font-bold text-white mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[18px]">photo_camera</span> Print Screens & The "Analog Hole"
+          </h4>
+          <p class="text-[13px] text-[#8a8a9a] leading-relaxed">
+            "What if they just take a picture of the screen?" Disabling 'Copy' and 'Download' prevents instant digital mass-distribution and programmatic scraping. While someone can manually photograph a screen, this severely restricts the "blast radius" from immediate zero-friction viral sharing to an extremely high-friction, low-quality physical capture.
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
