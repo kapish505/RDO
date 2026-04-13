@@ -308,11 +308,16 @@ async function runStep(step) {
 
       // We must get the creator's profile!
       const creatorProfileStr = await getEncryptionProfile(window.walletState.address);
-      if (creatorProfileStr) {
-          try {
-              const profile = JSON.parse(creatorProfileStr);
-              creatorEncryptedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
-          } catch(e) { console.error("Could not encrypt key for creator:", e); }
+      if (!creatorProfileStr) {
+          throw new Error("Missing PKI Profile! Please go to the Dashboard to register your Encryption Key before creating an RDO.");
+      }
+      
+      try {
+          const profile = JSON.parse(creatorProfileStr);
+          creatorEncryptedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
+      } catch(e) {
+          console.error("Could not encrypt key for creator:", e);
+          throw new Error("Failed to encrypt your access key using your profile.");
       }
 
       if (isWhitelist) {
