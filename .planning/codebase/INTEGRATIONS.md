@@ -44,7 +44,7 @@
 
 | Integration | Details |
 |-------------|---------|
-| **Pinata Cloud** | IPFS pinning service. API keys stored in `contractAddress.js` |
+| **Pinata Cloud** | IPFS pinning service. API keys currently prototyped in `contractAddress.js` config. For production, **remove keys from client-side code** and implement a server-side upload proxy, or securely scope upload tokens via Pinata JWTs. |
 | **Pinata Upload API** | `https://api.pinata.cloud/pinning/pinFileToIPFS` — used for encrypted content upload |
 | **Pinata JSON Upload** | `https://api.pinata.cloud/pinning/pinJSONToIPFS` — available but not primary path |
 | **Pinata Auth Test** | `https://api.pinata.cloud/data/testAuthentication` — connection validation |
@@ -91,7 +91,9 @@ When Pinata API keys are set to placeholder values (`'YOUR_PINATA_API_KEY'`), up
 - **None** — no databases. All persistent state lives:
   - On-chain (contract storage)
   - IPFS (encrypted content)
-  - Browser localStorage (`rdo_keys`, `rdo_meta`)
+
+> **Warning on Local Storage & Keys**
+> Legacy implementations used browser `localStorage` (`rdo_keys`, `rdo_meta`) to cache raw base64 AES keys. This practice is deprecated. Clearing browser data will irreversibly lose keys if PKI backups were not performed. Modern implementations must use Web Crypto non-extractable keys or rely exclusively on the on-chain PKI wrapper system for explicit key export/import to prevent loss.
 
 ## Webhooks / Push Notifications
 

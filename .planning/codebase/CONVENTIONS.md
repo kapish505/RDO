@@ -69,7 +69,7 @@ showToast('Wallet connected: 0x1234', 'success', 4000);  // optional duration
 
 // js/wallet.js has its own early showToast() fallback for before shared.js loads:
 function showToast(msg, type) {
-  if (typeof window._showToast === 'function') return window._showToast(type, '', msg);
+  if (typeof window._showToast === 'function') return window._showToast(msg, type);
   console.log(`[${type}] ${msg}`);
 }
 ```

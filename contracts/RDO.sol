@@ -194,10 +194,7 @@
             if (msg.sender == rdo.creator) {
                 // Creator always has unconditional access to their own RDO.
                 // Does NOT consume openCount or get blocked by locks/revocations.
-                if (msg.value > 0) {
-                    emit RDOAccessed(rdoId, msg.sender, action, false, "Creator should not send payment");
-                    return (false, "Creator should not send payment");
-                }
+                require(msg.value == 0, "Creator should not send payment");
                 emit RDOAccessed(rdoId, msg.sender, action, true, "Creator access bypass");
                 return (true, "");
             }

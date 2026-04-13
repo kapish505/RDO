@@ -9,8 +9,9 @@
 Pinata API key and secret are hardcoded in plain text and committed to the repository:
 
 ```javascript
-const PINATA_API_KEY = "2c0c64ef7771c9e9477b";
-const PINATA_SECRET_API_KEY = "3cf3d96f512050cd62b929b6c7907073a3a501eb72dae4e8f39dfcfc28e15e5b";
+const PINATA_API_KEY = "***REDACTED***";
+const PINATA_SECRET_API_KEY = "***REDACTED***";
+// Note: Actual values are exposed in the source file contractAddress.js
 ```
 
 **Impact**: Anyone with repository access (or who views page source) can use these keys to upload/manage files on the Pinata account. Since this is a client-side app, these keys are also visible in the browser's network inspector.

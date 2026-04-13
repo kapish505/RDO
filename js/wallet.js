@@ -12,7 +12,7 @@ window.walletState = {
 
 // Safe showToast wrapper - falls back to console if toast not available
 function showToast(msg, type) {
-  if (typeof window._showToast === 'function') return window._showToast(type, '', msg);
+  if (typeof window._showToast === 'function') return window._showToast(msg, type);
   console.log(`[${type}] ${msg}`);
 }
 
