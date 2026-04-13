@@ -2,7 +2,7 @@
 // Update these values with your actual deployed contract and API keys.
 
 // Deployed smart contract address (Sepolia Testnet)
-const CONTRACT_ADDRESS = "0xdD1BE8d2cc176A18A6d401e85aa5420288A42746";
+const CONTRACT_ADDRESS = "0xaddF555472161276a0389e955335d01a8F71bcE7";
 
 // Pinata IPFS Configuration
 // Get these from https://app.pinata.cloud/keys
