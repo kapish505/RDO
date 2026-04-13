@@ -115,6 +115,11 @@ function buildCard(rdo) {
 
   const accessLabel = rdo.isWhitelist ? 'Whitelist' : 'Public';
   const maxOpensLabel = rdo.maxOpens === 0 ? '∞' : rdo.maxOpens;
+  const isPaid = !!rdo.isPaid && rdo.pricePerAccess > 0n;
+  const priceLabel = isPaid ? rdo.pricePerAccessEth + ' ETH' : '';
+  const paidBadge = isPaid
+    ? '<span class="px-2 py-0.5 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Paid</span>'
+    : '<span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Free</span>';
 
   const card = document.createElement('div');
   card.className = 'bg-surface-container-low border border-[#474750]/20 rounded-lg overflow-hidden hover:border-primary/20 transition-all group';
@@ -125,7 +130,10 @@ function buildCard(rdo) {
           <div class="text-[10px] font-bold tracking-widest text-secondary uppercase mb-1 font-label">RDO #${rdo.numericId}</div>
           <h3 class="text-base font-mono text-on-surface truncate max-w-[180px]">${rdo.ipfsCid.slice(0,10)}...${rdo.ipfsCid.slice(-8)}</h3>
         </div>
-        <span class="px-2.5 py-1 border rounded-full text-[9px] font-bold tracking-widest uppercase ${statusColor}">${status.label}</span>
+        <div class="flex flex-col items-end gap-1.5">
+          <span class="px-2.5 py-1 border rounded-full text-[9px] font-bold tracking-widest uppercase ${statusColor}">${status.label}</span>
+          ${paidBadge}
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2 mb-4 text-[11px]">
@@ -142,8 +150,8 @@ function buildCard(rdo) {
           <div class="${rdo.allowCopy ? 'text-primary' : 'text-secondary'} font-medium">${rdo.allowCopy ? 'Allowed' : 'Denied'}</div>
         </div>
         <div class="bg-surface-container p-2.5 rounded">
-          <div class="text-outline uppercase tracking-wider mb-0.5">Download</div>
-          <div class="${rdo.allowDownload ? 'text-primary' : 'text-secondary'} font-medium">${rdo.allowDownload ? 'Allowed' : 'Denied'}</div>
+          <div class="text-outline uppercase tracking-wider mb-0.5">Price</div>
+          <div class="${isPaid ? 'text-amber-400' : 'text-emerald-400'} font-medium">${isPaid ? priceLabel : 'Free'}</div>
         </div>
       </div>
 

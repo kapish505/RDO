@@ -19,7 +19,7 @@
 		],
 		"name": "addToWhitelist",
 		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -50,6 +50,16 @@
 						"internalType": "bool",
 						"name": "allowDownload",
 						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "isPaid",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerAccess",
+						"type": "uint256"
 					},
 					{
 						"internalType": "uint256",
@@ -181,6 +191,18 @@
 				"internalType": "uint256",
 				"name": "maxOpens",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "isPaid",
+				"type": "bool"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "pricePerAccess",
+				"type": "uint256"
 			}
 		],
 		"name": "RDOCreated",
@@ -300,7 +322,7 @@
 				"type": "string"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -440,6 +462,16 @@
 						"type": "bool"
 					},
 					{
+						"internalType": "bool",
+						"name": "isPaid",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerAccess",
+						"type": "uint256"
+					},
+					{
 						"internalType": "uint256",
 						"name": "maxOpens",
 						"type": "uint256"
@@ -536,6 +568,16 @@
 				"internalType": "bool",
 				"name": "allowDownload",
 				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isPaid",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pricePerAccess",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",

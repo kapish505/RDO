@@ -28,6 +28,8 @@
             bool        allowRead;
             bool        allowCopy;
             bool        allowDownload;
+            bool        isPaid;
+            uint256     pricePerAccess; // wei, required per access action when isPaid=true
             uint256     maxOpens;       // 0 = unlimited
             uint256     openCount;      // total successful accesses
             bool        lockOnViolation;
@@ -57,7 +59,9 @@
             address indexed creator,
             string  ipfsCid,
             AccessType accessType,
-            uint256 maxOpens
+            uint256 maxOpens,
+            bool isPaid,
+            uint256 pricePerAccess
         );
 
         event EncryptionKeyRegistered(address indexed user, string pubKey);
@@ -118,6 +122,8 @@
             bool allowRead;
             bool allowCopy;
             bool allowDownload;
+            bool isPaid;
+            uint256 pricePerAccess;
             uint256 maxOpens;
             bool lockOnViolation;
             address[] initialWhitelist;
@@ -130,6 +136,9 @@
         */
         function createRDO(CreateRDOParams calldata params) external returns (uint256 rdoId) {
             require(bytes(params.ipfsCid).length > 0, "RDO: empty CID");
+            if (params.isPaid) {
+                require(params.pricePerAccess > 0, "RDO: price must be > 0");
+            }
 
             rdoCounter++;
             rdoId = rdoCounter;
@@ -141,6 +150,8 @@
             rdo.allowRead = params.allowRead;
             rdo.allowCopy = params.allowCopy;
             rdo.allowDownload = params.allowDownload;
+            rdo.isPaid = params.isPaid;
+            rdo.pricePerAccess = params.isPaid ? params.pricePerAccess : 0;
             rdo.maxOpens = params.maxOpens;
             rdo.openCount = 0;
             rdo.lockOnViolation = params.lockOnViolation;
@@ -163,7 +174,7 @@
                 _whitelist[rdoId][msg.sender] = true;
             }
 
-            emit RDOCreated(rdoId, msg.sender, params.ipfsCid, params.accessType, params.maxOpens);
+            emit RDOCreated(rdoId, msg.sender, params.ipfsCid, params.accessType, params.maxOpens, rdo.isPaid, rdo.pricePerAccess);
         }
 
         /**
@@ -176,13 +187,17 @@
         function requestAccess(
             uint256 rdoId,
             string calldata action
-        ) external rdoExists(rdoId) returns (bool allowed, string memory reason) {
+        ) external payable rdoExists(rdoId) returns (bool allowed, string memory reason) {
             DigitalObject storage rdo = _rdos[rdoId];
 
             // ── Creator Bypass ──
             if (msg.sender == rdo.creator) {
                 // Creator always has unconditional access to their own RDO.
                 // Does NOT consume openCount or get blocked by locks/revocations.
+                if (msg.value > 0) {
+                    emit RDOAccessed(rdoId, msg.sender, action, false, "Creator should not send payment");
+                    return (false, "Creator should not send payment");
+                }
                 emit RDOAccessed(rdoId, msg.sender, action, true, "Creator access bypass");
                 return (true, "");
             }
@@ -228,6 +243,23 @@
             if (actionHash == keccak256("download") && !rdo.allowDownload) {
                 _handleViolation(rdoId, action, "Download not permitted");
                 return (false, "Download not permitted");
+            }
+
+            // ── Enforce on-chain payment ──
+            if (rdo.isPaid) {
+                if (msg.value != rdo.pricePerAccess) {
+                    emit RDOAccessed(rdoId, msg.sender, action, false, "Incorrect payment amount");
+                    return (false, "Incorrect payment amount");
+                }
+
+                (bool sent, ) = payable(rdo.creator).call{value: msg.value}("");
+                if (!sent) {
+                    emit RDOAccessed(rdoId, msg.sender, action, false, "Payment transfer failed");
+                    return (false, "Payment transfer failed");
+                }
+            } else if (msg.value > 0) {
+                emit RDOAccessed(rdoId, msg.sender, action, false, "Payment not required");
+                return (false, "Payment not required");
             }
 
             // ── Grant access ──
@@ -317,6 +349,8 @@
             bool    allowRead,
             bool    allowCopy,
             bool    allowDownload,
+            bool    isPaid,
+            uint256 pricePerAccess,
             uint256 maxOpens,
             uint256 openCount,
             bool    lockOnViolation,
@@ -328,6 +362,8 @@
                 rdo.allowRead,
                 rdo.allowCopy,
                 rdo.allowDownload,
+                rdo.isPaid,
+                rdo.pricePerAccess,
                 rdo.maxOpens,
                 rdo.openCount,
                 rdo.lockOnViolation,
@@ -349,6 +385,8 @@
             bool       allowRead;
             bool       allowCopy;
             bool       allowDownload;
+            bool       isPaid;
+            uint256    pricePerAccess;
             uint256    maxOpens;
             uint256    openCount;
             bool       lockOnViolation;
@@ -365,6 +403,8 @@
             v.allowRead       = rdo.allowRead;
             v.allowCopy       = rdo.allowCopy;
             v.allowDownload   = rdo.allowDownload;
+            v.isPaid          = rdo.isPaid;
+            v.pricePerAccess  = rdo.pricePerAccess;
             v.maxOpens        = rdo.maxOpens;
             v.openCount       = rdo.openCount;
             v.lockOnViolation = rdo.lockOnViolation;

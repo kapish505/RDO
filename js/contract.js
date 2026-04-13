@@ -4,6 +4,8 @@
 
 let rdoContract = null;
 
+let createParamFieldsCache = null;
+
 async function getContract(requireSigner = false) {
   if (!walletState.provider) {
     throw new Error('Wallet not connected. Please connect your wallet first.');
@@ -30,20 +32,36 @@ async function loadABI() {
   }
 }
 
+async function getCreateRDOParamFields() {
+  if (createParamFieldsCache) return createParamFieldsCache;
+  const abi = await loadABI();
+  const createFn = abi.find((item) => item.type === 'function' && item.name === 'createRDO');
+  const components = createFn?.inputs?.[0]?.components || [];
+  createParamFieldsCache = new Set(components.map((c) => c.name));
+  return createParamFieldsCache;
+}
+
 // ── Create RDO ──────────────────────────────
 async function createRDO(paramsObj) {
   const contract = await getContract(true);
+  const supportedFields = await getCreateRDOParamFields();
+
+  // Keep backward compatibility with older deployed contracts that do not yet
+  // expose monetization fields in CreateRDOParams.
+  const safeParams = Object.fromEntries(
+    Object.entries(paramsObj).filter(([key]) => supportedFields.has(key))
+  );
 
   // Pre-calculate the ID by doing a static call before sending the transaction!
   let rdoId = null;
   try {
-    const predictedId = await contract.createRDO.staticCall(paramsObj);
+    const predictedId = await contract.createRDO.staticCall(safeParams);
     rdoId = predictedId.toString();
   } catch (e) {
     console.warn("staticCall failed to predict rdoId:", e);
   }
 
-  const tx = await contract.createRDO(paramsObj);
+  const tx = await contract.createRDO(safeParams);
   const receipt = await tx.wait();
 
   // Try parsing from event if staticCall failed
@@ -103,6 +121,9 @@ async function getRDO(rdoId, providerOverride) {
     allowRead:        result.allowRead,
     allowCopy:        result.allowCopy,
     allowDownload:    result.allowDownload,
+    isPaid:           !!result.isPaid,
+    pricePerAccess:   result.pricePerAccess,
+    pricePerAccessEth: result.isPaid ? ethers.formatEther(result.pricePerAccess) : '0',
     maxOpens:         Number(result.maxOpens),
     openCount:        Number(result.openCount),
     lockOnViolation:  result.lockOnViolation,
@@ -115,12 +136,13 @@ async function getRDO(rdoId, providerOverride) {
 }
 
 // ── Request Access ──────────────────────────
-async function requestAccess(rdoId, action) {
+async function requestAccess(rdoId, action, paymentEth = '0') {
   const contract = await getContract(true);
 
   showToast(`Requesting ${action} access...`, 'info');
 
-  const tx = await contract.requestAccess(rdoId, action);
+  const paymentWei = ethers.parseEther(String(paymentEth || '0'));
+  const tx = await contract.requestAccess(rdoId, action, { value: paymentWei });
   showToast('Tx submitted. Confirming...', 'info');
 
   const receipt = await tx.wait();

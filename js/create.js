@@ -9,6 +9,22 @@ function copyDecryptionKey() {
   const text = document.getElementById('decryption-key-display')?.innerText;
   if (text) { navigator.clipboard.writeText(text); if(typeof showToast === 'function') showToast('Decryption key copied!', 'success'); }
 }
+function copyShareLink() {
+  const shareEl = document.getElementById('share-link-display');
+  const feedback = document.getElementById('share-copy-feedback');
+  if (!shareEl || !shareEl.innerText) return;
+
+  navigator.clipboard.writeText(shareEl.innerText);
+  if (typeof showToast === 'function') showToast('Share link copied!', 'success');
+  if (feedback) {
+    feedback.classList.remove('hidden');
+    feedback.classList.add('copied-flash');
+    setTimeout(() => {
+      feedback.classList.remove('copied-flash');
+      feedback.classList.add('hidden');
+    }, 1200);
+  }
+}
 
 let rdoConfig = {
   maxOpens: 100,
@@ -16,7 +32,9 @@ let rdoConfig = {
   allowRead: true,   // always true — read toggle removed from UI
   allowCopy: true,
   allowDownload: false,
-  lockOnViolation: true
+  lockOnViolation: true,
+  isPaid: false,
+  pricePerAccessEth: ''
 };
 
 let rdoState = {
@@ -26,6 +44,10 @@ let rdoState = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  const priceInput = document.getElementById('price-per-access');
+  if (priceInput) {
+    priceInput.addEventListener('input', () => validatePricePerAccess());
+  }
   updateSummary();
 });
 
@@ -48,10 +70,10 @@ function clearFile() {
 
 // ── UI Config ─────────────────────────────────────────────
 function updateMaxOpens(val) {
-  rdoConfig.maxOpens = val;
+  rdoConfig.maxOpens = Number(val);
   const valEl = document.getElementById('max-opens-display');
   if (valEl) {
-    valEl.innerText = val == 0 ? 'Unlimited' : val;
+    valEl.innerText = rdoConfig.maxOpens === 0 ? 'Unlimited' : rdoConfig.maxOpens;
   }
   updateSummary();
 }
@@ -69,13 +91,77 @@ function updateSummary() {
   setStatus('s-copy', rdoConfig.allowCopy);
   setStatus('s-download', rdoConfig.allowDownload);
   
-  document.getElementById('s-max').innerText = rdoConfig.maxOpens == 0 ? 'Unlimited' : rdoConfig.maxOpens;
-  
+  document.getElementById('s-max').innerText = rdoConfig.maxOpens === 0 ? 'Unlimited' : rdoConfig.maxOpens;
+
   const lockEl = document.getElementById('s-lock');
   if (lockEl) {
     lockEl.innerText = rdoConfig.lockOnViolation ? 'Enabled' : 'Disabled';
     lockEl.className = rdoConfig.lockOnViolation ? 'text-sm font-medium text-emerald-400' : 'text-sm font-medium text-secondary';
   }
+
+  const paidEl = document.getElementById('s-paid');
+  if (paidEl) {
+    paidEl.innerText = rdoConfig.isPaid ? 'Paid' : 'Free';
+    paidEl.className = rdoConfig.isPaid ? 'text-[15px] font-medium text-amber-400' : 'text-[15px] font-medium text-emerald-400';
+  }
+
+  const priceEl = document.getElementById('s-price');
+  if (priceEl) {
+    const price = rdoConfig.isPaid ? (rdoConfig.pricePerAccessEth || '0') : '0';
+    priceEl.innerText = `${price} ETH`;
+    priceEl.className = rdoConfig.isPaid ? 'text-[15px] font-mono text-amber-300' : 'text-[15px] font-mono text-secondary';
+  }
+}
+
+function togglePayPerOpen(btn) {
+  rdoConfig.isPaid = !rdoConfig.isPaid;
+  const priceWrap = document.getElementById('price-input-wrap');
+  const dot = btn.querySelector('div');
+
+  if (rdoConfig.isPaid) {
+    btn.classList.add('bg-primary');
+    btn.classList.remove('bg-surface-container-highest');
+    btn.dataset.state = 'on';
+    dot?.classList.add('ml-auto', 'bg-white');
+    dot?.classList.remove('bg-outline');
+    priceWrap?.classList.remove('hidden');
+  } else {
+    btn.classList.remove('bg-primary');
+    btn.classList.add('bg-surface-container-highest');
+    btn.dataset.state = 'off';
+    dot?.classList.remove('ml-auto', 'bg-white');
+    dot?.classList.add('bg-outline');
+    priceWrap?.classList.add('hidden');
+    hidePriceError();
+  }
+
+  updateSummary();
+}
+
+function validatePricePerAccess() {
+  const input = document.getElementById('price-per-access');
+  if (!input) return false;
+  rdoConfig.pricePerAccessEth = input.value.trim();
+
+  if (!rdoConfig.isPaid) {
+    hidePriceError();
+    return true;
+  }
+
+  const value = Number(rdoConfig.pricePerAccessEth);
+  const ok = Number.isFinite(value) && value > 0;
+  if (!ok) showPriceError();
+  else hidePriceError();
+  updateSummary();
+  return ok;
+}
+
+function showPriceError() {
+  document.getElementById('price-error')?.classList.remove('hidden');
+}
+
+function hidePriceError() {
+  document.getElementById('price-error')?.classList.add('hidden');
 }
 
 
@@ -164,7 +250,11 @@ async function runStep(step) {
         text: textContent,
         file: fileData,
         fileName: selectedFile ? selectedFile.name : null,
-        mimeType: selectedFile ? selectedFile.type : 'text/plain'
+        mimeType: selectedFile ? selectedFile.type : 'text/plain',
+        meta: {
+          isPaid: rdoConfig.isPaid,
+          pricePerAccessEth: rdoConfig.isPaid ? rdoConfig.pricePerAccessEth : '0'
+        }
       });
 
       // 2. Encrypt it using crypto.js
@@ -203,6 +293,10 @@ async function runStep(step) {
       if (!window.walletState.address) {
         if(typeof connectWallet === 'function') await connectWallet();
         if (!window.walletState.address) throw new Error("Wallet not connected");
+      }
+
+      if (rdoConfig.isPaid && !validatePricePerAccess()) {
+        throw new Error('Price per access must be greater than 0 ETH.');
       }
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';
@@ -254,6 +348,8 @@ async function runStep(step) {
         allowDownload: rdoConfig.allowDownload,
         maxOpens: rdoConfig.maxOpens,
         lockOnViolation: rdoConfig.lockOnViolation,
+        isPaid: rdoConfig.isPaid,
+        pricePerAccess: rdoConfig.isPaid ? ethers.parseEther(rdoConfig.pricePerAccessEth).toString() : '0',
         initialWhitelist: parsedWhitelist,
         encryptedKeys: encryptedKeysArray,
         creatorEncryptedKey: creatorEncryptedKey
@@ -283,7 +379,15 @@ async function runStep(step) {
         if (viewLink && tx.rdoId) {
            viewLink.href = `view.html?id=${tx.rdoId}`;
         }
+
+        const publicHash = (!isWhitelist && rdoState.exportedKey) ? `#${encodeURIComponent(rdoState.exportedKey)}` : '';
+        const shareLink = `${window.location.origin}${window.location.pathname.replace('create.html', 'view.html')}?id=${encodeURIComponent(tx.rdoId || '')}${publicHash}`;
         
+        const shareDisplay = document.getElementById('share-link-display');
+        const openShareLink = document.getElementById('open-share-link');
+        if (shareDisplay) shareDisplay.innerText = shareLink;
+        if (openShareLink) openShareLink.href = shareLink;
+
         const keyDisplay = document.getElementById('decryption-key-display');
         if (keyDisplay) {
            keyDisplay.parentElement.innerHTML = '<span class="text-[10px] text-green-400 font-bold uppercase tracking-widest block mb-2">Decryption Keys Delivered Automatically via On-Chain PKI</span><div class="text-xs text-on-surface-variant font-mono break-all opacity-70">No strings to copy. The contract has securely routed your AES decryption key directly into the authorized wallets.</div>';

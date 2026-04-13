@@ -53,8 +53,10 @@
   #toast-container { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
   .toast { pointer-events:all; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; background:#1a1a22; border-radius:8px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,.6); animation:slideIn .2s ease; border:1px solid rgba(59,130,246,.1); }
   @keyframes slideIn { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:none} }
+  @keyframes popFlash { 0%{transform:scale(1)} 50%{transform:scale(1.04)} 100%{transform:scale(1)} }
   .content-view { display: none; }
   .content-view.active { display: block; }
+  .copied-flash { animation: popFlash 0.35s ease; }
 
   /* Page enter animation */
   main { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) 0.1s both; }
@@ -101,7 +103,6 @@
 </style>
 </head>
 <body class="min-h-screen">
-</div>
 
 <!-- TopNavBar -->
 <nav class="bg-[#0e0e11]/90 backdrop-blur-sm text-on-surface sticky top-0 border-b border-[#474750]/20 flex justify-between items-center w-full px-6 h-16 z-50 relative">
@@ -234,6 +235,23 @@
             </button>
           </div>
         </div>
+
+        <div class="bg-surface-container-low p-5 border border-[#474750]/20 space-y-4 rounded">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant font-label">Monetization</label>
+              <p class="text-[15px] text-outline">Enable pay-per-open to require ETH before each access.</p>
+            </div>
+            <button id="toggle-paid" onclick="togglePayPerOpen(this)" data-state="off" class="w-10 h-5 bg-surface-container-highest rounded-full relative flex items-center px-1 transition-colors perm-toggle">
+              <div class="w-3 h-3 bg-outline rounded-full transition-all"></div>
+            </button>
+          </div>
+          <div id="price-input-wrap" class="hidden">
+            <label class="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant font-label block mb-2">Price Per Access (ETH)</label>
+            <input id="price-per-access" type="number" min="0" step="0.0001" placeholder="0.005" class="w-full bg-surface-container-lowest border border-[#474750]/30 p-3 text-[15px] text-on-surface font-mono focus:border-primary focus:outline-none transition-colors rounded"/>
+            <p id="price-error" class="hidden text-[11px] text-error mt-2 uppercase tracking-wider">Price must be greater than 0.</p>
+          </div>
+        </div>
       </section>
 
       <!-- Section 3: Deploy -->
@@ -248,7 +266,7 @@
           <span id="label-encrypt" class="text-[15px] text-on-surface-variant uppercase font-bold tracking-widest">Ready</span>
         </button>
 
-        <button id="step-ipfs" onclick="runStep('ipfs')" disabled class="step-btn w-full flex items-center justify-between p-4 bg-surface-container border border-[#474750]/10 opacity-50 cursor-not-allowed rounded" id="step-ipfs">
+        <button id="step-ipfs" onclick="runStep('ipfs')" disabled class="step-btn w-full flex items-center justify-between p-4 bg-surface-container border border-[#474750]/10 opacity-50 cursor-not-allowed rounded">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-outline text-lg" id="icon-ipfs">cloud_upload</span>
             <span class="text-[15px] font-medium text-on-surface-variant">Upload to IPFS</span>
@@ -282,6 +300,18 @@
             <span class="text-[15px] text-on-surface-variant">Tx Hash:</span>
             <a id="tx-link" href="#" target="_blank" class="text-[15px] text-primary underline underline-offset-4 font-mono"></a>
             <a href="view.html" class="ml-auto text-[15px] font-bold uppercase tracking-widest text-primary hover:underline">View RDO →</a>
+          </div>
+          <div id="share-box" class="mt-4 p-4 bg-surface-container border border-primary/20 rounded">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-symbols-outlined text-primary text-[15px]">link</span>
+              <span class="text-[15px] font-bold tracking-widest uppercase text-primary font-label">Shareable Link</span>
+            </div>
+            <code id="share-link-display" class="block text-[11px] text-on-surface font-mono break-all bg-surface-container-lowest px-3 py-2 rounded border border-[#474750]/20"></code>
+            <div class="mt-3 flex items-center gap-2 flex-wrap">
+              <button onclick="copyShareLink()" class="px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-on-surface border border-[#474750]/30 hover:border-primary/40 transition-colors rounded">Copy Link</button>
+              <a id="open-share-link" target="_blank" class="px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-primary border border-primary/30 hover:bg-primary/10 transition-colors rounded">Open in New Tab</a>
+              <span id="share-copy-feedback" class="hidden text-[11px] text-emerald-400 uppercase tracking-widest">Copied</span>
+            </div>
           </div>
           <!-- Decryption Key Display -->
           <div class="mt-4 p-4 bg-surface-container border border-amber-400/20 rounded">
@@ -333,6 +363,14 @@
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Storage</span>
               <span class="text-[15px] font-medium text-on-surface">IPFS</span>
             </div>
+            <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
+              <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Monetization</span>
+              <span id="s-paid" class="text-[15px] font-medium text-emerald-400">Free</span>
+            </div>
+            <div class="flex justify-between items-baseline border-b border-[#474750]/10 pb-3">
+              <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Price / Open</span>
+              <span id="s-price" class="text-[15px] font-mono text-secondary">0 ETH</span>
+            </div>
             <div class="flex justify-between items-baseline pb-3">
               <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-label">Violation Lock</span>
               <span id="s-lock" class="text-[15px] font-medium text-emerald-400">Enabled</span>
@@ -367,7 +405,7 @@
     <div class="flex gap-6">
       <a class="hover:text-on-surface-variant transition-all" href="index.html">Home</a>
       <a class="hover:text-on-surface-variant transition-all" href="view.html">View RDO</a>
-      <a class="hover:text-on-surface-variant transition-all" href="test.html">Test Console</a>
+      <a class="hover:text-on-surface-variant transition-all" href="dashboard.html">My RDOs</a>
     </div>
   </div>
 </footer>
@@ -383,4 +421,7 @@
 <script src="js/ipfs.js"></script>
 <script src="js/contract.js"></script>
 <script src="js/create.js"></script>
+
+</body>
+</html>
 

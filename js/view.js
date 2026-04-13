@@ -1,56 +1,71 @@
 const urlParams = new URLSearchParams(window.location.search);
-const rdoId = urlParams.get('id');
-const decryptionKey = urlParams.get('key'); // Exported key in Base64
-let rdoDetails = null; // Store fetched RDO from contract
+let currentRdoId = urlParams.get('id');
+const queryDecryptionKey = urlParams.get('key');
+let rdoDetails = null;
+let rdoMonetization = {
+  isPaid: false,
+  pricePerAccessEth: '0'
+};
 
 function loadRDO() {
   const val = document.getElementById('rdo-input').value.trim();
   if (!val) return;
-  // Check if we have a stored key for this RDO
+
   let storedKey = '';
   try {
     const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
-    if (keys[val]) storedKey = '&key=' + encodeURIComponent(keys[val]);
-  } catch(e) {}
-  window.location.href = `view.html?id=${val}${storedKey}`;
+    if (keys[val]) storedKey = `&key=${encodeURIComponent(keys[val])}`;
+  } catch (e) {}
+
+  window.location.href = `view.html?id=${encodeURIComponent(val)}${storedKey}`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!rdoId) {
-    return;
-  }
-  
+  const inputEl = document.getElementById('rdo-input');
+  if (currentRdoId && inputEl) inputEl.value = currentRdoId;
+  if (!currentRdoId) return;
+  await loadRDOFromChain(currentRdoId);
+});
+
+async function loadRDOFromChain(rdoId) {
   document.getElementById('rdo-id-title').innerText = `RDO #${rdoId}`;
-  
+
   const loadingState = document.getElementById('loading-state');
   const detailState = document.getElementById('rdo-detail');
-  
   loadingState.classList.remove('hidden');
 
-  // Attempt to load RDO details from contract immediately
   try {
-    if (window.ethereum) {
-      await connectWallet(false); // Connect wallet silently
-      rdoDetails = await getRDO(rdoId);
-      populateRdoDetails(rdoDetails);
-      
+    if (!window.ethereum) {
+      if (typeof showToast === 'function') showToast('Wallet required to fetch on-chain data.', 'error');
       loadingState.classList.add('hidden');
-      detailState.classList.remove('hidden-section');
-    } else {
-      if(typeof showToast === 'function') showToast('Wallet required to fetch on-chain data', 'error');
+      return;
     }
-  } catch (err) {
-    console.error("Failed to load RDO from contract:", err);
+
+    await connectWallet(false);
+    rdoDetails = await getRDO(rdoId);
+    currentRdoId = rdoId;
+
+    rdoMonetization = {
+      isPaid: !!rdoDetails.isPaid,
+      pricePerAccessEth: String(rdoDetails.pricePerAccessEth || '0')
+    };
+
+    populateRdoDetails(rdoDetails);
     loadingState.classList.add('hidden');
-    if(typeof showToast === 'function') showToast('Failed to load RDO. Is the ID correct?', 'error');
+    detailState.classList.remove('hidden-section');
+  } catch (err) {
+    console.error('Failed to load RDO from contract:', err);
+    loadingState.classList.add('hidden');
+    if (typeof showToast === 'function') showToast('Failed to load RDO. Is the ID correct?', 'error');
   }
-});
+}
 
 function populateRdoDetails(rdo) {
   document.getElementById('rdo-cid').innerText = `${rdo.ipfsCid.slice(0,10)}...${rdo.ipfsCid.slice(-10)}`;
   document.getElementById('rdo-creator').innerText = truncateAddress(rdo.creator);
   document.getElementById('rdo-access').innerText = formatAccessType(rdo.accessType);
-  
+  updateMonetizationBadge();
+
   if(rdo.isLocked || rdo.isRevoked) {
     const statusEl = document.getElementById('rdo-status');
     statusEl.innerText = rdo.isRevoked ? 'REVOKED' : 'LOCKED';
@@ -69,7 +84,7 @@ function populateRdoDetails(rdo) {
     statusEl.classList.replace('border-primary/20', 'border-amber-400/20');
   }
 
-  const maxOpensStr = rdo.maxOpens == 0 ? '&infin;' : rdo.maxOpens;
+  const maxOpensStr = rdo.maxOpens === 0 ? '&infin;' : rdo.maxOpens;
   document.getElementById('rdo-opens').innerHTML = `${rdo.openCount} / ${maxOpensStr}`;
   
   if (rdo.maxOpens > 0) {
@@ -123,6 +138,43 @@ function populateRdoDetails(rdo) {
   }
 }
 
+function updateMonetizationBadge() {
+  const badge = document.getElementById('rdo-paid-badge');
+  const price = document.getElementById('rdo-price');
+  if (!badge || !price) return;
+
+  const normalizedPrice = Number(rdoMonetization.pricePerAccessEth || '0');
+  const paid = !!rdoMonetization.isPaid && Number.isFinite(normalizedPrice) && normalizedPrice > 0;
+
+  badge.innerText = paid ? 'Paid' : 'Free';
+  badge.classList.remove('paid-badge', 'free-badge');
+  badge.classList.add(paid ? 'paid-badge' : 'free-badge');
+  price.innerText = paid ? `${rdoMonetization.pricePerAccessEth} ETH / access` : '0 ETH / access';
+}
+
+function setPaymentStatus(state, message) {
+  const el = document.getElementById('payment-status');
+  if (!el) return;
+
+  if (!state) {
+    el.classList.add('hidden');
+    return;
+  }
+
+  el.classList.remove('hidden');
+  el.className = 'text-[11px] uppercase tracking-widest px-3 py-2 rounded border';
+
+  if (state === 'pending') {
+    el.classList.add('text-primary', 'border-primary/30', 'bg-primary/10');
+  } else if (state === 'success') {
+    el.classList.add('text-emerald-400', 'border-emerald-400/30', 'bg-emerald-400/10');
+  } else {
+    el.classList.add('text-error', 'border-error/30', 'bg-error/10');
+  }
+
+  el.innerText = message;
+}
+
 function addChip(container, icon, label, classes) {
   const c = document.createElement('div');
   c.className = `flex items-center gap-1.5 px-3 py-1.5 border rounded-full text-xs font-bold font-label tracking-widest ${classes}`;
@@ -132,7 +184,7 @@ function addChip(container, icon, label, classes) {
 
 // ── App Actions ───────────────────────────────────────────
 async function doAction(action) {
-  if (!rdoId) return;
+  if (!currentRdoId) return;
 
   const resultContainer = document.getElementById('access-result-content');
   resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting access...</span>';
@@ -146,13 +198,46 @@ async function doAction(action) {
     const isOwner = rdoDetails && rdoDetails.creator && 
       window.walletState.address.toLowerCase() === rdoDetails.creator.toLowerCase();
 
+    const actionBtn = document.getElementById(`btn-${action}`);
+    const normalizedPrice = Number(rdoMonetization.pricePerAccessEth || '0');
+    const requiresPayment = !isOwner && !!rdoMonetization.isPaid && Number.isFinite(normalizedPrice) && normalizedPrice > 0;
+
+    if (requiresPayment) {
+      if (actionBtn) {
+        actionBtn.classList.add('payment-required');
+        setTimeout(() => actionBtn.classList.remove('payment-required'), 1000);
+      }
+
+      if (typeof showToast === 'function') {
+        showToast(`Payment required: ${rdoMonetization.pricePerAccessEth} ETH`, 'warning');
+      }
+
+      const ok = window.confirm(`This action requires ${rdoMonetization.pricePerAccessEth} ETH. Continue payment?`);
+      if (!ok) {
+        setPaymentStatus('failed', 'Payment cancelled');
+        throw new Error('Payment cancelled by user.');
+      }
+
+      setPaymentStatus('pending', 'Awaiting payable access transaction...');
+    } else {
+      setPaymentStatus(null);
+    }
+
     // 1. Check Smart Contract Permission (skip for owner — their opens shouldn't count)
     if (!isOwner) {
-      const accessResult = await requestAccess(rdoId, action);
+      const paymentEth = requiresPayment ? rdoMonetization.pricePerAccessEth : '0';
+      const accessResult = await requestAccess(currentRdoId, action, paymentEth);
       if (!accessResult || !accessResult.allowed) {
         const reason = accessResult?.reason || 'Permission denied';
+        if (requiresPayment) setPaymentStatus('failed', 'Payment/access failed');
+        if (typeof showToast === 'function') showToast(`Access refused: ${reason}`, 'error');
         throw new Error(`Access Denied: ${reason}`);
       }
+      if (requiresPayment) {
+        setPaymentStatus('success', `Payment + access confirmed (${accessResult.txHash.slice(0, 10)}...)`);
+        if (typeof showToast === 'function') showToast('Payment success.', 'success');
+      }
+      if (typeof showToast === 'function') showToast('Access granted.', 'success');
     } else {
       // Owner still needs to check if their permission type is enabled
       if (action === 'read' && rdoDetails && !rdoDetails.allowRead) throw new Error('Read not enabled on this RDO');
@@ -172,21 +257,24 @@ async function doAction(action) {
 
     // Check URL Hash first (used for Public RDO links)
     const hashKey = window.location.hash.substring(1);
-    if (hashKey) {
+    if (queryDecryptionKey) {
+        keyToUse = decodeURIComponent(queryDecryptionKey);
+    }
+    else if (hashKey) {
         keyToUse = decodeURIComponent(hashKey);
     } 
     // Check Local Storage next (Creator fallback)
     else {
         try {
             const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
-            if (keys[rdoId]) keyToUse = keys[rdoId];
+            if (keys[currentRdoId]) keyToUse = keys[currentRdoId];
         } catch(e) {}
     }
 
     // Fallback to PKI if no raw key is available locally
     if (!keyToUse) {
         resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Requesting encrypted key shard from contract...</span>';
-        const encryptedKeyShard = await getEncryptedAESKey(rdoId, window.walletState.address);
+        const encryptedKeyShard = await getEncryptedAESKey(currentRdoId, window.walletState.address);
         if (!encryptedKeyShard || encryptedKeyShard.trim() === '') {
             throw new Error("You do not have a registered encrypted AES key for this RDO.");
         }
@@ -204,6 +292,7 @@ async function doAction(action) {
     
     // Decrypted Content logic - parse the bundle we made in create.js
     const bundle = JSON.parse(decryptedJSON.content);
+
 
     // Display appropriate result
     resultContainer.innerHTML = `<span class="text-xs text-green-400">Successfully decrypted! Action: ${action.toUpperCase()}</span>`;
@@ -253,7 +342,7 @@ async function doAction(action) {
         const blob = new Blob([bundle.text], { type: 'text/plain' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `rdo-${rdoId.slice(0,8)}.txt`;
+        a.download = `rdo-${currentRdoId.slice(0,8)}.txt`;
         a.click();
         URL.revokeObjectURL(a.href);
       }
@@ -266,7 +355,7 @@ async function doAction(action) {
 
 async function revokeRDOAction() {
   try {
-    await revokeRDO(rdoId);
+    await revokeRDO(currentRdoId);
     if(typeof showToast === 'function') showToast('RDO Revoked', 'success');
     setTimeout(() => location.reload(), 2000);
   } catch(e) {
@@ -276,7 +365,7 @@ async function revokeRDOAction() {
 
 async function unlockRDOAction() {
   try {
-    await unlockRDO(rdoId);
+    await unlockRDO(currentRdoId);
     if(typeof showToast === 'function') showToast('RDO Unlocked', 'success');
     setTimeout(() => location.reload(), 2000);
   } catch(e) {
