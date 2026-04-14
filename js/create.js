@@ -300,49 +300,15 @@ async function runStep(step) {
       }
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';
-      
-      // Parse whitelist addresses and fetch their encryption profiles
-      let parsedWhitelist = [];
-      let encryptedKeysArray = [];
-      let creatorEncryptedKey = "";
+      const rawAdds = document.getElementById('whitelist-addresses').value || "";
 
-      // We must get the creator's profile!
-      const creatorProfileStr = await getEncryptionProfile(window.walletState.address);
-      if (!creatorProfileStr) {
-          throw new Error("Missing PKI Profile! Please go to the Dashboard to register your Encryption Key before creating an RDO.");
-      }
-      
-      try {
-          const profile = JSON.parse(creatorProfileStr);
-          creatorEncryptedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
-      } catch(e) {
-          console.error("Could not encrypt key for creator:", e);
-          throw new Error("Failed to encrypt your access key using your profile.");
-      }
-
-      if (isWhitelist) {
-        const rawAdds = document.getElementById('whitelist-addresses').value;
-        if (rawAdds) {
-          parsedWhitelist = rawAdds.split(',').map(s => s.trim()).filter(s => s.length > 0);
-          
-          for (const addr of parsedWhitelist) {
-              const profStr = await getEncryptionProfile(addr);
-              if (profStr) {
-                  try {
-                      const profile = JSON.parse(profStr);
-                      const shieldedKey = await encryptAESKeyWithRSA(profile.pubKey, rdoState.exportedKey);
-                      encryptedKeysArray.push(shieldedKey);
-                  } catch(e) {
-                      console.warn("Invalid profile for", addr);
-                      encryptedKeysArray.push("");
-                  }
-              } else {
-                  console.warn("No profile found for", addr);
-                  encryptedKeysArray.push("");
-              }
-          }
-        }
-      }
+      // Construct encrypted key arrays using our abstraction
+      const payloadGeneration = await generateRDOKeyPayload(
+        window.walletState.address, 
+        rdoState.exportedKey, 
+        isWhitelist, 
+        rawAdds
+      );
       
       // Contract call using struct matching params
       const paramsObj = {
@@ -355,9 +321,9 @@ async function runStep(step) {
         lockOnViolation: rdoConfig.lockOnViolation,
         isPaid: rdoConfig.isPaid,
         pricePerAccess: rdoConfig.isPaid ? ethers.parseEther(rdoConfig.pricePerAccessEth).toString() : '0',
-        initialWhitelist: parsedWhitelist,
-        encryptedKeys: encryptedKeysArray,
-        creatorEncryptedKey: creatorEncryptedKey
+        initialWhitelist: payloadGeneration.parsedWhitelist,
+        encryptedKeys: payloadGeneration.encryptedKeysArray,
+        creatorEncryptedKey: payloadGeneration.creatorEncryptedKey
       };
 
       const tx = await createRDO(paramsObj);

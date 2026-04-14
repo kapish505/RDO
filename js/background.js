@@ -90,7 +90,16 @@
     let count = 0;
     let rafId;
 
+    // Suspend loop completely when tab is hidden to save battery
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        animate(); // restart loop
+      }
+    });
+
     function animate() {
+      if (document.hidden) return; // Halt loop
+      
       rafId = requestAnimationFrame(animate);
 
       const posArr = geometry.attributes.position.array;

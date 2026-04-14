@@ -5,9 +5,7 @@
 const CONTRACT_ADDRESS = "0xaddF555472161276a0389e955335d01a8F71bcE7";
 
 // Pinata IPFS Configuration
-// Get these from https://app.pinata.cloud/keys
-const PINATA_API_KEY = "2c0c64ef7771c9e9477b";
-const PINATA_SECRET_API_KEY = "3cf3d96f512050cd62b929b6c7907073a3a501eb72dae4e8f39dfcfc28e15e5b";
+// Keys removed for security; uploads now route through Vercel serverless functions
 const PINATA_GATEWAY = "https://coffee-tricky-felidae-740.mypinata.cloud/ipfs/";
 
 // ── Expose config for test console ─────────────────────────────────────────

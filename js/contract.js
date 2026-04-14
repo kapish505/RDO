@@ -255,25 +255,13 @@ async function isWhitelisted(rdoId, address) {
 async function getMyRDOIds() {
   const contract = await getContract(false);
   
-  // Since rdoCounter reverts and event signatures have deployed ABI mismatches,
-  // we do a fast binary search on getRDO to find the exact number of minted RDOs.
   let maxFound = 0;
-  let low = 1;
-  let high = 4096; // sufficiently high max for this phase
-  
-  while (low <= high) {
-    let mid = Math.floor((low + high) / 2);
-    try {
-      const rdo = await contract.getRDO(mid);
-      if (rdo && rdo.creator && rdo.creator !== '0x0000000000000000000000000000000000000000') {
-        maxFound = mid;
-        low = mid + 1; // Try higher
-      } else {
-        high = mid - 1; // It's empty, try lower
-      }
-    } catch {
-      high = mid - 1; // Reverted, try lower
-    }
+  try {
+    const counterStr = await contract.rdoCounter();
+    maxFound = Number(counterStr);
+  } catch (err) {
+    console.error("Failed to read rdoCounter directly, returning 0:", err);
+    return [];
   }
   
   if (maxFound === 0) return [];

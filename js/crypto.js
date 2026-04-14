@@ -406,3 +406,52 @@ async function recoverRSAPrivateKey(profileJsonStr, signer) {
     // C. Return the plaintext RSA private key
     return new TextDecoder().decode(decryptedBuffer);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  RDO Payload & Access Abstractions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generates the encrypted AES key payloads for the Creator and any Whitelisted addresses
+ * by resolving against EVM PKI mappings securely.
+ */
+async function generateRDOKeyPayload(creatorAddress, exportedKey, isWhitelist, whitelistString) {
+  let parsedWhitelist = [];
+  let encryptedKeysArray = [];
+  let creatorEncryptedKey = "";
+
+  const creatorProfileStr = await getEncryptionProfile(creatorAddress);
+  if (!creatorProfileStr) {
+      throw new Error("Missing PKI Profile! Please go to the Dashboard to register your Encryption Key before creating an RDO.");
+  }
+  
+  try {
+      const profile = JSON.parse(creatorProfileStr);
+      creatorEncryptedKey = await encryptAESKeyWithRSA(profile.pubKey, exportedKey);
+  } catch(e) {
+      console.error("Could not encrypt key for creator:", e);
+      throw new Error("Failed to encrypt your access key using your profile.");
+  }
+
+  if (isWhitelist && whitelistString) {
+    parsedWhitelist = whitelistString.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    for (const addr of parsedWhitelist) {
+        const profStr = await getEncryptionProfile(addr);
+        if (profStr) {
+            try {
+                const profile = JSON.parse(profStr);
+                const shieldedKey = await encryptAESKeyWithRSA(profile.pubKey, exportedKey);
+                encryptedKeysArray.push(shieldedKey);
+            } catch(e) {
+                console.warn("Invalid profile for", addr);
+                encryptedKeysArray.push("");
+            }
+        } else {
+            console.warn("No profile found for", addr);
+            encryptedKeysArray.push("");
+        }
+    }
+  }
+
+  return { creatorEncryptedKey, parsedWhitelist, encryptedKeysArray };
+}

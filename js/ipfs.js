@@ -2,85 +2,35 @@
    ipfs.js - Pinata IPFS Upload/Fetch
    ============================================ */
 
-// ── Upload to IPFS via Pinata ─────────────────
+// ── Upload to IPFS via Secure Vercel Proxy ───────────
 async function uploadToIPFS(content, fileName, metadata = {}) {
-  if (!PINATA_API_KEY || PINATA_API_KEY === 'YOUR_PINATA_API_KEY') {
-    // Demo mode: return a fake CID
-    console.warn('Pinata API keys not set. Using demo mode.');
-    const fakeCid = 'Qm' + Array.from(
-      window.crypto.getRandomValues(new Uint8Array(22)),
-      b => b.toString(16).padStart(2, '0')
-    ).join('').slice(0, 44);
-    return fakeCid;
+  // `content` is expected to be a JSON string from create.js
+  let parsedContent;
+  try {
+    parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+  } catch(e) {
+    parsedContent = { rawParams: content }; // Fallback
   }
-
-  const formData = new FormData();
-  const blob = new Blob([content], { type: 'application/json' });
-  formData.append('file', blob, fileName);
-
-  // Add metadata
-  const pinataMetadata = {
-    name: fileName,
-    keyvalues: {
-      app: 'RDO',
-      ...metadata
-    }
-  };
-  formData.append('pinataMetadata', JSON.stringify(pinataMetadata));
-
-  const pinataOptions = {
-    cidVersion: 0
-  };
-  formData.append('pinataOptions', JSON.stringify(pinataOptions));
-
-  const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-    method: 'POST',
-    headers: {
-      'pinata_api_key': PINATA_API_KEY,
-      'pinata_secret_api_key': PINATA_SECRET_API_KEY
-    },
-    body: formData
-  });
-
-  if (!response.ok) {
-    let errText = await response.text();
-    let errDesc = response.statusText;
-    try { 
-       const errObj = JSON.parse(errText); 
-       if (errObj.error) errDesc = errObj.error.details || errObj.error;
-    } catch(e) { }
-    throw new Error(`IPFS upload failed (${response.status}): ${errDesc}`);
-  }
-
-  const result = await response.json();
-  return result.IpfsHash;
+  
+  return await uploadJSONToIPFS(parsedContent, fileName, metadata);
 }
 
-// ── Upload JSON to IPFS ──────────────────────
+// ── Upload JSON to IPFS (Main Proxy Interface) ───────
 async function uploadJSONToIPFS(jsonData, name, metadata = {}) {
-  if (!PINATA_API_KEY || PINATA_API_KEY === 'YOUR_PINATA_API_KEY') {
-    console.warn('Pinata API keys not set. Using demo mode.');
-    const fakeCid = 'Qm' + Array.from(
-      window.crypto.getRandomValues(new Uint8Array(22)),
-      b => b.toString(16).padStart(2, '0')
-    ).join('').slice(0, 44);
-    return fakeCid;
-  }
+  const payload = {
+    pinataContent: jsonData,
+    pinataMetadata: {
+      name: name,
+      keyvalues: { app: 'RDO', ...metadata }
+    }
+  };
 
-  const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+  const response = await fetch('/api/uploadJSON', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'pinata_api_key': PINATA_API_KEY,
-      'pinata_secret_api_key': PINATA_SECRET_API_KEY
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      pinataContent: jsonData,
-      pinataMetadata: {
-        name: name,
-        keyvalues: { app: 'RDO', ...metadata }
-      }
-    })
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
