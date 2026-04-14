@@ -1,63 +1,36 @@
-# Technology Stack
+# Project Stack
 
-## Languages & Runtime
+## Core Technologies
 
-| Layer | Technology | Version / Notes |
-|-------|-----------|-----------------|
-| Smart Contract | Solidity | `^0.8.20` — single contract `contracts/RDO.sol` |
-| Frontend | HTML5 + Vanilla JavaScript | No framework; plain `.html` pages + ES2020+ JS modules |
-| Styling | TailwindCSS (CDN) + Vanilla CSS | Tailwind loaded via `cdn.tailwindcss.com` with `forms` and `container-queries` plugins; custom CSS in `css/style.css` and `css/animations.css` |
+- **Frontend**: HTML5, Vanilla JavaScript (ES6+), CSS3
+- **Styling**: Tailwind CSS (Utility-first CSS framework via CDN)
+- **Web3 Interface**: Ethers.js v6 (for Ethereum blockchain interaction)
+- **Smart Contracts**: Solidity ^0.8.20 (Custom `RDO.sol` implementation)
+- **Blockchain Network**: Sepolia Testnet (Ethereum)
+- **Storage**: IPFS (InterPlanetary File System) via Pinata
 
-## Frontend Dependencies (CDN-loaded, no npm)
+## Libraries and Dependencies
 
-| Library | CDN Source | Purpose |
-|---------|-----------|---------|
-| **ethers.js** v6.11.1 | `cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js` | Ethereum wallet interaction, contract calls, ABI encoding |
-| **TailwindCSS** (latest) | `cdn.tailwindcss.com?plugins=forms,container-queries` | Utility-first CSS framework |
-| **Three.js** r128 | `cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js` | Animated dotted wave background (`js/background.js`) |
-| **Google Fonts** | fonts.googleapis.com | Space Grotesk (headlines), Inter (body), Material Symbols Outlined (icons) |
+### Application Logic & UI
+- **Tailwind CSS**: 3.4.1 (Loaded via CDN script `https://cdn.tailwindcss.com`)
+  - Configured inline via `<script id="tailwind-config">` in HTML files.
+- **Three.js**: Lightweight 3D animation library (Loaded via CDN `https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js`)
+  - Used specifically for the interactive background starfield/particle effect.
+- **FontAwesome**: Iconography (Loaded via CDN `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`)
+- **Google Fonts**: Space Grotesk, Inter, and Material Symbols Rounded.
 
-> **No package.json, no npm, no build toolchain.** The project is a pure static site with all dependencies loaded via CDN `<script>` tags.
+### Web3 & Cryptography
+- **Ethers.js**: 6.11.1 (Loaded via CDN `https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js`)
+  - Used for contract abstraction, transaction signing, and ABI decoding.
+- **Web Crypto API**: Native browser API (`window.crypto.subtle`)
+  - Used for AES-GCM (payload encryption) and RSA-OAEP (key distribution).
 
-## Smart Contract Stack
+### Tooling & Infrastructure
+- **Dependency Graphing**: `graphify` via Python `uv` MCP Server
+  - Used iteratively to map project imports and analyze structural dependencies. Includes `graph.json` and artifact outputs.
+- **Version Control**: Git / GitHub
+- **Deployment**: Vercel (Configured via `vercel.json` as a static site)
 
-- **Compiler**: Solidity `^0.8.20`
-- **Deployment target**: Sepolia Testnet (chainId `0xaa36a7`)
-- **Deployed address**: `0xdD1BE8d2cc176A18A6d401e85aa5420288A42746` (in `contractAddress.js`)
-- **Deployment method**: Remix IDE (as noted in contract comments)
-- **No Hardhat/Foundry** — no test suite, no migration scripts, no local node config
-
-## Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `contractAddress.js` | Contract address, Pinata API keys, Pinata gateway URL, and `window.RDO_CONFIG` global |
-| `abi.json` | Full ABI of the deployed `RDO` contract (647 lines) |
-| `vercel.json` | Deployment config — `cleanUrls: true`, `trailingSlash: false` |
-
-## Hosting / Deployment
-
-- **Platform**: Vercel (static hosting)
-- **Config**: `vercel.json` with clean URLs (no `.html` extensions needed)
-- **No server-side logic** — everything runs in the browser
-
-## Browser APIs Used
-
-| API | Usage |
-|-----|-------|
-| **Web Crypto API** | AES-256-GCM encryption/decryption, RSA-OAEP key wrapping, PBKDF2 key derivation, SHA-256 hashing |
-| **MetaMask / window.ethereum** | Wallet connection, transaction signing, message signing (for PKI recovery) |
-| **Clipboard API** | Copy-to-clipboard for RDO IDs, share links, decryption keys |
-| **IntersectionObserver** | Scroll-triggered reveal animations |
-| **WebGL / Three.js** | Animated particle background |
-| **localStorage** | Persisting `rdo_keys` (decryption keys) and `rdo_meta` (monetization metadata) |
-
-## Tailwind Configuration
-
-Tailwind is configured inline via `<script id="tailwind-config">` in each HTML file with:
-- **Dark mode**: `class` strategy (all pages use `<html class="dark">`)
-- **Custom color tokens**: Material Design 3-inspired surface hierarchy (`surface`, `surface-container`, `surface-container-high`, etc.)
-- **Custom fonts**: `headline` (Space Grotesk), `body` (Inter), `label` (Inter)
-- **Custom radii**: Very tight defaults (`0.125rem`) with incrementally larger options
-
-> ⚠ Each HTML page re-declares its own Tailwind config inline. Color definitions are slightly inconsistent across pages (e.g., `index.html` uses `"surface": "#090909"` while other pages use `"surface": "#0e0e11"`).
+## Developer Environment
+- **Environment**: Client-side execution exclusively. There are no Node.js backend processes or module bundlers (Webpack, Vite, etc.) used for the frontend application at runtime. Execution runs raw in-browser. 
+- **Contract Environment**: Hardhat/Foundry (implied for compilation) to derive `abi.json`.

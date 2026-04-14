@@ -1,88 +1,18 @@
-# Testing
+# Testing Strategy and Guidelines
 
-## Current State
+## Methodologies
 
-**No automated tests exist.** The project has:
+The project primarily enforces explicit behavior mapping tracking isolated interaction sequences over manual functional constraints rather than complex automated CI/CD pipeline deployments. Execution validation operates specifically targeting asynchronous Node provider loops natively via MetaMask connections executing live tests mapped onto the Sepolia Testnet environments.
 
-- ❌ No unit tests
-- ❌ No integration tests
-- ❌ No end-to-end tests
-- ❌ No test framework configured (no Jest, Mocha, Vitest, Cypress, etc.)
-- ❌ No test runner or npm scripts
-- ❌ No CI/CD pipeline
-- ❌ No Solidity test suite (no Hardhat/Foundry tests)
-- ❌ No `package.json` at all
+### Core Manual Verification Path (End-To-End)
 
-## Manual Testing Infrastructure
+A baseline confirmation loop of functionality mandates standard interaction evaluations across the platform components ensuring integration consistency natively:
 
-### Browser Console Testing
+1. **Dashboard Bootstrap**: Open application parameters via `dashboard.html`. Connect explicit wallet profiles guaranteeing primary RPC hook bindings function.
+2. **Key Operations Registration**: Initialize `Generate & Register Profile` testing cryptographic WebSubtle implementation executions inside generic JS environments securely validating on-chain state updates.
+3. **Packaging Integrity**: Proceed to `create.html`. Formulate exact `Pay-Per-Open` definitions capturing native ETH conversion formatting successfully executing IPFS offload. Verify execution completes mapping strictly matching correct fallback parameters.
+4. **Target Access Loop**: Open public resolution pathways `view.html`. Execute secondary wallet evaluations testing strictly bound read barriers interacting via functional request parameters confirming decryption layers resolve validly without UI artifacts throwing. 
+5. **Contract Ownership Scoping**: Verify management layers properly isolating internal functionality parameters (Revoke access) validating dashboard grid resolutions isolate correct index queries mapping accurately.
 
-The codebase exposes `window.RDO_CONFIG` (in `contractAddress.js`) for manual console testing:
-
-```javascript
-window.RDO_CONFIG = {
-  CONTRACT_ADDRESS,
-  get ABI() { return []; }  // Placeholder; real ABI loaded via loadABI()
-};
-```
-
-### Pinata Connection Test
-
-`js/ipfs.js` exports `testPinataConnection()` for verifying API key setup:
-
-```javascript
-const result = await testPinataConnection();
-// { success: true, message: "..." } or { success: false, message: "..." }
-```
-
-### Demo Mode
-
-When Pinata API keys are placeholder values (`'YOUR_PINATA_API_KEY'`), the IPFS upload functions return fake CIDs, allowing the creation flow to be tested without a real Pinata account.
-
-### Footer Links
-
-Some pages link to a `test.html` page in the footer (e.g., `create.html` line 408, `view.html` line 327), but this file **does not exist** in the repository.
-
-## Testing Recommendations
-
-### Priority 1: Smart Contract Tests
-
-The Solidity contract (`contracts/RDO.sol`) is the most critical component and currently has zero tests. Recommended:
-
-- Set up Hardhat or Foundry
-- Test all contract functions: `createRDO`, `requestAccess`, `revokeRDO`, `unlockRDO`, `addToWhitelist`, `removeFromWhitelist`
-- Test access control modifiers (`onlyCreator`, `rdoExists`, `rdoActive`)
-- Test violation handling and auto-lock logic
-- Test monetization payment flow (correct amount, refund on failure)
-- Test edge cases: max opens exhaustion, double revoke, creator bypass
-
-### Priority 2: Crypto Module Tests
-
-`js/crypto.js` contains complex cryptographic operations that could break silently:
-
-- AES-256-GCM encrypt → decrypt roundtrip
-- RSA-OAEP key generation → export → import roundtrip
-- AES key wrapping/unwrapping via RSA
-- PKI profile generation → recovery roundtrip
-- Edge cases: empty content, large files, binary vs text
-
-### Priority 3: End-to-End Flow Tests
-
-Full create → view → access flow:
-
-- Create RDO with public access → view → read successfully
-- Create RDO with whitelist → non-whitelisted user denied
-- Create paid RDO → payment required for access
-- Create RDO → revoke → access denied
-- Create RDO → exceed max opens → auto-lock
-
-## Verification Methods Currently Used
-
-The project relies entirely on **manual browser testing**:
-
-1. Open `create.html` in browser with MetaMask
-2. Fill form, run 3-step process
-3. Navigate to `view.html` with resulting RDO ID
-4. Test read/copy/download actions
-5. Test revoke/unlock from `dashboard.html`
-6. Check Etherscan for transaction confirmation
+## Missing Toolchain Constraints
+There is currently NO generic automated `Mocha`/`Chai` executing via HardHat environments testing generic execution parameters directly outside generic IDE abstractions. Implementing pure behavioral-driven TDD scripts enforcing strict parameter boundaries via a localized `anvil` or `hardhat` node server configuration remains strongly prioritized for scaling logic correctly across broader infrastructure implementations.

@@ -1,100 +1,40 @@
-# External Integrations
+# Integrations & Dependencies
 
-## Blockchain / Smart Contract
+## 1. MetaMask (EVM Wallet)
 
-| Integration | Details |
-|-------------|---------|
-| **Ethereum (Sepolia Testnet)** | Primary blockchain. Contract deployed at `0xdD1BE8d2cc176A18A6d401e85aa5420288A42746` |
-| **MetaMask** | Wallet provider via `window.ethereum`. Used for: account connection, transaction signing, message signing (PKI key recovery), network switching |
-| **ethers.js v6** | Contract interaction library. Uses `BrowserProvider` + `getSigner()` pattern |
+The app relies heavily on browser-based Ethereum wallets (primarily MetaMask) injected globally as `window.ethereum`.
 
-### Contract Functions Called
+### Usage
+- **Identity**: Connects to user's designated `window.walletState.address`.
+- **Transactions**: Signs transactions through `ethers.js` connected to the `web3Provider`.
+- **E2EE Bootstrapping**: Requires PKI Signature creation to derive an internal Master AES Key locally inside the client's transient memory environment for payload decryption bootstrapping.
 
-| Function | Type | Called From |
-|----------|------|-------------|
-| `createRDO(params)` | Write | `js/contract.js` → `js/create.js` |
-| `requestAccess(rdoId, action)` | Write (payable) | `js/contract.js` → `js/view.js` |
-| `revokeRDO(rdoId)` | Write | `js/contract.js` → `js/view.js`, `js/dashboard.js` |
-| `unlockRDO(rdoId)` | Write | `js/contract.js` → `js/view.js`, `js/dashboard.js` |
-| `addToWhitelist(rdoId, addresses, encryptedKeys)` | Write (payable) | `js/contract.js` |
-| `removeFromWhitelist(rdoId, addresses)` | Write | `js/contract.js` |
-| `registerEncryptionKey(pubKey)` | Write | `js/contract.js` → `js/dashboard.js` |
-| `getRDO(rdoId)` | Read | `js/contract.js` → multiple pages |
-| `getRDOMeta(rdoId)` | Read | `js/contract.js` (available but `getRDO` preferred) |
-| `getRDOPolicy(rdoId)` | Read | `js/contract.js` (available but `getRDO` preferred) |
-| `encryptionPubKeys(address)` | Read | `js/contract.js` → PKI flow |
-| `getEncryptedKey(rdoId, user)` | Read | `js/contract.js` → `js/view.js` |
-| `isWhitelisted(rdoId, user)` | Read | `js/contract.js` |
-| `isActive(rdoId)` | Read | `js/contract.js` |
-| `rdoCounter()` | Read | `js/contract.js` (attempted, but uses binary search fallback) |
+## 2. Pinata (IPFS Gateway API)
 
-### Events Emitted & Consumed
+IPFS is the exclusive asset storage solution for RDO JSON blobs and media objects, accessed globally via Pinata.
 
-| Event | Usage |
-|-------|-------|
-| `RDOCreated` | Parsed from tx receipt to extract `rdoId` after minting |
-| `RDOAccessed` | Parsed from tx receipt to determine access granted/denied + reason |
-| `RDORevoked` | Emitted on revoke |
-| `RDOLocked` | Emitted on auto-lock |
-| `RDOUnlocked` | Emitted on manual unlock |
-| `WhitelistUpdated` | Emitted on whitelist changes |
-| `EncryptionKeyRegistered` | Emitted on PKI profile registration |
+### Implementation Details
+- **Upload API**: `https://api.pinata.cloud/pinning/pinJSONToIPFS` (Handles JSON serialization and content anchoring)
+- **Read APIs**: Multi-gateway fallback configuration to fetch objects via CID. (Primary gateway: `gateway.pinata.cloud`)
+- **Key Exposure Security Context**: Keys are currently stored directly inside `contractAddress.js`. This remains a known architectural requirement for statically hosted apps, but migrating to a proxy server to mask the bearer tokens for upload procedures is recommended to avoid abuse.
 
-## IPFS / Pinata
+## 3. Custom Solidity Smart Contract (`RDO.sol`)
 
-| Integration | Details |
-|-------------|---------|
-| **Pinata Cloud** | IPFS pinning service. API keys currently prototyped in `contractAddress.js` config. For production, **remove keys from client-side code** and implement a server-side upload proxy, or securely scope upload tokens via Pinata JWTs. |
-| **Pinata Upload API** | `https://api.pinata.cloud/pinning/pinFileToIPFS` — used for encrypted content upload |
-| **Pinata JSON Upload** | `https://api.pinata.cloud/pinning/pinJSONToIPFS` — available but not primary path |
-| **Pinata Auth Test** | `https://api.pinata.cloud/data/testAuthentication` — connection validation |
-| **Pinata Gateway** | `https://coffee-tricky-felidae-740.mypinata.cloud/ipfs/` — dedicated gateway |
+The Ethereum VM functions as the ultimate arbiter of access rights and Monetization logic. The integration happens via the `/abi.json` artifact synced from Hardhat/Foundry compilations.
 
-### IPFS Gateway Fallback Chain
+### Key Workflows
+- **Retrieving MetaData**: `getRDOMeta(rdoId)` extracts high-level definitions without full iteration.
+- **Pay-Per-Open Execution**: When $isPaid$, users confirm a transaction on ETH natively, sending specific WEI values appended directly inside a `contract.requestAccess{value}` operation. The contract now enforces strict matching requirements and bypass reversions cleanly.
+- **Verification Mapping**: Stores all encrypted AES key payloads securely via PKI user bindings mapping. Contracts operate off mapped struct types synced locally to matching exact struct lengths.
 
-The `fetchFromIPFS()` function in `js/ipfs.js` tries **7 gateways** in sequence with 60s timeout each:
+## 4. Graphify (Architecture/Dependency Analysis)
 
-1. `gateway.pinata.cloud`
-2. `ipfs.io`
-3. `nftstorage.link`
-4. `w3s.link`
-5. `4everland.io`
-6. `cf-ipfs.com`
-7. `dweb.link`
+An active MCP integration used offline during planning to parse inter-module JavaScript file import structures and code path references. Relies on the Python `uv` MCP Server logic pointing precisely across `js/` dependencies.
 
-### Demo Mode
-
-When Pinata API keys are set to placeholder values (`'YOUR_PINATA_API_KEY'`), upload functions return fake CIDs starting with `Qm` — allows UI testing without network access.
-
-## External CDNs
-
-| CDN | Assets Served |
-|-----|---------------|
-| `cdnjs.cloudflare.com` | ethers.js, Three.js |
-| `cdn.tailwindcss.com` | TailwindCSS + plugins |
-| `fonts.googleapis.com` | Google Fonts (Space Grotesk, Inter, Material Symbols) |
-
-## Block Explorer
-
-| Service | Usage |
-|---------|-------|
-| **Etherscan (Sepolia)** | Transaction links generated via `getExplorerUrl()` in `js/shared.js` — format: `https://sepolia.etherscan.io/tx/{hash}` |
-
-## Authentication
-
-- **No traditional auth** — wallet address is the identity
-- **No backend server** — all state is on-chain or in browser localStorage
-- **PKI identity** — users register RSA-OAEP public keys on-chain via the `registerEncryptionKey()` contract function
-
-## Databases
-
-- **None** — no databases. All persistent state lives:
-  - On-chain (contract storage)
-  - IPFS (encrypted content)
-
-> **Warning on Local Storage & Keys**
-> Legacy implementations used browser `localStorage` (`rdo_keys`, `rdo_meta`) to cache raw base64 AES keys. This practice is deprecated. Clearing browser data will irreversibly lose keys if PKI backups were not performed. Modern implementations must use Web Crypto non-extractable keys or rely exclusively on the on-chain PKI wrapper system for explicit key export/import to prevent loss.
-
-## Webhooks / Push Notifications
-
-- **None** — the system is fully pull-based. Users must manually load/refresh to see state changes.
+## External Network Dependencies Summary
+- `gateway.pinata.cloud` (IPFS Read)
+- `api.pinata.cloud` (IPFS Write)
+- `cloudflare-ipfs.com` (Fallback IPFS read)
+- `ipfs.io` (Fallback IPFS read)
+- `cdn.tailwindcss.com` (CSS Framework)
+- `cdnjs.cloudflare.com` (Scripts & Libraries)
