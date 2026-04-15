@@ -149,7 +149,7 @@ function updateMonetizationBadge() {
   badge.innerText = paid ? 'Paid' : 'Free';
   badge.classList.remove('paid-badge', 'free-badge');
   badge.classList.add(paid ? 'paid-badge' : 'free-badge');
-  price.innerText = paid ? `${rdoMonetization.pricePerAccessEth} ETH / access` : '0 ETH / access';
+  price.innerText = paid ? `${rdoMonetization.pricePerAccessEth} Sepolia ETH / access` : '0 Sepolia ETH / access';
 }
 
 function setPaymentStatus(state, message) {
@@ -209,10 +209,10 @@ async function doAction(action) {
       }
 
       if (typeof showToast === 'function') {
-        showToast(`Payment required: ${rdoMonetization.pricePerAccessEth} ETH`, 'warning');
+        showToast(`Payment required: ${rdoMonetization.pricePerAccessEth} Sepolia ETH`, 'warning');
       }
 
-      const ok = window.confirm(`This action requires ${rdoMonetization.pricePerAccessEth} ETH. Continue payment?`);
+      const ok = window.confirm(`This action requires ${rdoMonetization.pricePerAccessEth} Sepolia ETH. Continue payment?`);
       if (!ok) {
         setPaymentStatus('failed', 'Payment cancelled');
         throw new Error('Payment cancelled by user.');

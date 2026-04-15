@@ -108,7 +108,7 @@ function updateSummary() {
   const priceEl = document.getElementById('s-price');
   if (priceEl) {
     const price = rdoConfig.isPaid ? (rdoConfig.pricePerAccessEth || '0') : '0';
-    priceEl.innerText = `${price} ETH`;
+    priceEl.innerText = `${price} Sepolia ETH`;
     priceEl.className = rdoConfig.isPaid ? 'text-[15px] font-mono text-amber-300' : 'text-[15px] font-mono text-secondary';
   }
 }
@@ -296,7 +296,7 @@ async function runStep(step) {
       }
 
       if (rdoConfig.isPaid && !validatePricePerAccess()) {
-        throw new Error('Price per access must be greater than 0 ETH.');
+        throw new Error('Price per access must be greater than 0 Sepolia ETH.');
       }
 
       const isWhitelist = rdoConfig.accessType === 'whitelist';

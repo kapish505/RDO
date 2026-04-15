@@ -116,7 +116,7 @@ function buildCard(rdo) {
   const accessLabel = rdo.isWhitelist ? 'Whitelist' : 'Public';
   const maxOpensLabel = rdo.maxOpens === 0 ? '∞' : rdo.maxOpens;
   const isPaid = !!rdo.isPaid && rdo.pricePerAccess > 0n;
-  const priceLabel = isPaid ? rdo.pricePerAccessEth + ' ETH' : '';
+  const priceLabel = isPaid ? rdo.pricePerAccessEth + ' Sepolia ETH' : '';
   const paidBadge = isPaid
     ? '<span class="px-2 py-0.5 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Paid</span>'
     : '<span class="px-2 py-0.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-[9px] font-bold tracking-widest uppercase rounded-full">Free</span>';
