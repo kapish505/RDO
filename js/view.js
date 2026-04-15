@@ -202,6 +202,23 @@ async function doAction(action) {
     const normalizedPrice = Number(rdoMonetization.pricePerAccessEth || '0');
     const requiresPayment = !isOwner && !!rdoMonetization.isPaid && Number.isFinite(normalizedPrice) && normalizedPrice > 0;
 
+    // PRE-FLIGHT CHECK: Ensure the user possesses the decryption key before they pay.
+    let preflightKey = null;
+    const queryDecryptionKey = new URLSearchParams(window.location.search).get('key');
+    const hashKey = window.location.hash.substring(1);
+    if (queryDecryptionKey) preflightKey = decodeURIComponent(queryDecryptionKey);
+    else if (hashKey) preflightKey = decodeURIComponent(hashKey);
+    else {
+        try {
+            const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
+            if (keys[currentRdoId]) preflightKey = keys[currentRdoId];
+        } catch(e) {}
+    }
+
+    if (!isOwner && (!rdoDetails || !rdoDetails.isWhitelist) && !preflightKey) {
+        throw new Error("Missing Decryption Hash. You must use the exact Share Link containing the password hash (#...) to access this Public RDO. Payment aborted.");
+    }
+
     if (requiresPayment) {
       if (actionBtn) {
         actionBtn.classList.add('payment-required');
@@ -253,23 +270,8 @@ async function doAction(action) {
     const payload = await fetchJSONFromIPFS(rdoDetails.ipfsCid);
     
     // 3. Decrypt Payload
-    let keyToUse = null;
-
-    // Check URL Hash first (used for Public RDO links)
-    const hashKey = window.location.hash.substring(1);
-    if (queryDecryptionKey) {
-        keyToUse = decodeURIComponent(queryDecryptionKey);
-    }
-    else if (hashKey) {
-        keyToUse = decodeURIComponent(hashKey);
-    } 
-    // Check Local Storage next (Creator fallback)
-    else {
-        try {
-            const keys = JSON.parse(localStorage.getItem('rdo_keys') || '{}');
-            if (keys[currentRdoId]) keyToUse = keys[currentRdoId];
-        } catch(e) {}
-    }
+    // 3. Decrypt Payload
+    let keyToUse = preflightKey;
 
     // Fallback to PKI if no raw key is available locally
     if (!keyToUse) {
