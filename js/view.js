@@ -215,8 +215,18 @@ async function doAction(action) {
         } catch(e) {}
     }
 
-    if (!isOwner && (!rdoDetails || !rdoDetails.isWhitelist) && !preflightKey) {
-        throw new Error("Missing Decryption Hash. You must use the exact Share Link containing the password hash (#...) to access this Public RDO. Payment aborted.");
+    if (!isOwner) {
+      if (!rdoDetails.isWhitelist && !preflightKey) {
+          throw new Error("Missing Decryption Hash. You must use the exact Share Link containing the password hash (#...) to access this Public RDO. Payment aborted.");
+      }
+      
+      if (rdoDetails.isWhitelist && !preflightKey) {
+          resultContainer.innerHTML = '<span class="text-xs text-primary animate-pulse">Running Pre-flight PKI Check...</span>';
+          const testShard = await getEncryptedAESKey(currentRdoId, window.walletState.address);
+          if (!testShard || testShard.trim() === '') {
+              throw new Error("Payment Aborted: You are whitelisted but the creator failed to provision your encrypted AES decryption key (you likely did not have a PKI profile registered when the RDO was created). Please ask the creator to re-issue.");
+          }
+      }
     }
 
     if (requiresPayment) {
