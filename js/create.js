@@ -352,7 +352,9 @@ async function runStep(step) {
         }
 
         const publicHash = (!isWhitelist && rdoState.exportedKey) ? `#${encodeURIComponent(rdoState.exportedKey)}` : '';
-        const shareLink = `${window.location.origin}${window.location.pathname.replace('create.html', 'view.html')}?id=${encodeURIComponent(tx.rdoId || '')}${publicHash}`;
+        let baseViewPath = window.location.pathname.replace('create.html', 'view.html');
+        if (baseViewPath === '/create') baseViewPath = '/view'; // Clean URL fallback
+        const shareLink = `${window.location.origin}${baseViewPath}?id=${encodeURIComponent(tx.rdoId || '')}${publicHash}`;
         
         const shareDisplay = document.getElementById('share-link-display');
         const openShareLink = document.getElementById('open-share-link');
